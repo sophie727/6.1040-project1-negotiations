@@ -51,7 +51,12 @@ external Author
   _getCase (caseName: String) : (case: Case)
     where a case with this caseName exists,
     then return that case.
+
   _getBrief (case: Case, role: Role) : (confidential: String)
     where role in case.roles and case exists,
     then return the confidentialBrief for that role.
+
+  _getPayoff (case: Case, role: Role, termSheet: TermSheet) : (payoff: Number)
+    where role in case.roles, case exists, and the options chosen for the issues addressed in TermSheet are the same options and issues as exist in this case's set of Issues
+    then return the payoff for that role in this case given this TermSheet
 ```

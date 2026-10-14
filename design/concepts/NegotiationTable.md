@@ -8,15 +8,19 @@ Give parties a space to negotiate in.
 
 The "universal" value is a number that objectively represents this option, regardless of perspective. e.g. two people might value salary differently, but regardless of how much they value a salary of $100K, the number 100K is still a number that objectively represents this option.
 
-#### **concept** NegotiationTable [User, Case, Role]
+## Types
 
-**purpose** give parties a space to negotiate in.
+```types
+external User
 
-**principle**
+external Case
 
-**state**
-
+external Role
 ```
+
+## State
+
+```state
   a set of Tables with
     an id String
     a case Case
@@ -36,12 +40,12 @@ The "universal" value is a number that objectively represents this option, regar
     a deadline DateTime
 ```
 
-**actions**
+## Actions
 
-```
+```actions
   open (case: Case, deadline: DateTime): (table: Table)
     then create an OPEN Table with no seats and an empty transcript.
-  seat (table: Table, user: User, role: Role)
+  seat (table: Table, user: User, role: Role): (table: Table)
     when table is OPEN and this role has not been seated yet
     then adds a seat with this user and this role.
   send (table: Table, sender: User, body: String): (message: Message)
