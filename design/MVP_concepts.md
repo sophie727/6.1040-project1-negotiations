@@ -1,51 +1,8 @@
-## Concept design
-
-### Concepts
-
-#### **concept** Cases [Author]
-
-**purpose** A negotiation case consists of the scenario for a negotiation roleplay, complete with each role's payoffs and confidential briefings.
-
-**principle** an author presents the issues under discussion, the options available on each issue, and the knowledge that each person has about the situation, producing a case that multiple parties can negotiate.
-
-**state**
-
-```
-  a set of Cases with
-    an author Author
-    a caseName String
-    a set of Issues with
-      a name String
-      an optionRange (set of Strings)
-    a set of Roles with
-      a label String
-      a PayoffSheet set of issueWeightings with
-        an Issue
-        an issueWeight Number
-        a set of optionWeights with
-          an option String
-          an optionWeight Number
-      a confidentialBrief String
-```
-
-**actions**
-
-```
-  defineCase (an author Author, caseName String, a set of Issues, a set of Roles) : (skeleton: Skeleton)
-    where no author has created a case with that name.
-    then create a skeleton matching the above inputs.
-  _getBrief (case: Case, role: Role) : (confidential: String)
-    where role in case.Roles and case exists,
-    then return the confidentialBrief for that role.
-```
-
----
-
 #### **concept** NegotiationTable [User, Case, Role]
 
 **purpose** give parties a space to negotiate in.
 
-**principle** the negotiation table is opened for a case, with one seat per role; seated users exchange messages, which are recorded in order. After the negotiation ends, no further messages can be sent, and the transcript cannot be changed.
+**principle** the negotiation table is opened for a case, with one seat per role; seated users exchange messages, which are recorded in order. After the negotiation ends, no further messages can be sent, and the transcript cannot be changed. A user's payoff after a negotiation will be based on their payoff sheet and will be the sum of the linear interpolations of the optionWeights for each issue.
 
 **state**
 
