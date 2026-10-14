@@ -3,3 +3,5 @@ This is an app to allow users to practice negotiation and grow their negotiation
 Sync-engine: https://github.com/mit-sdg/sync-engine
 
 Conceptbox is an example of a website built with sync-engine, with concepts and reactions: https://github.com/mit-sdg/conceptbox
+
+NEVER push to github. I will never ask you to do so and I never want you to do so.
