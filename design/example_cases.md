@@ -17,16 +17,17 @@ It provides insight on what the cases look like. There will eventually be a UI t
 - Salary
     - option name: $80K; universal value: 80,000
     - option name: $120K; universal value: 120,000
-- Health Insurance
-    - option name: Included; universal value: 1
-    - option name: Not included; universal value: 0 (this is a binary include/disinclude option, so the universal value is 1/0)
+- Health Insurance (discrete, so no universal values)
+    - option name: Full Coverage
+    - option name: Half Coverage
+    - option name: Not included
 - Bonus
     - option name: $0; universal value: 0
     - option name: $10K; universal value: 10,000
-- Position title
-    - option name: assistant manager; universal value: 1
-    - option name: senior manager; universal value: 2
-    - option name: director; universal value: 3 (these universal values are more arbitrary, and set by the author based on their estimation of the value of each of these. )
+- Position title (discrete, no universal values)
+    - option name: assistant manager
+    - option name: senior manager
+    - option name: director
 
 **Roles:**
 
@@ -34,7 +35,7 @@ It provides insight on what the cases look like. There will eventually be a UI t
     - With the payoffs:
         - for start date, Manon weights January 1 at 800 and March 1 at 0.
         - for salary, Manon weights $80K as 500 and $120K as 0.
-        - for health insurance, Manon weights both the same (0).
+        - for health insurance, Manon weights them all the same (0).
         - for bonus, Manon weights $0 at 100 and $10K at 0.
         - for position title, Manon weights assistant manager at 0, senior manager at 100, and director at 200.
     - And a BATNA of 1000.
@@ -42,7 +43,7 @@ It provides insight on what the cases look like. There will eventually be a UI t
     - With the payoffs:
         - for start date, Hiro weights January 1 at 0 and March 1 at 300.
         - for salary, Hiro weights $80K as 0 and $120K as 600.
-        - for health insurance, Hiro weights included at 300 and disincluded at 0.
+        - for health insurance, Hiro weights full coverage at 300, half coverage at 150, and not included at 0.
         - for bonus, Hiro weights $0 at 0 and $10K at 100.
         - for position title, Hiro weights assistant manager at 0, senior manager at 100, and director at 200.
     - And a BATNA of 1000.

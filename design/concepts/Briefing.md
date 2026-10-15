@@ -1,0 +1,253 @@
+# Briefing
+
+## Purpose
+
+Give each side of a negotiation scenario a confidential brief that says what every possible agreement is worth to them and when they should walk away, so that any agreement can be scored for each side and compared with the most valuable one possible.
+
+_Prevents:_ someone negotiates a scenario that is missing an issue, a payoff, or a brief; a scenario changes after people have negotiated it; an agreement is scored on a value its issue doesn't allow.
+
+## Principle
+
+Through Briefing, an author defines a specific scenario and sets the payoffs that negotiators can derive from it.
+
+Sophie writes the scenario "The Job Offer". She then adds the issues that make up this scenario, including
+
+- Salary, which is a continuous issue: its options $80K and $120K have the universal values 80000 and 120000, numbers that mean the same thing to every role, so negotiators are also able to agree on any salary in between, such as 100000.
+- Health Insurance, a discrete issue: the options are Not included, Half Coverage, and Full Coverage. Only those three can be agreed on, so they need no universal values.
+
+She then adds two roles:
+
+- Hiro, the candidate, whose payoffs give $80K 0 points and $120K 600 points. For Health Insurance, Not included gets 0 points, Half Coverage 150 points, and Full Coverage 300 points. His BATNA is 1,000 points. A role's BATNA, the Best Alternative To A Negotiated Agreement, is what that role would get if no deal is reached, so Hiro should turn down any agreement worth less than 1,000 points to him.
+- Manon, the employer, with payoffs and a BATNA of her own. She also gives Manon a brief--that is, a confidential description of Hiro's situation and priorities.
+
+Sophie tries to publish, but she can't because Hiro doesn't have a brief yet: she's only allowed to publish the scenario when there are at least two roles, each with a brief and payoffs for all issues and options. She gives Hiro a brief, and then publishes the scenario. After publishing, she's no longer able to change the scenario, and instead, Briefing scores and compares deals. In particular, Briefing can now score any term sheet for this scenario. A term sheet with a salary of 100000 and health insurance Full Coverage is worth 600 points to Hiro: 300 for salary, halfway between 0 and 600, and 300 for insurance. A term sheet can't agree on anything between Half Coverage and Full Coverage, because health insurance is discrete. Finally, Briefing finds the whole pie: a term sheet with the most points for Hiro and Manon together that satisfies both BATNAs, showing what the "best" agreement might be.
+
+## Types
+
+```types
+external Author
+  The person who writes a scenario.
+
+IssueKind is CONTINUOUS or DISCRETE
+  Whether negotiators may agree on any value between an issue's lowest and highest options, or only on one of its options.
+
+opaque TermSheet
+  What was agreed on each issue of a scenario: one of its options on a discrete issue, or a universal value from its lowest to its highest option on a continuous issue. The implementer chooses how to represent it.
+```
+
+## State
+
+```state
+a set of Scenarios with
+  an Author
+  a unique name String
+
+a set of Published Scenarios
+
+a seq of Issues with
+  a Scenario
+  a name String
+  a kind IssueKind
+  an optional unit String
+  unique scenario and name
+
+a seq of Options with
+  an Issue
+  a name String
+  an optional universalValue Number
+  unique issue and name
+
+a seq of Roles with
+  a Scenario
+  a name String
+  a batna Number
+  an optional brief String
+  unique scenario and name
+
+a set of Payoffs with
+  a Role
+  an Option
+  a points Number
+  unique role and option
+
+Rule: every name and unit is trimmed (spaces at the start/end removed) before being stored, measured, and compared.
+Rule: only a continuous issue has a unit.
+Rule: an option has a universalValue exactly when its issue is continuous, and no two options of one issue share a universalValue.
+Rule: a payoff's role and option belong to the same scenario.
+Rule: a published scenario has at least one issue and at least two roles, each of its issues has at least two options, and each of its roles has a brief and a payoff for every option of the scenario.
+Rule: nothing about a published scenario changes.
+```
+
+## Actions
+
+```actions
+create(author: Author, name: String) : returns (scenario: Scenario)
+  where name is blank or longer than 100 characters
+  then
+    refuses INVALID_SCENARIO_NAME "A scenario name must have 1 to 100 characters."
+  where name is accepted and a scenario already has that name
+  then
+    refuses NAME_TAKEN "A scenario with that name already exists."
+  where name is accepted and no scenario has that name
+  then
+    add a new scenario with author and name
+    returns scenario
+
+addIssue(scenario: Scenario, name: String, kind: IssueKind, unit?: String) : returns (issue: Issue)
+  where scenario is not in Scenarios
+  then
+    refuses UNKNOWN_SCENARIO "There is no such scenario."
+  where scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_ISSUE_NAME "An issue name must have 1 to 100 characters."
+  where scenario is unpublished, name is accepted, and scenario has an issue with that name
+  then
+    refuses ISSUE_EXISTS "This scenario already has an issue with that name."
+  where scenario is unpublished, name is accepted, scenario has no issue with that name, kind is DISCRETE, and a unit that isn't blank is given
+  then
+    refuses UNIT_NOT_ALLOWED "Only a continuous issue has a unit."
+  where scenario is unpublished, name is accepted, scenario has no issue with that name, and kind is CONTINUOUS or no unit that isn't blank is given
+  then
+    append a new issue with scenario, name, kind, and unit, leaving out a blank unit
+    returns issue
+
+addOption(issue: Issue, name: String, universalValue?: Number) : returns (option: Option)
+  where issue is not in Issues
+  then
+    refuses UNKNOWN_ISSUE "There is no such issue."
+  where the issue's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the issue's scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_OPTION_NAME "An option name must have 1 to 100 characters."
+  where the issue's scenario is unpublished, name is accepted, and issue has an option with that name
+  then
+    refuses OPTION_EXISTS "This issue already has an option with that name."
+  where the issue's scenario is unpublished, name is accepted, issue has no option with that name, issue is continuous, and no universalValue is given
+  then
+    refuses VALUE_REQUIRED "An option of a continuous issue needs a universal value."
+  where the issue's scenario is unpublished, name is accepted, issue has no option with that name, issue is discrete, and a universalValue is given
+  then
+    refuses VALUE_NOT_ALLOWED "An option of a discrete issue has no universal value."
+  where the issue's scenario is unpublished, name is accepted, issue has no option with that name, issue is continuous, a universalValue is given, and issue has an option at that universalValue
+  then
+    refuses VALUE_TAKEN "This issue already has an option at that universal value."
+  where the issue's scenario is unpublished, name is accepted, issue has no option with that name, and either issue is discrete and no universalValue is given, or issue is continuous and has no option at the given universalValue
+  then
+    append a new option with issue, name, and universalValue if given
+    returns option
+
+addRole(scenario: Scenario, name: String, batna: Number) : returns (role: Role)
+  where scenario is not in Scenarios
+  then
+    refuses UNKNOWN_SCENARIO "There is no such scenario."
+  where scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_ROLE_NAME "A role name must have 1 to 100 characters."
+  where scenario is unpublished, name is accepted, and scenario has a role with that name
+  then
+    refuses ROLE_EXISTS "This scenario already has a role with that name."
+  where scenario is unpublished, name is accepted, and scenario has no role with that name
+  then
+    append a new role with scenario, name, and batna
+    returns role
+
+setPayoff(role: Role, option: Option, points: Number) : returns ()
+  where role is not in Roles or option is not in Options
+  then
+    refuses UNKNOWN_ROLE_OR_OPTION "There is no such role or option."
+  where role and option belong to different scenarios
+  then
+    refuses DIFFERENT_SCENARIOS "The role and the option belong to different scenarios."
+  where role and option belong to the same scenario, and it is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where role and option belong to the same scenario, and it is unpublished
+  then
+    set the points of the payoff with role and option, adding that payoff if there is none
+    returns
+
+setBrief(role: Role, brief: String) : returns ()
+  where role is not in Roles
+  then
+    refuses UNKNOWN_ROLE "There is no such role."
+  where the role's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the role's scenario is unpublished and brief is blank or longer than 20000 characters
+  then
+    refuses INVALID_BRIEF "A brief must have 1 to 20,000 characters."
+  where the role's scenario is unpublished and brief is accepted
+  then
+    set the role's brief to brief
+    returns
+
+publish(scenario: Scenario) : returns (scenario: Scenario)
+  where scenario is not in Scenarios
+  then
+    refuses UNKNOWN_SCENARIO "There is no such scenario."
+  where scenario is in Published Scenarios
+  then
+    refuses ALREADY_PUBLISHED "This scenario is already published."
+  where scenario is unpublished and lacks an issue, a second role, a second option for some issue, a payoff for some role and option, or a brief for some role
+  then
+    refuses INCOMPLETE "A scenario needs an issue, at least two roles, at least two options for every issue, and every payoff and brief before it can be published."
+  where scenario is unpublished and has everything it needs
+  then
+    add scenario to Published Scenarios
+    returns scenario
+```
+
+## Queries
+
+```queries
+_published() : many (scenario: Scenario, name: String)
+  Returns every published scenario with its name, or no rows when none is published.
+  Orders rows by name.
+
+_scenario(scenario: Scenario) : optional (name: String, author: Author, published: Flag)
+  Returns the scenario's name and author, and whether it is published, or no row for an unknown scenario.
+
+_issues(scenario: Scenario) : many (issue: Issue, name: String, kind: IssueKind, unit?: String)
+  Returns the scenario's issues, or no rows when it has none.
+  Orders rows by when each issue was added.
+
+_options(issue: Issue) : many (option: Option, name: String, universalValue?: Number)
+  Returns the issue's options, with their universal values on a continuous issue, or no rows when it has none.
+  Orders rows by universal value, lowest first, on a continuous issue, and by when each option was added on a discrete issue.
+
+_roles(scenario: Scenario) : many (role: Role, name: String)
+  Returns the scenario's roles, or no rows when it has none.
+  Orders rows by when each role was added.
+
+_role(role: Role) : optional (scenario: Scenario, name: String, batna: Number, brief?: String)
+  Returns the role's scenario, name, BATNA, and brief if it has one, or no row for an unknown role.
+
+_payoffs(role: Role) : many (issue: Issue, option: Option, points: Number)
+  Returns the role's points for each option, or no rows when it has none.
+  Orders rows by issue, in the order the issues were added, and then by option, in the order _options gives.
+
+_dealValidity(scenario: Scenario, terms: TermSheet) : many (issue?: String, problem: String)
+  Returns one row for each problem with the term sheet: the issue it's about, by the issue's name or, for an issue the scenario doesn't have, however the term sheet names it; and what's wrong: "This scenario has no such issue.", "Nothing is agreed on this issue.", "This issue has no such option." for a discrete issue, or "The value must be a number from 80000 to 120000." with the issue's own range for a continuous issue.
+  Returns a single row with no issue, saying "This scenario doesn't exist or isn't published.", for a scenario that isn't published, and no rows when the term sheet is valid.
+  Orders rows by issue, in the order the issues were added, with issues the scenario doesn't have last.
+
+_dealPayoff(role: Role, terms: TermSheet) : optional (points: Number)
+  Returns the role's total points for the term sheet: on a discrete issue, the points of the agreed option; on a continuous issue, the points of the option at the agreed value, or the straight-line blend of the points of the two options on either side of it.
+  Returns no row for an unknown role, or when _dealValidity finds a problem with the term sheet for the role's scenario.
+
+_dealJointPayoff(scenario: Scenario, terms: TermSheet) : optional (jointPoints: Number)
+  Returns the total points of all the scenario's roles for the term sheet, added together.
+  Returns no row when _dealValidity finds a problem with the term sheet for the scenario.
+
+_wholePie(scenario: Scenario) : optional (terms: TermSheet, jointPoints: Number, jointBatna: Number)
+  Returns, among the term sheets worth at least its BATNA to every role, one with the most points for all the scenario's roles together, along with those joint points and the roles' BATNAs added together; when several term sheets tie, it returns the same one every time.
+  Returns no row for a scenario that isn't published, or when no term sheet is worth at least its BATNA to every role, which means no deal was possible.
+```
