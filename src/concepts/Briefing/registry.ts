@@ -1,0 +1,60 @@
+import { registerConcept } from "@mit-sdg/sync-engine/assembly";
+import spec from "@design/concepts/Briefing.md" with { type: "text" };
+import type { Db } from "mongodb";
+import type { User } from "../Registering/Registering.ts";
+import {
+  AlreadyPublished,
+  BriefingConcept,
+  DifferentScenarios,
+  Incomplete,
+  InvalidBrief,
+  InvalidIssueName,
+  InvalidOptionName,
+  InvalidRoleName,
+  InvalidScenarioName,
+  IssueExists,
+  NameTaken,
+  OptionExists,
+  Published,
+  RoleExists,
+  UnitNotAllowed,
+  UnknownIssue,
+  UnknownRole,
+  UnknownRoleOrOption,
+  UnknownScenario,
+  ValueNotAllowed,
+  ValueRequired,
+  ValueTaken,
+} from "./Briefing.ts";
+
+/** Scenarios are written by people with accounts. */
+class Briefing extends BriefingConcept<User> {}
+
+export const briefing = registerConcept({
+  class: Briefing,
+  spec,
+  refusals: {
+    INVALID_SCENARIO_NAME: InvalidScenarioName,
+    NAME_TAKEN: NameTaken,
+    UNKNOWN_SCENARIO: UnknownScenario,
+    PUBLISHED: Published,
+    INVALID_ISSUE_NAME: InvalidIssueName,
+    ISSUE_EXISTS: IssueExists,
+    UNIT_NOT_ALLOWED: UnitNotAllowed,
+    UNKNOWN_ISSUE: UnknownIssue,
+    INVALID_OPTION_NAME: InvalidOptionName,
+    OPTION_EXISTS: OptionExists,
+    VALUE_REQUIRED: ValueRequired,
+    VALUE_NOT_ALLOWED: ValueNotAllowed,
+    VALUE_TAKEN: ValueTaken,
+    INVALID_ROLE_NAME: InvalidRoleName,
+    ROLE_EXISTS: RoleExists,
+    UNKNOWN_ROLE_OR_OPTION: UnknownRoleOrOption,
+    DIFFERENT_SCENARIOS: DifferentScenarios,
+    UNKNOWN_ROLE: UnknownRole,
+    INVALID_BRIEF: InvalidBrief,
+    ALREADY_PUBLISHED: AlreadyPublished,
+    INCOMPLETE: Incomplete,
+  },
+  floors: { mongo: ({ database }: { database: Db }, name: string) => new Briefing(database, name) },
+});
