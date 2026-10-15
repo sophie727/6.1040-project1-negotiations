@@ -1,8 +1,13 @@
-import { MongoClient } from "mongodb";
 import { assembleApplication } from "./assembly.ts";
+import { connect } from "./host/database.ts";
+import { seed } from "./seed/seed.ts";
 
-// The client connects only when a concept first uses the database, so listing the routes never connects.
-const database = new MongoClient(process.env.MONGODB_URI ?? "mongodb://localhost:27017").db(process.env.MONGODB_DB ?? "wholepie");
-
+// Until the HTTP server exists, starting the app connects to the database, seeds it, and reports what it holds.
+const { database, close } = await connect(process.env.MONGODB_URI);
 const application = assembleApplication({ database });
-console.log(JSON.stringify(Object.keys(application.publicInterface.routes).sort()));
+await seed(application);
+
+const scenarios = await application.concepts.Briefing._published();
+console.log(`Published scenarios: ${scenarios.map(({ name }) => name).join(", ")}`);
+console.log(`Routes: ${JSON.stringify(Object.keys(application.publicInterface.routes).sort())}`);
+await close();

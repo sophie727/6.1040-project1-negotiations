@@ -11,17 +11,17 @@ It provides insight on what the cases look like. There will eventually be a UI t
 
 **Issues:**
 
-- Start date
+- Start date (continuous)
     - option name: January 1; universal value: 0 (0 days after the first date option)
-    - option name: March 1; universal value: 58 (58 days after the first date option)
-- Salary
+    - option name: March 1; universal value: 59 (59 days after the first date option)
+- Salary (continuous)
     - option name: $80K; universal value: 80,000
     - option name: $120K; universal value: 120,000
 - Health Insurance (discrete, so no universal values)
     - option name: Full Coverage
     - option name: Half Coverage
     - option name: Not included
-- Bonus
+- Bonus (continuous)
     - option name: $0; universal value: 0
     - option name: $10K; universal value: 10,000
 - Position title (discrete, no universal values)
