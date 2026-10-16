@@ -458,7 +458,7 @@ Authored path: `table.showing.tableAsSeenBy`.
 - Covered by [The table](../design/compositions/table.md), line 23.
 
 ```former
-Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario, scenarioName, status, timeLimit, deadline, roleName, batna, brief, seat, seatName, message, sender, body, sentAt, proposal, proposer, terms, proposalStatus, proposedAt, points); promises exactly one record — forms:
+Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario, scenarioName, status, timeLimit, deadline, roleName, batna, brief, seat, seatName, message, sender, body, sentAt, proposal, proposer, terms, proposalStatus, proposedAt, points, option, optionPoints); promises exactly one record — forms:
   a record of
     where Tabling._table (table) has (scenario, status, timeLimit)
     where whether Tabling._table (table) has (deadline)
@@ -474,6 +474,10 @@ Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario,
         message
         sender
         sentAt
+    payoffs: each Briefing._payoffs (role) has (option, points: optionPoints)
+      form a record of
+        option
+        points: optionPoints
     proposals: each Proposing._proposals (subject: table) has (proposal, proposedAt, proposer, status: proposalStatus, terms)
       where whether Briefing._dealPayoff (role, terms) has (points)
       form a record of
@@ -503,7 +507,7 @@ Authored path: `debrief.showing.debriefOf`.
 - Covered by [The debrief](../design/compositions/debrief.md), line 5.
 
 ```former
-Former "the debrief of (table)" — inputs (table); bindings (scenario, outcome, agreed, quitter, best, bestJointPoints, jointBatna, role, name, batna, points, bestPoints); promises exactly one record — forms:
+Former "the debrief of (table)" — inputs (table); bindings (scenario, outcome, agreed, quitter, best, bestJointPoints, jointBatna, role, name, batna, points, bestPoints, option, optionPoints); promises exactly one record — forms:
   a record of
     where Tabling._table (table) has (scenario, status: outcome)
     where whether view "the terms (table) settled on" with (table) has (terms: agreed)
@@ -512,6 +516,7 @@ Former "the debrief of (table)" — inputs (table); bindings (scenario, outcome,
     agreed
     best
     bestJointPoints
+    issues: former "the issues of (scenario)" with (scenario)
     jointBatna
     outcome
     roles: each Briefing._roles (scenario) has (name, role)
@@ -522,6 +527,10 @@ Former "the debrief of (table)" — inputs (table); bindings (scenario, outcome,
         batna
         bestPoints
         name
+        payoffs: each Briefing._payoffs (role) has (option, points: optionPoints)
+          form a record of
+            option
+            points: optionPoints
         points
         role
     walkedAway: quitter
@@ -758,19 +767,6 @@ then
   Reasoning.prompt (ask: "What do you say next to the other side?", subject: table)
 ```
 
-### counterpart.asking.GreetWhenBegun
-
-Authored path: `counterpart.asking.GreetWhenBegun`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 9.
-
-```reaction
-when Tabling.begin (table)
-where
-  view "the role the counterpart plays at (table)" with (table)
-then
-  Reasoning.prompt (ask: "What do you say next to the other side?", subject: table)
-```
-
 ### counterpart.reading.ReadTable
 
 Authored path: `counterpart.reading.ReadTable`.
@@ -834,7 +830,7 @@ then
 
 Authored path: `debrief.showing.ShowDebrief`.
 - Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 16.
+- Covered by [The debrief](../design/compositions/debrief.md), line 17.
 
 ```reaction
 when RequestBoundary.request (path: "/tables/debrief", requestId, session, table)
@@ -846,7 +842,7 @@ then
 
 Authored path: `debrief.showing.ShowDebrief`.
 - Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 16.
+- Covered by [The debrief](../design/compositions/debrief.md), line 17.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by debrief.showing.ShowDebrief
@@ -862,7 +858,7 @@ then
 
 Authored path: `debrief.showing.ShowDebrief`.
 - Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 16.
+- Covered by [The debrief](../design/compositions/debrief.md), line 17.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by debrief.showing.ShowDebrief
@@ -878,7 +874,7 @@ then
 
 Authored path: `debrief.showing.ShowDebrief`.
 - Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 16.
+- Covered by [The debrief](../design/compositions/debrief.md), line 17.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by debrief.showing.ShowDebrief

@@ -2,7 +2,7 @@ import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { each, former, is, no, view, whether, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
 import { textInput } from "./reusable/inputs.ts";
-import { seatedAs } from "./table.ts";
+import { issuesOf, seatedAs } from "./table.ts";
 
 const { Briefing, Proposing, Sessioning, Tabling } = concepts;
 
@@ -30,13 +30,29 @@ const walkedAway = view("the role that walked away from (table)", ({ table }, { 
 /**
  * The whole pie of (table): how it ended, the terms agreed on if it settled, and the best deal the scenario allowed,
  * with each role's BATNA and its points from both. Without an agreement, each role gets its BATNA. When no deal could
- * have given every role at least its BATNA, the best deal is null.
+ * have given every role at least its BATNA, the best deal is null. Now that the negotiation is over, it also reveals the
+ * scenario's issues and every role's points for each option, so the page can show what each issue was worth to each side.
  */
 const debriefOf = former(
   "the debrief of (table)",
   (
     { table },
-    { scenario, outcome, agreed, quitter, best, bestJointPoints, jointBatna, role, name, batna, points, bestPoints },
+    {
+      scenario,
+      outcome,
+      agreed,
+      quitter,
+      best,
+      bestJointPoints,
+      jointBatna,
+      role,
+      name,
+      batna,
+      points,
+      bestPoints,
+      option,
+      optionPoints,
+    },
   ) =>
     where(
       Tabling._table({ table }).is({ scenario, status: outcome }),
@@ -50,13 +66,21 @@ const debriefOf = former(
       best,
       bestJointPoints,
       jointBatna,
+      issues: issuesOf({ scenario }),
       roles: each(Briefing._roles({ scenario }).is({ role, name }))
         .where(
           Briefing._role({ role }).is({ batna }),
           whether(Briefing._dealPayoff({ role, terms: agreed }).is({ points })),
           whether(Briefing._dealPayoff({ role, terms: best }).is({ points: bestPoints })),
         )
-        .form({ role, name, batna, points, bestPoints }),
+        .form({
+          role,
+          name,
+          batna,
+          points,
+          bestPoints,
+          payoffs: each(Briefing._payoffs({ role }).is({ option, points: optionPoints })).form({ option, points: optionPoints }),
+        }),
     }),
 );
 

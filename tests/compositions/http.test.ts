@@ -4,7 +4,7 @@ import { createHttpHandler } from "@mit-sdg/sync-engine-http/handler";
 import { wholePiePolicy } from "../../src/host/http.ts";
 import { startWholePie } from "../support/app.ts";
 
-const ORIGIN = "http://localhost:3000";
+const ORIGIN = "http://localhost:3141";
 const SESSION = "__Host-wholepie-session";
 
 /** The Whole Pie behind its HTTP handler, and a browser that keeps its cookies, as the frontend will call it. */

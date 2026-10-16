@@ -64,8 +64,9 @@ describe("the counterpart's endpoints", () => {
     const { api, application, practice } = await startWholePie({ counterpart: null });
     const nadia = await practice("nadia");
     ok(await api.tables.begin({ session: nadia.session, table: nadia.table }));
-    const [greeting] = await application.concepts.Reasoning._about({ subject: nadia.table });
-    const prompt = greeting!.prompt;
+    ok(await api.tables.send({ session: nadia.session, table: nadia.table, body: "Hello, Manon." }));
+    const [question] = await application.concepts.Reasoning._about({ subject: nadia.table });
+    const prompt = question!.prompt;
 
     expect(await api.counterpart.table({ session: nadia.session, prompt })).toEqual({ error: "NOT_SIGNED_IN" });
     expect(await api.answers.take({ session: nadia.session, prompt })).toEqual({ error: "NOT_SIGNED_IN" });

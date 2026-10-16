@@ -8,7 +8,8 @@ The [debrief endpoint](reaction:debrief.showing.ShowDebrief) answers only once t
 - [the terms the table settled on](view:debrief.outcome.settledTerms), or null without an agreement. Tabling decides how a negotiation ended, so an agreement counts only when the table settled: one reached just as the table expired doesn't count;
 - [the role that walked away](view:debrief.outcome.walkedAway), if one did;
 - the whole pie, from `Briefing._wholePie`: among the term sheets worth at least its BATNA to every role, one with the most points for all the roles together, with those joint points and the roles' BATNAs added together. When no deal could have given every role its BATNA, these are null, and walking away was the right call;
-- for each role, its name, its BATNA, its points from the agreement, and its points from the whole pie. Without an agreement, its points are null, and the role gets its BATNA instead.
+- for each role, its name, its BATNA, its points from the agreement, and its points from the whole pie. Without an agreement, its points are null, and the role gets its BATNA instead;
+- [the scenario's issues](table.md#showing-the-table), and every role's points for each option. During the negotiation, each person saw only their own; now that it's over, the page can show what each issue was worth to each side, and so which trades the deal missed.
 
 From these, the page draws each side's slice, and how much value the deal created and how much of it the person claimed.
 

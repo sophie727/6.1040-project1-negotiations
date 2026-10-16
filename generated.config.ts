@@ -24,5 +24,5 @@ export default {
     ],
   },
   // The browser's client uses the HTTP contract, where each refusal arrives as its HTTP category.
-  projections: [httpWire({ policy: wholePiePolicy("http://localhost:3000"), name: "TheWholePieWireHttp" })],
+  projections: [httpWire({ policy: wholePiePolicy("http://localhost:3141"), name: "TheWholePieWireHttp" })],
 };

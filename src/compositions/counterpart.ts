@@ -32,13 +32,6 @@ const hasWaitingQuestion = view("a question that asks (ask) about (table) is wai
 
 // Asking
 
-/** When the negotiation begins, the counterpart speaks first. */
-const GreetWhenBegun = reaction(({ table }) =>
-  when(Tabling.begin({ table }).responds({}))
-    .where(counterpartRole({ table }))
-    .then(Reasoning.prompt({ subject: table, ask: REPLY_ASK })),
-);
-
 /** When someone else sends a message, the counterpart replies, unless a reply is already waiting to be written. */
 const AskForReply = reaction(({ table, sender }) =>
   when(Conversing.send({ subject: table, sender }).responds({}))
@@ -156,7 +149,7 @@ const RejectForCounterpart = reaction(({ prompt, table, proposal, terms, role, p
 );
 
 export const composition = {
-  asking: { counterpartRole, hasWaitingQuestion, GreetWhenBegun, AskForReply, AskForDecision },
+  asking: { counterpartRole, hasWaitingQuestion, AskForReply, AskForDecision },
   reading: { ReadTable },
   answering: { SendReply, SayWhy, AcceptForCounterpart, RejectForCounterpart },
 };

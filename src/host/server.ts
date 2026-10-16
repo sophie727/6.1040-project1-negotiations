@@ -16,7 +16,7 @@ import { seed } from "../seed/seed.ts";
 import { connect } from "./database.ts";
 import { wholePiePolicy } from "./http.ts";
 
-const port = Number(process.env.PORT ?? 3000);
+const port = Number(process.env.PORT ?? 3141);
 const publicOrigin = process.env.PUBLIC_ORIGIN ?? `http://localhost:${port}`;
 const site = `${import.meta.dir}/../../frontend/dist`;
 

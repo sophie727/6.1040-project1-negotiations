@@ -82,9 +82,9 @@ export const issuesOf = former(
 );
 
 /**
- * (table) as whoever plays (role) there sees it: the scenario, the table's status and clock, the role's own brief and
- * BATNA, every seat's role, the issues, the conversation, and every proposal with what it is worth to (role). Nothing
- * here comes from another role's brief or points.
+ * (table) as whoever plays (role) there sees it: the scenario, the table's status and clock, the role's own brief,
+ * BATNA, and points for each option, every seat's role, the issues, the conversation, and every proposal with what it
+ * is worth to (role). Nothing here comes from another role's brief or points.
  */
 export const tableAsSeenBy = former(
   "(table) as (role) sees it",
@@ -111,6 +111,8 @@ export const tableAsSeenBy = former(
       proposalStatus,
       proposedAt,
       points,
+      option,
+      optionPoints,
     },
   ) =>
     where(
@@ -133,6 +135,7 @@ export const tableAsSeenBy = former(
         .where(Briefing._role({ role: seat }).is({ name: seatName }))
         .form({ role: seat, name: seatName }),
       issues: issuesOf({ scenario }),
+      payoffs: each(Briefing._payoffs({ role }).is({ option, points: optionPoints })).form({ option, points: optionPoints }),
       messages: each(Conversing._messages({ subject: table }).is({ message, sender, body, sentAt })).form({
         message,
         sender,

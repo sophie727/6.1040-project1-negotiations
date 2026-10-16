@@ -37,18 +37,14 @@ describe("the journey", () => {
         }),
       );
 
-    // She begins at 2:00 pm, so time is up at 2:30 pm, and the counterpart, playing Manon, speaks first.
+    // She begins at 2:00 pm, so time is up at 2:30 pm. The counterpart, playing Manon, waits for her to open.
     expect(ok(await api.tables.begin({ session, table })).deadline).toBe("2026-10-15T14:30:00.000Z");
-    await eventually(async () => expect((await show()).table.messages).toMatchObject([{ sender: manon }]));
+    expect((await show()).openQuestions).toBe(0);
 
     // When she says something, Manon answers.
     ok(await api.tables.send({ session, table, body: "I was hoping for $120K." }));
     await eventually(async () =>
-      expect((await show()).table.messages).toMatchObject([
-        { sender: manon },
-        { sender: hiro, body: "I was hoping for $120K." },
-        { sender: manon },
-      ]),
+      expect((await show()).table.messages).toMatchObject([{ sender: hiro, body: "I was hoping for $120K." }, { sender: manon }]),
     );
 
     // Manon rejects an offer worth less to her than her alternative.
@@ -73,10 +69,16 @@ describe("the journey", () => {
       bestJointPoints: 2200,
       jointBatna: 2000,
     });
-    expect(debrief.roles).toEqual([
+    expect(debrief.roles).toMatchObject([
       { role: manon, name: "Manon", batna: 1000, points: 1100, bestPoints: 1100 },
       { role: hiro, name: "Hiro", batna: 1000, points: 1100, bestPoints: 1100 },
     ]);
+    // Now that it's over, she can see what each option was worth to each of them: health insurance was worth nothing to Manon.
+    expect(debrief.issues.map(({ name }) => name)).toEqual(preparing.issues.map(({ name }) => name));
+    const insurance = debrief.issues.find(({ name }) => name === "Health Insurance")!.options.map(({ option }) => option);
+    const manons = debrief.roles[0]!.payoffs;
+    expect(manons).toHaveLength(12);
+    expect(manons.filter(({ option }) => insurance.includes(option)).map(({ points }) => points)).toEqual([0, 0, 0]);
 
     // Back in the bakery, the table is among hers.
     expect(ok(await api.bakery({ session })).tables).toMatchObject([
