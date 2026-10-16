@@ -5,6 +5,7 @@
     "": {
       "dependencies": {
         "@mit-sdg/sync-engine": "1.1.0",
+        "@mit-sdg/sync-engine-http": "1.1.0",
         "mongodb": "^7.2.0",
       },
       "devDependencies": {
@@ -17,6 +18,8 @@
   },
   "packages": {
     "@mit-sdg/sync-engine": ["@mit-sdg/sync-engine@1.1.0", "", { "dependencies": { "mdast-util-from-markdown": "^2.0.3", "semver": "^7.7.3", "typescript": ">=6 <7" }, "bin": { "sync-engine": "dist/command/main.js" } }, "sha512-thlCGZSbgT1G/BmYDCtM5ugxKUYEuQQKbffUQRGLi4u4LGJ76eR6rfj1/e9uH0DftIi6Sih6cW0CSAvcJdUz3Q=="],
+
+    "@mit-sdg/sync-engine-http": ["@mit-sdg/sync-engine-http@1.1.0", "", { "peerDependencies": { "@mit-sdg/sync-engine": "1.1.0" } }, "sha512-xQ4l5ggtotV6DqXXmi+8yZZdsAt+5FDtF5Z6z7TPlxDApUdyPuLJxwVwpMYDxlKvyv++qqhy6xpUPz8ZNRwPkw=="],
 
     "@mongodb-js/saslprep": ["@mongodb-js/saslprep@1.6.1", "", { "dependencies": { "sparse-bitfield": "^3.0.3" } }, "sha512-D4CQtk9IwjCLAvCf1xvHEod3960q8XMUzfmdRU9qjUNlHnesGuTOvJcOTaPm9koZ1caUKA2aTbszZiAkcmSgmg=="],
 
