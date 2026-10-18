@@ -2,20 +2,20 @@
 
 Reactions call `Reasoning.prompt`, and an agent answers each prompt. The agent is an actor, like a person: it signs in to its own session from the server, and then changes state only by calling the endpoints below. These endpoints use only Reasoning and AgentSessioning, a second instance of Sessioning, so they are the same as in conceptbox, and so is `src/agents/reusable/agent.ts`, which calls them.
 
-The rest is in [the counterpart](../counterpart.md): the reactions that call `Reasoning.prompt`, the endpoint that returns what the agent may read about a prompt's table, and the reactions that apply a concluded answer.
+Two agents use them: the counterpart, which plays the other side at each practice table, and the coach, which writes the debrief once a negotiation ends. The rest is in [the counterpart](../counterpart.md) and [the debrief](../debrief.md#coaching): the reactions that call `Reasoning.prompt`, the endpoints that return what each agent may read about a prompt's table, and the reactions that apply a concluded answer.
 
 ## A question, from asking to answer
 
 1. A reaction calls `Reasoning.prompt`, and the prompt is waiting.
 2. The agent takes the prompt, and the prompt is forming.
-3. The agent reads the table through the counterpart's read endpoint, and calls extend once for each piece of the answer as it writes it.
-4. The agent concludes the prompt, and reactions in the counterpart composition apply the answer. If the agent can't finish, it abandons the prompt with a reason a person can read.
+3. The agent reads the table through its own read endpoint, and calls extend once for each piece of the answer as it writes it.
+4. The agent concludes the prompt. Reactions apply the counterpart's answers at the table, and the debrief page shows the coach's. If the agent can't finish, it abandons the prompt with a reason a person can read.
 
-Apart from signing in, the agent calls only these endpoints and the read endpoint, so it changes nothing but Reasoning.
+Apart from signing in, each agent calls only these endpoints and its read endpoint, so it changes nothing but Reasoning.
 
 ## Who the agent is
 
-The agent is named `counterpart`. It signs in from the server, by calling `AgentSessioning.start` with its name, and signs in again when a call is refused with `NOT_SIGNED_IN`. No endpoint starts an agent session, so nobody can sign in as an agent over HTTP. Every endpoint below starts with `AgentSessioning.use`, so a person's session is refused there, and an agent's session is refused by `Sessioning.use` at every person's endpoint. The agent's name is also the reasoner that Reasoning records for each answer.
+The agents are named `counterpart` and `coach`. Each signs in from the server, by calling `AgentSessioning.start` with its name, and signs in again when a call is refused with `NOT_SIGNED_IN`. No endpoint starts an agent session, so nobody can sign in as an agent over HTTP. Every endpoint below starts with `AgentSessioning.use`, so a person's session is refused there, and an agent's session is refused by `Sessioning.use` at every person's endpoint. The agent's name is also the reasoner that Reasoning records for each answer.
 
 ## Finding work
 

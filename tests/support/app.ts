@@ -1,6 +1,7 @@
 import { createGateway } from "@mit-sdg/sync-engine/boundary";
 import { createLocalClient } from "@mit-sdg/sync-engine/client";
 import type { TheWholePieWire } from "../../generated/wire.ts";
+import { createCoach, type DebriefMaterial, scriptedDebrief } from "../../src/agents/coach.ts";
 import { createCounterpart, standIn, type TableMaterial } from "../../src/agents/counterpart.ts";
 import type { Reasoner } from "../../src/agents/reusable/agent.ts";
 import { scriptedReasoner } from "../../src/agents/reusable/reasoners.ts";
@@ -14,21 +15,26 @@ export const START = new Date("2026-10-15T14:00:00.000Z");
 
 /**
  * The Whole Pie on a fresh database with the built-in scenarios, called through its typed client. Its clock stands
- * still until a test moves it forward. The counterpart answers with `counterpart`, the stand-in unless a test passes
- * another reasoner, or doesn't run at all when a test passes null.
+ * still until a test moves it forward. The counterpart and the coach answer with the scripted stand-ins unless a test
+ * passes another reasoner, and don't run at all when a test passes null.
  */
-export async function startWholePie({ counterpart = scriptedReasoner(standIn) }: { counterpart?: Reasoner<TableMaterial> | null } = {}) {
+export async function startWholePie({
+  counterpart = scriptedReasoner(standIn),
+  coach = scriptedReasoner(scriptedDebrief),
+}: { counterpart?: Reasoner<TableMaterial> | null; coach?: Reasoner<DebriefMaterial> | null } = {}) {
   const database = await testDatabase();
   let now = START;
   /** Moves the clock forward by `minutes`. */
   const advance = (minutes: number) => {
     now = new Date(now.getTime() + minutes * 60_000);
   };
-  const agent = counterpart === null ? undefined : createCounterpart(counterpart);
-  const application = assembleApplication({ database }, { clock: () => now, observers: agent ? [agent.observer] : [] });
+  const agents = [counterpart === null ? undefined : createCounterpart(counterpart), coach === null ? undefined : createCoach(coach)].filter(
+    (agent) => agent !== undefined,
+  );
+  const application = assembleApplication({ database }, { clock: () => now, observers: agents.map(({ observer }) => observer) });
   await seed(application);
   const api = createLocalClient<TheWholePieWire>({ invoker: createGateway<TheWholePieWire>({ application }) });
-  if (agent) void agent.start({ application, api });
+  for (const agent of agents) void agent.start({ application, api });
 
   async function register(username: string) {
     return ok(await api.auth.register({ username, password: "correct horse" }));

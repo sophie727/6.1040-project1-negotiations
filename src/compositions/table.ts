@@ -160,6 +160,16 @@ const questionsOpenAt = former("the open questions about (table)", ({ table }, {
     .count(),
 );
 
+/**
+ * Every question to the counterpart about (table), oldest first, with its stage and the reason it was abandoned, if it
+ * was, so the screen can say when the counterpart couldn't answer, rather than just stop showing that it is writing.
+ */
+const questionsAbout = former("the questions about (table)", ({ table }, { prompt, stage, reason }) =>
+  each(Reasoning._about({ subject: table }).is({ prompt, stage }))
+    .where(whether(Reasoning._reason({ prompt }).is({ reason })))
+    .form({ stage, reason }),
+);
+
 const ShowTable = endpoint(
   "/tables/show",
   ({ session, table, user, role }) =>
@@ -172,6 +182,7 @@ const ShowTable = endpoint(
               table: tableAsSeenBy({ table, role }),
               notes: notesOf({ user, table }),
               openQuestions: questionsOpenAt({ table }),
+              questions: questionsAbout({ table }),
             }),
           )
           .named("seated"),
@@ -270,7 +281,7 @@ const WriteNotes = endpoint(
 export const composition = {
   seating: { AddSeatForEachRole, JoinProposalsWhenSeated },
   access: { seatedAs, underWay, overdue, notOpen },
-  showing: { issuesOf, tableAsSeenBy, notesOf, questionsOpenAt, ShowTable },
+  showing: { issuesOf, tableAsSeenBy, notesOf, questionsOpenAt, questionsAbout, ShowTable },
   clock: { Begin, Expire, Withdraw },
   talking: { Send, WriteNotes },
 };

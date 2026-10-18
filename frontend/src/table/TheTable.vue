@@ -5,7 +5,7 @@ import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
 import Icon from "../reusable/ui/Icon.vue";
-import Brief from "./Brief.vue";
+import Markdown from "./Markdown.vue";
 import Countdown from "./Countdown.vue";
 import { formatTime } from "./format.ts";
 import Notes from "./Notes.vue";
@@ -36,10 +36,16 @@ const timeline = computed<Entry[]>(() =>
 );
 const latestTerms = computed(() => table.value.proposals.at(-1)?.terms);
 
+/** Why the counterpart couldn't answer the newest question, if it couldn't: the reason the agent gave when it abandoned it. */
+const trouble = computed(() => {
+  const newest = props.view.questions.at(-1);
+  return newest?.stage === "ABANDONED" ? (newest.reason ?? "Something went wrong.") : null;
+});
+
 // The chat follows new entries, unless the person has scrolled up to read.
 const scroller = ref<HTMLElement | null>(null);
 watch(
-  () => [timeline.value.length, props.view.openQuestions, table.value.proposals.map(({ status }) => status).join()],
+  () => [timeline.value.length, props.view.openQuestions, table.value.proposals.map(({ status }) => status).join(), trouble.value],
   async () => {
     const box = scroller.value;
     const following = box === null || box.scrollHeight - box.scrollTop - box.clientHeight < 120;
@@ -138,6 +144,9 @@ const tab = ref<"brief" | "notes">("brief");
           <p v-if="view.openQuestions > 0" class="thinking muted">
             {{ others }} is thinking<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
           </p>
+          <p v-else-if="trouble" class="trouble" role="status">
+            {{ others }} couldn't answer: {{ trouble }} Send another message, or propose again, to try again.
+          </p>
         </div>
         <form class="composer" @submit.prevent="send">
           <textarea
@@ -162,7 +171,7 @@ const tab = ref<"brief" | "notes">("brief");
           <button type="button" role="tab" :aria-selected="tab === 'notes'" @click="tab = 'notes'">Notes</button>
         </div>
         <div class="tab-body">
-          <Brief v-if="tab === 'brief'" :markdown="table.brief" />
+          <Markdown v-if="tab === 'brief'" :markdown="table.brief" />
           <Notes v-else :table="table.table" :saved="view.notes.body" :rows="18" />
         </div>
       </section>
@@ -240,6 +249,16 @@ const tab = ref<"brief" | "notes">("brief");
   border-radius: 16px 16px 4px 16px;
   color: #ffffff;
   background: var(--color-accent);
+}
+.trouble {
+  align-self: center;
+  max-width: 420px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  text-align: center;
 }
 .thinking .dots span {
   animation: blink 1.2s infinite;

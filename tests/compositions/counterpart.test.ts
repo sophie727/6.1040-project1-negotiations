@@ -70,6 +70,32 @@ describe("the counterpart", () => {
     ]);
   });
 
+  test("when the counterpart can't answer, the table says why, and the next message asks again", async () => {
+    let reachable = false;
+    const flaky: Reasoner<TableMaterial> = {
+      name: "flaky",
+      async answer(ask, table, write) {
+        if (!reachable) throw new ReasonerFailure("The model couldn't be reached.");
+        await write(standIn(ask, table));
+      },
+    };
+    const { api, practice } = await startWholePie({ counterpart: flaky });
+    const { session, table, show } = await practice("nadia");
+    ok(await api.tables.begin({ session, table }));
+
+    ok(await api.tables.send({ session, table, body: "Hello, Manon." }));
+    await eventually(async () =>
+      expect(await show()).toMatchObject({ openQuestions: 0, questions: [{ stage: "ABANDONED", reason: "The model couldn't be reached." }] }),
+    );
+
+    reachable = true;
+    ok(await api.tables.send({ session, table, body: "Are you there?" }));
+    await eventually(async () =>
+      expect(await show()).toMatchObject({ questions: [{ stage: "ABANDONED" }, { stage: "CONCLUDED", reason: null }] }),
+    );
+    expect((await show()).table.messages).toHaveLength(3);
+  });
+
   test("the stand-in replies with a canned message and answers each proposal by its worth to its role", () => {
     const table = {
       role: "manon",

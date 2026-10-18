@@ -1,31 +1,49 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { api, type DebriefView, type TableView } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 import { formatAgreed, formatPoints } from "../table/format.ts";
+import Markdown from "../table/Markdown.vue";
 import { issuePoints } from "../table/points.ts";
 import PieChart from "./PieChart.vue";
 import TotalValue from "./TotalValue.vue";
 
 /**
- * The Whole Pie: how the negotiation ended, each side's slice of the most the two could have shared, how the deal
- * compares with every possible deal, and, issue by issue, how it differs from the best deal.
+ * The Whole Pie: how the negotiation ended, each side's slice of the most the two could have shared, the coach's
+ * debrief, how the deal compares with every possible deal, and, issue by issue, how it differs from the best deal.
+ * While the coach is writing, the page asks again every POLL_MS, so the debrief appears as it's written.
  */
 const props = defineProps<{ view: TableView }>();
+const POLL_MS = 1500;
 const debriefView = ref<DebriefView | null>(null);
 const error = ref<string | null>(null);
+let timer: ReturnType<typeof setTimeout> | undefined;
+let gone = false;
 
-onMounted(async () => {
+async function load() {
   const result = await api.tables.debrief({ table: props.view.table.table });
+  if (gone) return;
   if ("error" in result) {
     if (result.error === "UNAUTHORIZED") useSession().sessionEnded();
-    error.value = messageFor("/tables/debrief", result.error);
-    return;
+    // A passing failure while the coach writes is retried; a first load that fails shows why.
+    if (debriefView.value === null) error.value = messageFor("/tables/debrief", result.error);
+  } else {
+    debriefView.value = result;
   }
-  debriefView.value = result;
+  if (debriefView.value === null || coachWriting.value) timer = setTimeout(load, POLL_MS);
+}
+
+onMounted(load);
+onUnmounted(() => {
+  gone = true;
+  clearTimeout(timer);
 });
+
+/** The coach's latest debrief, if the coach was asked for one. */
+const coaching = computed(() => debriefView.value?.coaching.at(-1));
+const coachWriting = computed(() => coaching.value?.stage === "WAITING" || coaching.value?.stage === "FORMING");
 
 const debrief = computed(() => debriefView.value?.debrief);
 const me = computed(() => debrief.value?.roles.find(({ role }) => role === debriefView.value?.role));
@@ -129,29 +147,47 @@ const lesson = computed(() => {
       <p class="headline display">{{ headline }}</p>
 
       <div class="columns">
-        <section class="panel">
-          <h2>Your slice</h2>
-          <PieChart :slices="slices" />
-          <p v-if="debrief.bestJointPoints === null" class="muted">
-            No deal could have given both of you at least your BATNAs, so there was no pie to share: walking away was right.
-          </p>
-          <p v-else class="muted">
-            The whole pie is {{ formatPoints(debrief.bestJointPoints) }} points: the most you and {{ otherNames }} could have
-            gotten together with a deal that beat both your BATNAs.
-          </p>
-          <dl v-if="scores" class="scores">
-            <div>
-              <dt>Value created</dt>
-              <dd class="display">{{ percent(scores.created) }}</dd>
-              <p class="muted">of what a deal could add over walking away</p>
-            </div>
-            <div>
-              <dt>Value claimed</dt>
-              <dd class="display">{{ percent(scores.claimed) }}</dd>
-              <p class="muted">of the value created went to you</p>
-            </div>
-          </dl>
-        </section>
+        <div class="left">
+          <section class="panel">
+            <h2>Your slice</h2>
+            <PieChart :slices="slices" />
+            <p v-if="debrief.bestJointPoints === null" class="muted">
+              No deal could have given both of you at least your BATNAs, so there was no pie to share: walking away was right.
+            </p>
+            <p v-else class="muted">
+              The whole pie is {{ formatPoints(debrief.bestJointPoints) }} points: the most you and {{ otherNames }} could have
+              gotten together with a deal that beat both your BATNAs.
+            </p>
+            <dl v-if="scores" class="scores">
+              <div>
+                <dt>Value created</dt>
+                <dd class="display">{{ percent(scores.created) }}</dd>
+                <p v-if="scores.created !== null && scores.created < 0" class="muted">
+                  The deal was worth less to the two of you than walking away.
+                </p>
+                <p v-else class="muted">of what a deal could add over walking away</p>
+              </div>
+              <div>
+                <dt>Value claimed</dt>
+                <dd class="display">{{ percent(scores.claimed) }}</dd>
+                <p v-if="scores.claimed !== null && scores.claimed < 0" class="muted">You got less than your BATNA.</p>
+                <p v-else class="muted">of the value created went to you</p>
+              </div>
+            </dl>
+          </section>
+
+          <section v-if="coaching" class="panel coach" aria-live="polite">
+            <h2>Your coach's debrief</h2>
+            <p v-if="coaching.stage === 'WAITING'" class="muted">Your coach is reading through your negotiation…</p>
+            <p v-else-if="coaching.stage === 'ABANDONED'" class="refusal">
+              Your coach couldn't write a debrief this time: {{ coaching.reason ?? "something went wrong." }}
+            </p>
+            <template v-else>
+              <Markdown :markdown="coaching.answer" />
+              <p v-if="coaching.stage === 'FORMING'" class="muted">Writing…</p>
+            </template>
+          </section>
+        </div>
 
         <div class="right">
           <section class="panel">
@@ -239,6 +275,11 @@ const lesson = computed(() => {
   gap: var(--space-6);
   align-items: start;
 }
+.coach :deep(.markdown h2),
+.coach :deep(.markdown h3) {
+  font-size: var(--text-base);
+}
+.left,
 .right {
   display: flex;
   flex-direction: column;

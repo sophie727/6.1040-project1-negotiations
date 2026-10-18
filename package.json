@@ -17,6 +17,7 @@
     "dev": "PUBLIC_ORIGIN=http://localhost:5173 bun --watch src/host/server.ts",
     "start": "bun src/host/server.ts",
     "build": "bun run --cwd frontend build",
+    "models": "bun scripts/models.ts",
     "generate": "sync-engine artifacts pin",
     "check": "sync-engine check && sync-engine artifacts check && tsc --noEmit && bun run --cwd frontend typecheck",
     "test": "bun test --timeout 60000"

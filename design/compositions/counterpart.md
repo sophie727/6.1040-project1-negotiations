@@ -2,7 +2,7 @@
 
 At a practice table, the person negotiates against the counterpart: the player `bot:counterpart`, who takes every seat the person doesn't. As in conceptbox, the counterpart is an agent. Reactions here ask it questions with `Reasoning.prompt`, the agent answers through [the answering endpoints](reusable/answering.md), and reactions here apply its concluded answers. No reaction calls a model, and the agent changes nothing at the table directly; the reactions here decide what each answer does.
 
-For now, the agent in `src/agents/counterpart.ts` answers with a stand-in: canned replies, and an answer to each proposal that accepts it exactly when it is worth at least the counterpart's BATNA. In the next step of the plan, a language model takes the stand-in's place, and nothing here changes.
+The agent in `src/agents/counterpart.ts` answers with a language model, Claude or Gemini, when the server has an API key for one. The model plays the role its brief describes: it reads the brief, the conversation, and each proposal's worth to its role, replies in at most three sentences, and decides on proposals. Without a key, and in the tests, a stand-in answers instead: canned replies, and an answer to each proposal that accepts it exactly when it is worth at least the counterpart's BATNA. Either way, the reactions here are the same.
 
 ## Asking
 

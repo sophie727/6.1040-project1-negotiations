@@ -326,7 +326,7 @@ Authored path: `practice.starting.playable`.
 ### (table) has ended
 
 Authored path: `debrief.outcome.ended`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 5.
+- Covered by [The debrief](../design/compositions/debrief.md), line 7.
 
 ```view
 (table) has ended — inputs (table); outputs (); bindings (status)
@@ -394,7 +394,7 @@ the role (user) plays at (table) — inputs (user, table); outputs (role); bindi
 ### the role that walked away from (table)
 
 Authored path: `debrief.outcome.walkedAway`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 9.
+- Covered by [The debrief](../design/compositions/debrief.md), line 11.
 
 ```view
 the role that walked away from (table) — inputs (table); outputs (role); bindings (negotiator) — answers at most one (role)
@@ -413,10 +413,34 @@ the role the counterpart plays at (table) — inputs (table); outputs (role); bi
   where Tabling._seats (table) has (negotiator: "bot:counterpart", role)
 ```
 
+### the role the person plays at (table)
+
+Authored path: `debrief.coaching.personRole`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 26.
+
+```view
+the role the person plays at (table) — inputs (table); outputs (role); bindings () — answers at most one (role)
+  where
+    Tabling._seats (table) has (role)
+    no view "the role the counterpart plays at (table)" with (table) has (role)
+```
+
+### the table of the debrief (prompt) that (agent) took
+
+Authored path: `debrief.coaching.debriefTakenBy`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 26.
+
+```view
+the table of the debrief (prompt) that (agent) took — inputs (agent, prompt); outputs (table); bindings () — answers at most one (table)
+  where
+    Reasoning._taken (reasoner: agent) has (prompt, subject: table)
+    Reasoning._about (subject: table) has (ask: "How did the person negotiate, and what could they do better next time?", prompt)
+```
+
 ### the terms (table) settled on
 
 Authored path: `debrief.outcome.settledTerms`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 8.
+- Covered by [The debrief](../design/compositions/debrief.md), line 10.
 
 ```view
 the terms (table) settled on — inputs (table); outputs (terms); bindings () — answers at most one (terms)
@@ -501,10 +525,25 @@ Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario,
     timeLimit
 ```
 
+### the coach's debriefs of (table)
+
+Authored path: `debrief.coaching.coachingOf`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 28.
+
+```former
+Former "the coach's debriefs of (table)" — inputs (table); bindings (prompt, answer, stage, reason); promises exactly one record — forms:
+  each Reasoning._about (subject: table) has (answer, ask: "How did the person negotiate, and what could they do better next time?", prompt, stage)
+    where whether Reasoning._reason (prompt) has (reason)
+    form a record of
+      answer
+      reason
+      stage
+```
+
 ### the debrief of (table)
 
 Authored path: `debrief.showing.debriefOf`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 5.
+- Covered by [The debrief](../design/compositions/debrief.md), line 7.
 
 ```former
 Former "the debrief of (table)" — inputs (table); bindings (scenario, outcome, agreed, quitter, best, bestJointPoints, jointBatna, role, name, batna, points, bestPoints, option, optionPoints); promises exactly one record — forms:
@@ -588,6 +627,20 @@ Former "the published scenarios" — inputs (); bindings (scenario, name, timeLi
           role
       scenario
       timeLimit
+```
+
+### the questions about (table)
+
+Authored path: `table.showing.questionsAbout`.
+- Covered by [The table](../design/compositions/table.md), line 23.
+
+```former
+Former "the questions about (table)" — inputs (table); bindings (prompt, stage, reason); promises exactly one record — forms:
+  each Reasoning._about (subject: table) has (prompt, stage)
+    where whether Reasoning._reason (prompt) has (reason)
+    form a record of
+      reason
+      stage
 ```
 
 ### the tables (user) has a seat at
@@ -826,11 +879,94 @@ then
   RequestBoundary.respond (requestId, table: former "(table) as (role) sees it" with (role, table))
 ```
 
+### debrief.coaching.CoachWhenExpired
+
+Authored path: `debrief.coaching.CoachWhenExpired`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 24.
+
+```reaction
+when Tabling.expire (table)
+where
+  view "the role the counterpart plays at (table)" with (table)
+then
+  Reasoning.prompt (ask: "How did the person negotiate, and what could they do better next time?", subject: table)
+```
+
+### debrief.coaching.CoachWhenSettled
+
+Authored path: `debrief.coaching.CoachWhenSettled`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 24.
+
+```reaction
+when Tabling.settle (table)
+where
+  view "the role the counterpart plays at (table)" with (table)
+then
+  Reasoning.prompt (ask: "How did the person negotiate, and what could they do better next time?", subject: table)
+```
+
+### debrief.coaching.CoachWhenWithdrawn
+
+Authored path: `debrief.coaching.CoachWhenWithdrawn`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 24.
+
+```reaction
+when Tabling.withdraw (table)
+where
+  view "the role the counterpart plays at (table)" with (table)
+then
+  Reasoning.prompt (ask: "How did the person negotiate, and what could they do better next time?", subject: table)
+```
+
+### debrief.coaching.ReadDebrief
+
+Authored path: `debrief.coaching.ReadDebrief`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 26.
+- Covered by [The debrief](../design/compositions/debrief.md), line 31.
+
+```reaction
+when RequestBoundary.request (path: "/coach/table", prompt, requestId, session)
+then
+  AgentSessioning.use (session)
+```
+
+### debrief.coaching.ReadDebrief:ended#2
+
+Authored path: `debrief.coaching.ReadDebrief`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 26.
+- Covered by [The debrief](../design/compositions/debrief.md), line 31.
+
+```reaction
+when AgentSessioning.use (session, subject: agent), asked by debrief.coaching.ReadDebrief
+where
+  earlier, RequestBoundary.request (path: "/coach/table", prompt, requestId, session)
+  view "the table of the debrief (prompt) that (agent) took" with (agent, prompt) has (table)
+  view "(table) has ended" with (table)
+  view "the role the person plays at (table)" with (table) has (role: person)
+then
+  RequestBoundary.respond (debrief: former "the debrief of (table)" with (table), requestId, table: former "(table) as (role) sees it" with (role: person, table))
+```
+
+### debrief.coaching.ReadDebrief:not-taken#2
+
+Authored path: `debrief.coaching.ReadDebrief`.
+- Covered by [The debrief](../design/compositions/debrief.md), line 26.
+- Covered by [The debrief](../design/compositions/debrief.md), line 31.
+
+```reaction
+when AgentSessioning.use (session, subject: agent), asked by debrief.coaching.ReadDebrief
+where
+  earlier, RequestBoundary.request (path: "/coach/table", prompt, requestId, session)
+  no view "the table of the debrief (prompt) that (agent) took" with (agent, prompt)
+then
+  RequestBoundary.respond (error: "NOT_TAKEN", requestId)
+```
+
 ### debrief.showing.ShowDebrief
 
 Authored path: `debrief.showing.ShowDebrief`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 17.
+- Covered by [The debrief](../design/compositions/debrief.md), line 7.
+- Covered by [The debrief](../design/compositions/debrief.md), line 19.
 
 ```reaction
 when RequestBoundary.request (path: "/tables/debrief", requestId, session, table)
@@ -841,8 +977,8 @@ then
 ### debrief.showing.ShowDebrief:ended#2
 
 Authored path: `debrief.showing.ShowDebrief`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 17.
+- Covered by [The debrief](../design/compositions/debrief.md), line 7.
+- Covered by [The debrief](../design/compositions/debrief.md), line 19.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by debrief.showing.ShowDebrief
@@ -851,14 +987,14 @@ where
   view "the role (user) plays at (table)" with (table, user) has (role)
   view "(table) has ended" with (table)
 then
-  RequestBoundary.respond (debrief: former "the debrief of (table)" with (table), requestId, role)
+  RequestBoundary.respond (coaching: former "the coach's debriefs of (table)" with (table), debrief: former "the debrief of (table)" with (table), requestId, role)
 ```
 
 ### debrief.showing.ShowDebrief:not-over#2
 
 Authored path: `debrief.showing.ShowDebrief`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 17.
+- Covered by [The debrief](../design/compositions/debrief.md), line 7.
+- Covered by [The debrief](../design/compositions/debrief.md), line 19.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by debrief.showing.ShowDebrief
@@ -873,8 +1009,8 @@ then
 ### debrief.showing.ShowDebrief:not-seated#2
 
 Authored path: `debrief.showing.ShowDebrief`.
-- Covered by [The debrief](../design/compositions/debrief.md), line 5.
-- Covered by [The debrief](../design/compositions/debrief.md), line 17.
+- Covered by [The debrief](../design/compositions/debrief.md), line 7.
+- Covered by [The debrief](../design/compositions/debrief.md), line 19.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by debrief.showing.ShowDebrief
@@ -2169,7 +2305,7 @@ where
   earlier, RequestBoundary.request (path: "/tables/show", requestId, session, table)
   view "the role (user) plays at (table)" with (table, user) has (role)
 then
-  RequestBoundary.respond (notes: former "the notes (user) wrote about (table)" with (table, user), openQuestions: former "the open questions about (table)" with (table), requestId, table: former "(table) as (role) sees it" with (role, table))
+  RequestBoundary.respond (notes: former "the notes (user) wrote about (table)" with (table, user), openQuestions: former "the open questions about (table)" with (table), questions: former "the questions about (table)" with (table), requestId, table: former "(table) as (role) sees it" with (role, table))
 ```
 
 ### table.talking.Send
@@ -2350,6 +2486,7 @@ not listed here have no explicit input contract.
 - `/auth/me` — requires `session`
 - `/auth/register` — requires `password`, `username`
 - `/bakery` — requires `session`
+- `/coach/table` — requires `prompt`, `session`
 - `/counterpart/table` — requires `prompt`, `session`
 - `/practice/start` — requires `role`, `scenario`, `session`, `timeLimit`
 - `/tables/accept` — requires `proposal`, `session`, `table`

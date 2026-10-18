@@ -6,7 +6,7 @@ A seat at a table belongs to a player: either a person, or one of the AI counter
 
 Everything said and offered at a table is said and offered by a role, not by a player, so the AI counterpart needs no account: its messages in Conversing and its proposals in Proposing come from the role it plays. A proposal offers a term sheet, which Proposing keeps without reading, and which Briefing scores. Each person keeps their own notes about each table in Noting.
 
-The agent signs in to its own instance of Sessioning, AgentSessioning, under a name such as `counterpart`, and it is the reasoner that Reasoning records for its answers. For now, every question to the agent is about a table: what the counterpart says next, whether it accepts a proposal, and the debrief. Once people can write scenarios in the app, generating their briefs will need questions about scenarios and roles too.
+Two agents answer questions: the counterpart, which plays the other side, and the coach, which writes the debrief. Each signs in to its own instance of Sessioning, AgentSessioning, under its name, `counterpart` or `coach`, and is the reasoner that Reasoning records for its answers. For now, every question to an agent is about a table: what the counterpart says next, whether it accepts a proposal, and the debrief. Once people can write scenarios in the app, generating their briefs will need questions about scenarios and roles too.
 
 ```types
 concrete Player
@@ -16,7 +16,7 @@ concrete TermSheet
   One agreed universal value for each issue of a scenario, in the form Briefing reads.
 
 concrete Agent
-  The name of an agent process, such as `counterpart`.
+  The name of an agent, `counterpart` or `coach`.
 ```
 
 ```instances

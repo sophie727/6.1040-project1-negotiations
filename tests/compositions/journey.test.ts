@@ -80,6 +80,13 @@ describe("the journey", () => {
     expect(manons).toHaveLength(12);
     expect(manons.filter(({ option }) => insurance.includes(option)).map(({ points }) => points)).toEqual([0, 0, 0]);
 
+    // The coach writes her a debrief.
+    await eventually(async () =>
+      expect(ok(await api.tables.debrief({ session, table })).coaching).toMatchObject([
+        { stage: "CONCLUDED", answer: expect.stringContaining("nothing was left on the table") },
+      ]),
+    );
+
     // Back in the bakery, the table is among hers.
     expect(ok(await api.bakery({ session })).tables).toMatchObject([
       { table, scenarioName: "The Job Offer", roleName: "Hiro", status: "SETTLED" },

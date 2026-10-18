@@ -1,8 +1,10 @@
 # The debrief
 
-However a negotiation ends, the person sees the whole pie: what they and the other side got, and the best deal the scenario allowed. Tabling says how the negotiation ended, Proposing holds the agreement, and Briefing scores term sheets and finds the whole pie.
+However a negotiation ends, the person sees the whole pie: what they and the other side got, and the best deal the scenario allowed. Tabling says how the negotiation ended, Proposing holds the agreement, and Briefing scores term sheets and finds the whole pie. A coach, the second agent, writes them a debrief.
 
-The [debrief endpoint](reaction:debrief.showing.ShowDebrief) answers only once the table [has ended](view:debrief.outcome.ended). Before then, it is refused with `NOT_OVER`, since the debrief reveals the other side's BATNA and points. Someone without a seat is refused with `NOT_FOUND`. It responds with the person's role and [the debrief](former:debrief.showing.debriefOf):
+## Showing the whole pie
+
+The [debrief endpoint](reaction:debrief.showing.ShowDebrief) answers only once the table [has ended](view:debrief.outcome.ended). Before then, it is refused with `NOT_OVER`, since the debrief reveals the other side's BATNA and points. Someone without a seat is refused with `NOT_FOUND`. It responds with the person's role, [the coach's debrief](#coaching), and [the debrief](former:debrief.showing.debriefOf):
 
 - the outcome: `SETTLED`, `WITHDRAWN`, or `EXPIRED`;
 - [the terms the table settled on](view:debrief.outcome.settledTerms), or null without an agreement. Tabling decides how a negotiation ended, so an agreement counts only when the table settled: one reached just as the table expired doesn't count;
@@ -15,4 +17,16 @@ From these, the page draws each side's slice, and how much value the deal create
 
 ```endpoints
 debrief.showing.ShowDebrief at /tables/debrief
+```
+
+## Coaching
+
+When a practice negotiation ends, the coach writes the person a debrief: what went well, what to work on, and the most valuable trade they missed. As with [the counterpart](counterpart.md), reactions ask with `Reasoning.prompt`, and an agent, named `coach`, answers through [the answering endpoints](reusable/answering.md). Each ending of a table with a counterpart asks once: when it is [settled](reaction:debrief.coaching.CoachWhenSettled), [withdrawn](reaction:debrief.coaching.CoachWhenWithdrawn), or [expired](reaction:debrief.coaching.CoachWhenExpired). Tabling ends each table exactly once, so each table gets one debrief.
+
+The coach reads the negotiation through [the coach's endpoint](reaction:debrief.coaching.ReadDebrief), which starts with `AgentSessioning.use`, so a person's session is refused. It answers only for [a debrief question the agent took](view:debrief.coaching.debriefTakenBy), and only once the table has ended, since it reveals the other side's points. It responds with the table as [the person](view:debrief.coaching.personRole) saw it, including the conversation and their own brief, and the whole pie above. Any other prompt, such as one of the counterpart's questions during the negotiation, is refused with `NOT_TAKEN`, so no agent can read the other side's points while the negotiation is under way.
+
+The debrief endpoint includes [the coach's debriefs](former:debrief.coaching.coachingOf) of the table, normally one, with its answer so far and its stage, and the reason if the coach abandoned it, such as "The model couldn't be reached." The page shows the answer as the coach writes it, and asks again until the debrief is concluded or abandoned.
+
+```endpoints
+debrief.coaching.ReadDebrief at /coach/table
 ```
