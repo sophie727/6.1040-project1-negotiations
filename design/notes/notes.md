@@ -11,6 +11,10 @@ The MVP completes one journey: a new user signs up, reads her confidential brief
 5. **Frontend.** Vue pages to pick a scenario, read the brief, negotiate at the table (chat, countdown, proposals, notes), and see the whole pie, using the generated client. _Check:_ the journey works in the browser from an empty database, with no page refreshes and every error shown.
 6. **Demo.** Record the walkthrough, and update these notes with what remains for P3.
 
+## The Demo
+
+The demo video is here: https://youtu.be/LbMD6UagjHQ.
+
 ## Significant decisions and Challenges
 
 I don't know, I think there weren't that many significant decisions or challenges after I started implementing.
