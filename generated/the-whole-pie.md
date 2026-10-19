@@ -767,7 +767,8 @@ Authored path: `counterpart.answering.SayWhy`.
 when Reasoning.conclude (prompt, ask: "Do you accept the proposal waiting for your answer?", subject: table)
 where
   instant is the current flow's instant
-  Reasoning._lines (prompt) has (line: remark, position: 2)
+  Reasoning._lines (prompt) has (line: remark, position)
+  position is at least 2
   view "the role the counterpart plays at (table)" with (table) has (role)
   view "(table) is under way at (instant)" with (instant, table)
 then
@@ -783,11 +784,11 @@ Authored path: `counterpart.answering.SendReply`.
 when Reasoning.conclude (prompt, ask: "What do you say next to the other side?", subject: table)
 where
   instant is the current flow's instant
-  Reasoning._about (subject: table) has (answer, prompt)
+  Reasoning._lines (prompt) has (line: part)
   view "the role the counterpart plays at (table)" with (table) has (role)
   view "(table) is under way at (instant)" with (instant, table)
 then
-  Conversing.send (body: answer, now: instant, sender: role, subject: table)
+  Conversing.send (body: part, now: instant, sender: role, subject: table)
 ```
 
 ### counterpart.asking.AskForDecision

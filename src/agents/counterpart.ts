@@ -63,13 +63,48 @@ export function waitingProposal(table: TableMaterial) {
   return table.proposals.findLast(({ status, proposer }) => status === "PENDING" && proposer !== table.role);
 }
 
+/** The most a message can hold in Conversing. */
+const MESSAGE_LIMIT = 2000;
+
 /**
- * The answer to a proposal, in the three lines the counterpart composition reads: ACCEPT or REJECT, the proposal, and
- * what the counterpart says about it. It never accepts a proposal worth less than the role's BATNA, whatever `accept` says.
+ * What the counterpart says, as the messages it sends: one line each, which the counterpart composition sends in
+ * order. Each paragraph is its own message, and a paragraph longer than a message can hold is cut after its last
+ * sentence that fits, or, where no sentence ends in time, between words, so nothing the counterpart says is lost.
+ */
+export function asMessages(text: string, limit = MESSAGE_LIMIT): string[] {
+  return text
+    .split(/\n+/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter((line) => line !== "")
+    .flatMap((paragraph) => cut(paragraph, limit));
+}
+
+/** `paragraph` in pieces of at most `limit` characters, each cut after a sentence where one ends in time. */
+function cut(paragraph: string, limit: number): string[] {
+  const pieces: string[] = [];
+  let rest = paragraph;
+  while (rest.length > limit) {
+    const window = rest.slice(0, limit + 1);
+    let at = -1;
+    // A sentence ends at a period, question mark, or exclamation point, and any closing quotes, before a space.
+    for (const end of window.matchAll(/[.!?]+["'’”)\]]*(?= )/g)) at = end.index + end[0].length;
+    if (at <= 0) at = window.lastIndexOf(" ");
+    if (at <= 0) at = limit;
+    pieces.push(rest.slice(0, at).trim());
+    rest = rest.slice(at).trim();
+  }
+  if (rest !== "") pieces.push(rest);
+  return pieces;
+}
+
+/**
+ * The answer to a proposal, in the lines the counterpart composition reads: ACCEPT or REJECT, the proposal, and then
+ * what the counterpart says about it, as one or more messages. It never accepts a proposal worth less than the role's
+ * BATNA, whatever `accept` says.
  */
 export function decision(proposal: TableMaterial["proposals"][number], table: TableMaterial, accept: boolean, remark: string): string {
   const accepting = accept && proposal.points !== null && proposal.points >= table.batna;
-  return [accepting ? "ACCEPT" : "REJECT", proposal.proposal, remark.replace(/\s+/g, " ").trim()].join("\n");
+  return [accepting ? "ACCEPT" : "REJECT", proposal.proposal, ...asMessages(remark)].join("\n");
 }
 
 const REPLIES = [
@@ -163,24 +198,24 @@ export function readDecision(text: string): { accept: boolean; remark: string } 
  * for several hundred tokens, so the room is generous; the prompts ask for short answers.
  */
 const ROOM = 4096;
-/** The most a message can hold in Conversing, so a reply that runs long is cut there rather than refused. */
-const MESSAGE_LIMIT = 2000;
 
 /**
- * The counterpart played by `model`. A reply streams into the conversation as the model writes it. A decision waits
- * for the model's whole answer, and `decision` turns down any proposal below the role's BATNA, whatever the model said.
+ * The counterpart played by `model`. A reply waits for the model's whole answer, so it can be split into messages a
+ * message can hold. A decision waits too, and `decision` turns down any proposal below the role's BATNA, whatever the
+ * model said.
  */
 export function modelCounterpart(model: Model): Reasoner<TableMaterial> {
   return {
     name: model.name,
     async answer(ask, table, write) {
       if (ask !== DECISION_ASK) {
-        let room = MESSAGE_LIMIT;
+        let text = "";
         await model.reply({ system: instructions(table), prompt: replyPrompt(table), maxTokens: ROOM }, async (piece) => {
-          const kept = piece.slice(0, room);
-          room -= kept.length;
-          if (kept) await write(kept);
+          text += piece;
         });
+        const messages = asMessages(text);
+        if (messages.length === 0) throw new ReasonerFailure("The model's reply was empty.");
+        await write(messages.join("\n"));
         return;
       }
       const proposal = waitingProposal(table);

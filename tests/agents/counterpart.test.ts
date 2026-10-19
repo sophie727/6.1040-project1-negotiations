@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { modelCounterpart, readDecision, type TableMaterial } from "../../src/agents/counterpart.ts";
+import { asMessages, modelCounterpart, readDecision, type TableMaterial } from "../../src/agents/counterpart.ts";
 import { DECISION_ASK, REPLY_ASK } from "../../src/compositions/counterpart.ts";
 import hirosBrief from "../../src/seed/briefs/hiro.md" with { type: "text" };
 import manonsBrief from "../../src/seed/briefs/manon.md" with { type: "text" };
@@ -62,13 +62,30 @@ describe("the counterpart, played by a model", () => {
     );
   });
 
-  test("it gives the model room to think, and cuts a reply that runs past what a message can hold", async () => {
+  test("it gives the model room to think, and splits a reply too long for one message into parts", async () => {
     const { app, nadia } = await nadiasTable();
     ok(await app.api.tables.send({ session: nadia.session, table: nadia.table, body: "Tell me everything." }));
     const table = await counterpartMaterial(app, nadia.table);
-    const { written, requests } = await answered("word ".repeat(600), REPLY_ASK, table);
-    expect(written).toHaveLength(2000);
+    const long = Array.from({ length: 40 }, (_, i) => `Point ${i} is about why a January start matters so much to the team.`).join(" ");
+    const { written, requests } = await answered(long, REPLY_ASK, table);
+    const parts = written.split("\n");
+    expect(parts.length).toBe(2);
+    expect(parts.every((part) => part.length <= 2000 && part.endsWith("team."))).toBe(true);
+    expect(parts.join(" ")).toBe(long);
     expect(requests[0]!.maxTokens).toBe(4096);
+  });
+
+  test("its messages keep a reply's words as written: a message per paragraph, and a long paragraph cut between sentences, or between words", () => {
+    expect(asMessages("I can do $95.5K, e.g. with a January start.  Deal?")).toEqual(["I can do $95.5K, e.g. with a January start. Deal?"]);
+    expect(asMessages("Thanks for coming in.\n\nNow, about salary.\n")).toEqual(["Thanks for coming in.", "Now, about salary."]);
+    // With room for 30 characters, each message holds as many whole sentences as fit.
+    expect(asMessages("“That works.” Agreed? " + "Yes. ".repeat(10), 30)).toEqual([
+      "“That works.” Agreed? Yes.",
+      "Yes. Yes. Yes. Yes. Yes. Yes.",
+      "Yes. Yes. Yes.",
+    ]);
+    expect(asMessages("a".repeat(4500)).map((part) => part.length)).toEqual([2000, 2000, 500]);
+    expect(asMessages("   \n  ")).toEqual([]);
   });
 
   test("it reads a decision however the model formats it, and rejects anything unclear", () => {

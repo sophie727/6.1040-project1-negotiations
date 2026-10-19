@@ -1,9 +1,10 @@
 /**
  * The HTTP server: the API under /api, a health check, and the built Vue app.
  *
- * Settings come from the environment, which Bun reads from `.env`: PORT, PUBLIC_ORIGIN (the origin browsers use),
- * MONGODB_URL (or MONGODB_URI), and MONGODB_DB. Without a MongoDB address, the data is kept in memory. On its first
- * start with an empty database, the server publishes the built-in scenarios.
+ * Settings come from the environment, which Bun reads from `.env`: PORT, HOST (the address to listen at, which 6.1040
+ * Apps sets to 0.0.0.0), PUBLIC_ORIGIN (the origin browsers use), MONGODB_URL (or MONGODB_URI), and MONGODB_DB (unset
+ * on 6.1040 Apps, whose address names the database). Without a MongoDB address, the data is kept in memory. On its
+ * first start with an empty database, the server publishes the built-in scenarios.
  *
  * With ANTHROPIC_API_KEY (and optionally ANTHROPIC_MODEL), the counterpart and the coach write with Claude, through
  * ANTHROPIC_BASE_URL when it is set, such as MIT's Parley at https://parley.api.mit.edu; otherwise, with GEMINI_API_KEY
@@ -40,6 +41,7 @@ const handleApi = createHttpHandler({ application, gateway, policy: wholePiePoli
 
 const server = Bun.serve({
   port,
+  hostname: process.env.HOST,
   async fetch(request) {
     const { pathname } = new URL(request.url);
     if (pathname.startsWith("/api/")) return handleApi(request);

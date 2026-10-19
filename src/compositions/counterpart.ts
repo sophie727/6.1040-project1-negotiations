@@ -15,8 +15,9 @@ export const COUNTERPART = "bot:counterpart";
  */
 export const REPLY_ASK = "What do you say next to the other side?";
 /**
- * The answer has three lines: ACCEPT or REJECT, the proposal it answers, and what the counterpart says about it. The
- * agent writes the proposal from what it read, so a decision can't apply to a newer proposal than the one decided on.
+ * The answer's lines are ACCEPT or REJECT, the proposal it answers, and then what the counterpart says about it, one
+ * message per line. The agent writes the proposal from what it read, so a decision can't apply to a newer proposal
+ * than the one decided on.
  */
 export const DECISION_ASK = "Do you accept the proposal waiting for your answer?";
 
@@ -78,24 +79,28 @@ const ReadTable = endpoint(
 
 // Answering
 
-/** The counterpart's reply is its next message, while the negotiation is under way. */
-const SendReply = reaction(({ prompt, table, answer, role, instant }) =>
+/**
+ * Each line of the counterpart's reply is its next message, in order, while the negotiation is under way. The agent
+ * puts each paragraph on its own line, and splits one too long for a message, so a long reply arrives in parts.
+ */
+const SendReply = reaction(({ prompt, table, part, role, instant }) =>
   when(Reasoning.conclude({ prompt }).responds({ subject: table, ask: REPLY_ASK }))
     .where(
       now(instant),
-      Reasoning._about({ subject: table }).is({ prompt, answer }),
+      Reasoning._lines({ prompt }).is({ line: part }),
       counterpartRole({ table }).is({ role }),
       underWay({ table, instant }),
     )
-    .then(Conversing.send({ subject: table, sender: role, body: answer, now: instant })),
+    .then(Conversing.send({ subject: table, sender: role, body: part, now: instant })),
 );
 
-/** What the counterpart says about a proposal it answers is its next message. */
-const SayWhy = reaction(({ prompt, table, remark, role, instant }) =>
+/** What the counterpart says about a proposal it answers, from the third line on, is its next message or messages. */
+const SayWhy = reaction(({ prompt, table, remark, position, role, instant }) =>
   when(Reasoning.conclude({ prompt }).responds({ subject: table, ask: DECISION_ASK }))
     .where(
       now(instant),
-      Reasoning._lines({ prompt }).is({ line: remark, position: 2 }),
+      Reasoning._lines({ prompt }).is({ line: remark, position }),
+      is.ge(position, 2),
       counterpartRole({ table }).is({ role }),
       underWay({ table, instant }),
     )

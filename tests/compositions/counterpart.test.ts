@@ -96,6 +96,33 @@ describe("the counterpart", () => {
     expect((await show()).table.messages).toHaveLength(3);
   });
 
+  test("each line of the counterpart's reply, or of what it says about a proposal, arrives as its own message, in order", async () => {
+    const talkative: Reasoner<TableMaterial> = {
+      name: "talkative",
+      async answer(ask, table, write) {
+        if (ask !== DECISION_ASK) return write("Thanks for coming in.\nLet's start with the start date.\nWhat's driving your timing?");
+        await write(decision(waitingProposal(table)!, table, false, "Not at that salary.\nCould you move on the bonus?"));
+      },
+    };
+    const { api, practice } = await startWholePie({ counterpart: talkative });
+    const { session, table, roles, terms, show } = await practice("nadia");
+    ok(await api.tables.begin({ session, table }));
+
+    ok(await api.tables.send({ session, table, body: "Hello, Manon." }));
+    await eventually(async () => expect((await show()).table.messages).toHaveLength(4));
+    ok(await api.tables.propose({ session, table, terms: terms(GREEDY) }));
+    await eventually(async () => expect((await show()).table.messages).toHaveLength(6));
+
+    const said = (await show()).table.messages.filter(({ sender }) => sender === roles.Manon).map(({ body }) => body);
+    expect(said).toEqual([
+      "Thanks for coming in.",
+      "Let's start with the start date.",
+      "What's driving your timing?",
+      "Not at that salary.",
+      "Could you move on the bonus?",
+    ]);
+  });
+
   test("the stand-in replies with a canned message and answers each proposal by its worth to its role", () => {
     const table = {
       role: "manon",
