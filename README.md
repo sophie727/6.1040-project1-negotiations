@@ -5,3 +5,5 @@ The design deliverables for P2 are in ./design/notes. MVP user journey is in mvp
 The stuff I submitted from P1 is in ./design/notes/P1_design.
 
 This is the demo video: https://youtu.be/LbMD6UagjHQ
+
+After I restart, if I want to run locally, I need to pull up mongoDB again by running `podman machine start`.

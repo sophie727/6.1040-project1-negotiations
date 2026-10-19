@@ -100,7 +100,7 @@ async function begin() {
     flex-direction: column;
     gap: var(--space-3);
     position: sticky;
-    top: var(--space-4);
+    top: calc(var(--topbar-height) + var(--space-4));
 }
 .start {
     font-size: var(--text-lg);

@@ -60,6 +60,10 @@ console.log(
   `The Whole Pie is listening on ${server.url} for ${publicOrigin}. ` +
     (model ? `The counterpart and the coach write with ${model.name}.` : "No model API key is set, so the counterpart and the coach are scripted."),
 );
+// Signing up and in are refused (403) unless the browser's origin is exactly PUBLIC_ORIGIN, so a deployment needs it.
+if (!process.env.PUBLIC_ORIGIN && process.env.NODE_ENV === "production") {
+  console.warn(`PUBLIC_ORIGIN isn't set, so only pages at ${publicOrigin} can sign in. Set it to the app's https:// address.`);
+}
 // A proxy such as Parley may offer only some models, so say so at once when the chosen one isn't among them.
 void listModels().then((offered) => {
   if (model && offered !== undefined && offered.length > 0 && !offered.includes(model.name)) {

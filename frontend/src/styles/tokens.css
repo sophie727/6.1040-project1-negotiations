@@ -1,59 +1,72 @@
-/* The bakery's colors: a crust-red header with golden lettering, as in the sketches, on a cream page. */
+/*
+ * The bakery's colors: a rusty-spice crust with amber-gold lettering on a lemon-chiffon page, with deep teal and
+ * frosted mint as the cool accents, like a vintage bakery's tiles. Palette: FDF8C3, 507C68, DBE7C5, F8BA12, AA420E.
+ */
 :root {
-  /* Palette */
-  --color-page: #fbf5ec;
-  --color-surface: #ffffff;
-  --color-text: #2d1f18;
-  --color-text-muted: #7b6a5d;
-  --color-line: #f3eadf;
-  --color-border: #e5d7c5;
-  --color-accent: #a3292b;
-  --color-accent-strong: #7f1d1f;
-  --color-accent-soft: #f7e4df;
-  --color-gold: #f2c14e;
-  --color-gold-soft: #fdf3d8;
-  --color-good: #2f7a4d;
-  --color-good-soft: #e3f2e8;
-  --color-danger: #b42318;
-  --color-danger-soft: #fdf1ef;
-  --color-tip: #2d1f18;
+    /* Palette */
+    --color-page: #fefbea;
+    --color-surface: #fffdf6;
+    --color-text: #2d1f18;
+    --color-text-muted: #7b6a5d;
+    --color-line: #f3eed6;
+    --color-border: #e6dfbf;
+    --color-accent: #aa420e;
+    --color-accent-strong: #86330a;
+    --color-accent-soft: #f7e3d6;
+    --color-gold: #f8ba12;
+    --color-gold-soft: #fdf8c3;
+    /* A shade deeper than the palette's deep teal (507C68), so it reads as text on frosted mint. */
+    --color-good: #3f6b57;
+    --color-good-soft: #dbe7c5;
+    /* Cooler than the rusty accent, so an error never looks like a button. */
+    --color-danger: #b8203c;
+    --color-danger-soft: #fdeced;
+    --color-tip: #2d1f18;
+    /* The navbar once the page scrolls: green, like a bakery's menu board, with lemon-chiffon lettering. */
+    --color-menu: #507c68;
+    --color-on-menu: #fdf8c3;
 
-  /* The slices of the pie: yours, theirs, and what was left on the table. */
-  --color-yours: #a3292b;
-  --color-theirs: #e2a83c;
-  --color-left: #eadfce;
+    /* The slices of the pie: yours, theirs, and what was left on the table. */
+    --color-yours: #aa420e;
+    --color-theirs: #f8ba12;
+    --color-left: #dbe7c5;
 
-  /* Typography */
-  --font-sans: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --text-xs: 0.8125rem;
-  --text-sm: 0.875rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.625rem;
-  --text-3xl: 2.125rem;
-  --leading: 1.5;
+    /* The navbar's height, which stays clear of whatever else sticks to the top as the page scrolls. */
+    --topbar-height: 64px;
 
-  /* Spacing: a 4px scale */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
+    /* Typography */
+    --font-sans:
+        "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+        sans-serif;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --text-xs: 0.8125rem;
+    --text-sm: 0.875rem;
+    --text-base: 0.9375rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.625rem;
+    --text-3xl: 2.125rem;
+    --leading: 1.5;
 
-  /* Radius */
-  --radius-sm: 10px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 999px;
+    /* Spacing: a 4px scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
 
-  /* Shadow */
-  --shadow-card: 0 1px 3px rgba(45, 31, 24, 0.08);
-  --shadow-popover: 0 10px 30px rgba(45, 31, 24, 0.18);
-  --shadow-dialog: 0 20px 60px rgba(45, 31, 24, 0.3);
+    /* Radius */
+    --radius-sm: 10px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 999px;
+
+    /* Shadow */
+    --shadow-card: 0 1px 3px rgba(45, 31, 24, 0.08);
+    --shadow-popover: 0 10px 30px rgba(45, 31, 24, 0.18);
+    --shadow-dialog: 0 20px 60px rgba(45, 31, 24, 0.3);
 }

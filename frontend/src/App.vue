@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import type { TableId } from "./api/client.ts";
 import BakeryPage from "./bakery/BakeryPage.vue";
 import PasswordForm from "./reusable/PasswordForm.vue";
@@ -11,10 +11,21 @@ import TablePage from "./table/TablePage.vue";
 
 const { me, checked, load, signOut } = useSession();
 onMounted(load);
+
+/** Whether the page has scrolled, when the navbar turns menu-board green; at the top, it blends into the page. */
+const scrolled = ref(false);
+const notice = () => {
+  scrolled.value = window.scrollY > 0;
+};
+onMounted(() => {
+  notice();
+  window.addEventListener("scroll", notice, { passive: true });
+});
+onUnmounted(() => window.removeEventListener("scroll", notice));
 </script>
 
 <template>
-  <header class="topbar">
+  <header class="topbar" :class="{ scrolled }">
     <a class="brand display" href="/" @click.prevent="go('/')">
       <img src="/pie.svg" alt="" width="30" height="30" />
       The Whole Pie
@@ -48,9 +59,19 @@ onMounted(load);
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: 14px max(24px, calc((100vw - 1168px) / 2));
-  background: var(--color-accent);
-  color: var(--color-gold);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--topbar-height);
+  padding: 0 max(24px, calc((100vw - 1168px) / 2));
+  color: var(--color-accent);
+  background: var(--color-page);
+  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.topbar.scrolled {
+  color: var(--color-on-menu);
+  background: var(--color-menu);
+  box-shadow: var(--shadow-card);
 }
 .brand {
   display: flex;
@@ -58,7 +79,7 @@ onMounted(load);
   gap: 10px;
   font-size: var(--text-2xl);
   font-weight: 700;
-  color: var(--color-gold);
+  color: inherit;
   text-decoration: none;
 }
 .brand img {
@@ -70,12 +91,19 @@ onMounted(load);
   height: 36px;
   padding: 0 14px;
   border-radius: var(--radius-full);
-  color: var(--color-gold);
-  background: rgba(0, 0, 0, 0.12);
+  color: inherit;
+  background: rgba(45, 31, 24, 0.06);
 }
 .topbar :deep(.icon-button:hover),
 .topbar :deep(.icon-button[aria-expanded="true"]) {
-  color: var(--color-gold);
+  color: inherit;
+  background: rgba(45, 31, 24, 0.12);
+}
+.topbar.scrolled :deep(.icon-button) {
+  background: rgba(0, 0, 0, 0.12);
+}
+.topbar.scrolled :deep(.icon-button:hover),
+.topbar.scrolled :deep(.icon-button[aria-expanded="true"]) {
   background: rgba(0, 0, 0, 0.22);
 }
 .topbar :deep(.items) {
@@ -97,7 +125,7 @@ onMounted(load);
 }
 @media (max-width: 600px) {
   .topbar {
-    padding: 12px 16px;
+    padding: 0 16px;
   }
   .content {
     padding: var(--space-4) var(--space-4) var(--space-8);
