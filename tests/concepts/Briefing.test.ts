@@ -328,6 +328,9 @@ describe("Briefing", () => {
     const { briefing } = await setup();
     const { scenario } = await lease(briefing, { ana: 150, ben: 150 });
     expect(await briefing._wholePie({ scenario })).toEqual([]);
+    // Even with no deal possible, everyone gets their BATNA when nobody agrees: 150 each, 300 together.
+    expect(await briefing._jointBatna({ scenario })).toEqual([{ jointBatna: 300 }]);
+    expect(await briefing._jointBatna({ scenario: "nowhere" as Scenario })).toEqual([]);
     const offer = await jobOffer(briefing);
     expect(await briefing._wholePie({ scenario: offer.scenario })).toEqual([]);
   });

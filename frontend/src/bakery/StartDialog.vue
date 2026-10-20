@@ -3,27 +3,34 @@ import { ref } from "vue";
 import type { Scenario } from "../api/client.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
 import { pastryFor } from "./pastries.ts";
-import { DEFAULT_TIME_LIMIT, startPractice } from "./start.ts";
+import { startPractice, startWithFriends } from "./start.ts";
 
-/** Asks which side of `scenario` to play and for how long, then opens the table. */
-const props = defineProps<{ scenario: Scenario }>();
+/**
+ * Asks which side of `scenario` to play, then opens the table: with the AI counterpart in the other seat, or with the
+ * other seats waiting for friends. How long to negotiate is chosen on the prep page.
+ */
+const props = defineProps<{ scenario: Scenario; opponents: "ai" | "friends" }>();
 const emit = defineEmits<{ close: [] }>();
 
 const role = ref(props.scenario.roles[0]?.role);
-const timeLimit = ref(props.scenario.timeLimit ?? DEFAULT_TIME_LIMIT);
 const working = ref(false);
 const error = ref<string | null>(null);
 
 async function start() {
   if (role.value === undefined) return;
   working.value = true;
-  error.value = await startPractice(props.scenario, role.value, Number(timeLimit.value));
+  error.value =
+    props.opponents === "ai" ? await startPractice(props.scenario, role.value) : await startWithFriends(props.scenario, role.value);
   working.value = false;
 }
 </script>
 
 <template>
-  <Dialog :title="`${pastryFor(scenario.name)} ${scenario.name}`" subtitle="An AI counterpart plays the other side." @close="emit('close')">
+  <Dialog
+    :title="`${pastryFor(scenario.name)} ${scenario.name}`"
+    :subtitle="opponents === 'ai' ? 'An AI counterpart plays the other side.' : 'Friends you invite with a link play the other side.'"
+    @close="emit('close')"
+  >
     <form class="start" @submit.prevent="start">
       <fieldset>
         <legend>Which side do you want to play?</legend>
@@ -34,13 +41,10 @@ async function start() {
           </label>
         </div>
       </fieldset>
-      <label class="field">
-        Time limit, in minutes
-        <input v-model.number="timeLimit" type="number" min="1" max="180" step="1" required />
-        <span v-if="scenario.timeLimit !== null" class="hint">The author recommends {{ scenario.timeLimit }} minutes.</span>
-      </label>
       <p v-if="error" class="refusal" role="alert">{{ error }}</p>
-      <button type="submit" class="button primary large" :disabled="working || role === undefined">Read your brief</button>
+      <button type="submit" class="button primary large" :disabled="working || role === undefined">
+        {{ opponents === "ai" ? "Read your brief" : "Open the table and get a link" }}
+      </button>
     </form>
   </Dialog>
 </template>

@@ -1,0 +1,119 @@
+# Matchmaking
+
+## Purpose
+
+Gather people who are each looking for others to do the same thing with into groups of the size it needs, first come, first served, so that nobody waits while there are enough people waiting to form a group, and nobody ends up in two groups.
+
+_Prevents:_ people who look at the same moment all wait, unaware of each other; someone ends up in two groups, or twice in one; someone who stopped looking, or left without saying so, is matched anyway.
+
+## Principle
+
+Nadia looks for someone to negotiate The Job Offer with, a scenario for two. Nobody else is looking, so she waits, checking in every few seconds. When Omar looks for someone to negotiate The Job Offer with too, the two of them make a group, so they are matched at once, and neither waits any longer. Once their match has a place to meet, their table, each of them can find it. A three-way negotiation waits until three people are looking for it. Pia waits and then shuts her laptop. A minute after she last checked in, she no longer counts, so when Quinn looks, Quinn waits rather than being matched with her, and when Pia's laptop wakes up, she has to look again. Leo gets tired of waiting and stops looking, so he is never matched.
+
+## Types
+
+```types
+external Seeker
+  Who looks for others to do something with.
+
+external Pool
+  What they want to do together, such as a scenario to negotiate. Only people looking in the same pool are matched.
+
+external Place
+  Where a match meets, such as the table its members negotiate at.
+
+LookingStatus is WAITING or MATCHED or STOPPED
+  Whether a request is still waiting for a group, found one, or was given up.
+```
+
+## State
+
+```state
+a seq of Requests with
+  a Seeker
+  a Pool
+  a size Number
+  a status LookingStatus
+  a lastSeen DateTime
+  an optional Match
+
+a set of Waiting Requests where status is WAITING with
+  unique seeker
+
+a set of Matches with
+  an optional Place
+
+Rule: a request has a match exactly when it is MATCHED.
+Rule: a match has exactly as many requests as their size, all with the same pool and size, and no two of them from the same seeker.
+Rule: a request's size is a whole number of at least 2, counting its seeker.
+Rule: of several searches at once that could form the same group, exactly one forms it.
+```
+
+## Actions
+
+```actions
+seek(seeker: Seeker, pool: Pool, size: Number, now: DateTime) : returns (request: Request, grouped: Flag)
+  where size is not a whole number of at least 2
+  then
+    refuses INVALID_SIZE "A group needs a whole number of people, at least two."
+  where size is accepted, and at least size minus one other seekers have a waiting request with pool and size that was last seen within a minute before now
+  then
+    stop the seeker's waiting request, if they have one
+    append a new request with seeker, pool, and size, last seen now, and put it in a new match with the oldest size minus one of those requests, all of them MATCHED, so grouped is true
+    returns request, grouped
+  where size is accepted, and fewer than size minus one other seekers have a waiting request with pool and size that was last seen within a minute before now
+  then
+    stop the seeker's waiting request, if they have one
+    append a new WAITING request with seeker, pool, and size, last seen now, so grouped is false
+    returns request, grouped
+
+checkIn(request: Request, seeker: Seeker, now: DateTime) : returns ()
+  where request isn't a waiting request of seeker's
+  then
+    refuses NOT_WAITING "You aren't waiting for a match."
+  where request is a waiting request of seeker's, last seen more than a minute before now
+  then
+    refuses LAPSED "You stopped checking in, so you're no longer waiting. Look again."
+  where request is a waiting request of seeker's, last seen within a minute before now
+  then
+    set the request's lastSeen to now
+    returns
+
+stop(request: Request, seeker: Seeker) : returns ()
+  where request isn't a waiting request of seeker's
+  then
+    refuses NOT_WAITING "You aren't waiting for a match."
+  where request is a waiting request of seeker's
+  then
+    set the request's status to STOPPED
+    returns
+
+meet(request: Request, place: Place) : returns ()
+  where request isn't MATCHED
+  then
+    refuses NOT_MATCHED "This request hasn't been matched."
+  where request is MATCHED and its match already has a place
+  then
+    refuses ALREADY_MET "This match already has a place to meet."
+  where request is MATCHED and its match has no place
+  then
+    set the place of the request's match to place
+    returns
+```
+
+## Queries
+
+```queries
+_request(request: Request) : optional (seeker: Seeker, pool: Pool, size: Number, status: LookingStatus)
+  Returns who made the request, what for, how many people its group needs, and its status, or no row for an unknown request.
+
+_lapsed(request: Request, now: DateTime) : one (lapsed: Flag)
+  Returns true when the request is waiting but was last seen more than a minute before now, so it no longer counts, and false otherwise.
+
+_members(request: Request) : many (seeker: Seeker)
+  Returns the seeker of every request in the request's match, including its own, or no rows when the request isn't matched.
+  Orders rows by when each request was made, oldest first.
+
+_place(request: Request) : optional (place: Place)
+  Returns where the request's match meets, or no row when the request isn't matched or its match has no place yet.
+```

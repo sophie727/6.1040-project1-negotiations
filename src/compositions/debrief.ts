@@ -1,28 +1,21 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { each, former, is, no, reaction, view, when, whether, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
+import { DEBRIEF_ASK, JOINT_DEBRIEF_ASK } from "./asks.ts";
 import { counterpartRole } from "./counterpart.ts";
 import { textInput } from "./reusable/inputs.ts";
-import { issuesOf, seatedAs, tableAsSeenBy } from "./table.ts";
+import { began, type Ending, ended, forEachEnding, issuesOf, seatedAs, tableAsSeenBy } from "./table.ts";
 
-const { AgentSessioning, Briefing, Proposing, Reasoning, Sessioning, Tabling } = concepts;
+const { AgentSessioning, Briefing, Proposing, Reasoning, Registering, Reviewing, Sessioning, Tabling } = concepts;
 
-/**
- * The question the coach answers when a practice negotiation ends. The reactions below, the debrief's former, and the
- * agent in `src/agents/coach.ts` match prompts by this exact text.
- */
-export const DEBRIEF_ASK = "How did the person negotiate, and what could they do better next time?";
-
-/** (table) has ended: in an agreement, with someone walking away, or with time running out. */
-const ended = view("(table) has ended", ({ table }, _outputs, { status }) =>
-  where(Tabling._table({ table }).is({ status }), is.among(status, ["SETTLED", "WITHDRAWN", "EXPIRED"])),
-).holds();
+/** The two questions the coach answers, defined with every agent's questions in `./asks.ts`. */
+export { DEBRIEF_ASK, JOINT_DEBRIEF_ASK } from "./asks.ts";
 
 /**
  * The terms (table) settled on. Tabling decides how a negotiation ended, so an agreement counts only when the table
  * settled: one reached at the moment time ran out, after the table expired, doesn't.
  */
-const settledTerms = view("the terms (table) settled on", ({ table }, { terms }) =>
+export const settledTerms = view("the terms (table) settled on", ({ table }, { terms }) =>
   where(Tabling._table({ table }).is({ status: "SETTLED" }), Proposing._agreement({ subject: table }).is({ terms })),
 ).optional();
 
@@ -98,35 +91,50 @@ const personRole = view("the role the person plays at (table)", ({ table }, { ro
   where(Tabling._seats({ table }).is({ role }), no(counterpartRole({ table }).is({ role }))),
 ).optional();
 
-/** When a practice negotiation is settled, the coach is asked for a debrief. */
-const CoachWhenSettled = reaction(({ table }) =>
-  when(Tabling.settle({ table }).responds({}))
-    .where(counterpartRole({ table }))
-    .then(Reasoning.prompt({ subject: table, ask: DEBRIEF_ASK })),
-);
+/**
+ * When a negotiation that began ends in the given way, the coach is asked for a debrief: of the person, at a practice
+ * table, or of each side, at a table between people.
+ */
+function coachWhen(ended: Ending) {
+  return reaction(({ table }) =>
+    when(ended(table))
+      .where(began({ table }))
+      .then(
+        where(counterpartRole({ table }))
+          .then(Reasoning.prompt({ subject: table, ask: DEBRIEF_ASK }))
+          .named("practice"),
+        where(no(counterpartRole({ table })))
+          .then(Reasoning.prompt({ subject: table, ask: JOINT_DEBRIEF_ASK }))
+          .named("between-people"),
+      ),
+  );
+}
 
-/** When someone walks away from a practice negotiation, the coach is asked for a debrief. */
-const CoachWhenWithdrawn = reaction(({ table }) =>
-  when(Tabling.withdraw({ table }).responds({}))
-    .where(counterpartRole({ table }))
-    .then(Reasoning.prompt({ subject: table, ask: DEBRIEF_ASK })),
-);
-
-/** When a practice negotiation runs out of time, the coach is asked for a debrief. */
-const CoachWhenExpired = reaction(({ table }) =>
-  when(Tabling.expire({ table }).responds({}))
-    .where(counterpartRole({ table }))
-    .then(Reasoning.prompt({ subject: table, ask: DEBRIEF_ASK })),
-);
+/** One reaction for each way a negotiation can end, all defined once by `coachWhen`. */
+const CoachWhenEnded = forEachEnding(coachWhen);
 
 /** The table that the debrief question (prompt), taken by (agent), is about. */
 const debriefTakenBy = view("the table of the debrief (prompt) that (agent) took", ({ agent, prompt }, { table }) =>
   where(Reasoning._taken({ reasoner: agent }).is({ prompt, subject: table }), Reasoning._about({ subject: table }).is({ prompt, ask: DEBRIEF_ASK })),
 ).optional();
 
+/** The table that the debrief of every side, question (prompt), taken by (agent), is about. */
+const jointDebriefTakenBy = view("the table of the joint debrief (prompt) that (agent) took", ({ agent, prompt }, { table }) =>
+  where(
+    Reasoning._taken({ reasoner: agent }).is({ prompt, subject: table }),
+    Reasoning._about({ subject: table }).is({ prompt, ask: JOINT_DEBRIEF_ASK }),
+  ),
+).optional();
+
+/** Every side of (table), each with the table as that side saw it, for a debrief of every side. */
+const sidesOf = former("every side of (table), as each saw it", ({ table }, { role }) =>
+  each(Tabling._seats({ table }).is({ role })).form({ role, table: tableAsSeenBy({ table, role }) }),
+);
+
 /**
- * What the coach reads for a debrief it took: the table as the person saw it, and the whole pie. A person's session is
- * refused by `AgentSessioning.use`, and any prompt but a debrief the agent took is refused with NOT_TAKEN.
+ * What the coach reads for a debrief it took: the table as the person saw it, or, for a debrief of every side, as each
+ * side saw it, and the whole pie. A person's session is refused by `AgentSessioning.use`, and any prompt but a debrief
+ * the agent took is refused with NOT_TAKEN.
  */
 const ReadDebrief = endpoint(
   "/coach/table",
@@ -137,7 +145,10 @@ const ReadDebrief = endpoint(
         where(debriefTakenBy({ agent, prompt }).is({ table }), ended({ table }), personRole({ table }).is({ role: person }))
           .then(respond({ table: tableAsSeenBy({ table, role: person }), debrief: debriefOf({ table }) }))
           .named("ended"),
-        where(no(debriefTakenBy({ agent, prompt })))
+        where(jointDebriefTakenBy({ agent, prompt }).is({ table }), ended({ table }))
+          .then(respond({ sides: sidesOf({ table }), debrief: debriefOf({ table }) }))
+          .named("joint"),
+        where(no(debriefTakenBy({ agent, prompt })), no(jointDebriefTakenBy({ agent, prompt })))
           .then(respond({ error: "NOT_TAKEN" }))
           .named("not-taken"),
       ),
@@ -145,13 +156,27 @@ const ReadDebrief = endpoint(
 );
 
 /** The coach's debriefs of (table), oldest first: normally one, with its answer so far, its stage, and why it was abandoned if it was. */
-const coachingOf = former("the coach's debriefs of (table)", ({ table }, { prompt, answer, stage, reason }) =>
-  each(Reasoning._about({ subject: table }).is({ prompt, ask: DEBRIEF_ASK, answer, stage }))
-    .where(whether(Reasoning._reason({ prompt }).is({ reason })))
+const coachingOf = former("the coach's debriefs of (table)", ({ table }, { prompt, ask, answer, stage, reason }) =>
+  each(Reasoning._about({ subject: table }).is({ prompt, ask, answer, stage }))
+    .where(is.among(ask, [DEBRIEF_ASK, JOINT_DEBRIEF_ASK]), whether(Reasoning._reason({ prompt }).is({ reason })))
     .form({ answer, stage, reason }),
 );
 
 // Showing
+
+/**
+ * The other people at (table), each with their username and the stars (user) gave them, if they've reviewed them yet.
+ * The counterpart has no username, so it is never among them, and at a practice table nobody is.
+ */
+const reviewsBy = former("the people (user) can review at (table)", ({ user, table }, { role, negotiator, username, stars }) =>
+  each(Tabling._seats({ table }).is({ role, negotiator }))
+    .where(
+      no(seatedAs({ user, table }).is({ role })),
+      Registering._username({ user: negotiator }).is({ username }),
+      whether(Reviewing._review({ subject: table, reviewer: user, reviewee: negotiator }).is({ stars })),
+    )
+    .form({ role, player: username, stars }),
+);
 
 const ShowDebrief = endpoint(
   "/tables/debrief",
@@ -160,7 +185,7 @@ const ShowDebrief = endpoint(
       .then(Sessioning.use({ session }).responds({ subject: user }))
       .then(
         where(seatedAs({ user, table }).is({ role }), ended({ table }))
-          .then(respond({ role, debrief: debriefOf({ table }), coaching: coachingOf({ table }) }))
+          .then(respond({ role, debrief: debriefOf({ table }), coaching: coachingOf({ table }), reviews: reviewsBy({ user, table }) }))
           .named("ended"),
         where(seatedAs({ user, table }), no(ended({ table })))
           .then(respond({ error: "NOT_OVER" }))
@@ -173,7 +198,7 @@ const ShowDebrief = endpoint(
 );
 
 export const composition = {
-  outcome: { ended, settledTerms, walkedAway },
-  coaching: { personRole, CoachWhenSettled, CoachWhenWithdrawn, CoachWhenExpired, debriefTakenBy, ReadDebrief, coachingOf },
-  showing: { debriefOf, ShowDebrief },
+  outcome: { settledTerms, walkedAway },
+  coaching: { personRole, CoachWhenEnded, debriefTakenBy, jointDebriefTakenBy, sidesOf, ReadDebrief, coachingOf },
+  showing: { debriefOf, reviewsBy, ShowDebrief },
 };

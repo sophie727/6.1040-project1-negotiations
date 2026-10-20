@@ -1,13 +1,13 @@
 import { type Collection, type Db, MongoServerError, ObjectId } from "mongodb";
 
 export class InvalidTimeLimit extends Error {}
-export class NoTimeLimit extends Error {}
 export class UnknownTable extends Error {}
 export class AlreadyBegun extends Error {}
 export class SeatExists extends Error {}
 export class NoSuchSeat extends Error {}
 export class RoleTaken extends Error {}
 export class AlreadySeated extends Error {}
+export class TableFull extends Error {}
 export class NotEnoughSeats extends Error {}
 export class NotAllSeated extends Error {}
 export class NotOpen extends Error {}
@@ -29,7 +29,8 @@ interface ScenarioDocument<Scenario> {
 interface TableDocument<Scenario, Negotiator> {
   _id: Table;
   scenario: Scenario;
-  timeLimit: number;
+  /** Set when the table begins, with its deadline. */
+  timeLimit?: number;
   deadline?: Date;
   status: TableStatus;
   withdrawnBy?: Negotiator;
@@ -82,17 +83,9 @@ export class TablingConcept<Scenario extends string, Role extends string, Negoti
     return {};
   }
 
-  async open({ scenario, timeLimit }: { scenario: Scenario; timeLimit?: number }) {
-    // A request that leaves out the time limit may still carry it as null.
-    let limit = timeLimit ?? undefined;
-    if (limit !== undefined && !acceptableLimit(limit)) throw invalidTimeLimit();
-    if (limit === undefined) {
-      const recommended = await this.scenarios.findOne({ _id: scenario });
-      if (recommended === null) throw new NoTimeLimit("This scenario has no recommended time limit, so choose one.");
-      limit = recommended.recommendedTimeLimit;
-    }
+  async open({ scenario }: { scenario: Scenario }) {
     const table = newId<Table>();
-    await this.tables.insertOne({ _id: table, scenario, timeLimit: limit, status: "PREPARING" });
+    await this.tables.insertOne({ _id: table, scenario, status: "PREPARING" });
     return { table };
   }
 
@@ -108,37 +101,51 @@ export class TablingConcept<Scenario extends string, Role extends string, Negoti
     return { table };
   }
 
-  async seat({ table, negotiator, role }: { table: Table; negotiator: Negotiator; role: Role }) {
+  async seat({ table, negotiator, role }: { table: Table; negotiator: Negotiator; role?: Role }) {
     await this.#preparing(table);
-    const seat = await this.seats.findOne({ table, role });
-    if (seat === null) throw new NoSuchSeat("This table has no seat for that role.");
-    await this.#ready();
-    let matchedCount: number;
-    try {
-      // Taking only an empty seat means two negotiators taking the same seat at once can't both succeed.
-      ({ matchedCount } = await this.seats.updateOne(
-        { _id: seat._id, negotiator: { $exists: false } },
-        { $set: { negotiator } },
-      ));
-    } catch (error) {
-      if (isDuplicate(error)) throw new AlreadySeated("You already have a seat at this table.");
-      throw error;
+    // A request that leaves out the role may still carry it as null.
+    const chosen = role ?? undefined;
+    let candidates: SeatDocument<Role, Negotiator>[];
+    if (chosen !== undefined) {
+      const seat = await this.seats.findOne({ table, role: chosen });
+      if (seat === null) throw new NoSuchSeat("This table has no seat for that role.");
+      candidates = [seat];
+    } else {
+      candidates = shuffled(await this.seats.find({ table, negotiator: { $exists: false } }).toArray());
+      if (candidates.length === 0) throw tableFull();
     }
-    if (matchedCount === 0) throw new RoleTaken("Someone already has that role at this table.");
-    return { table };
+    await this.#ready();
+    for (const seat of candidates) {
+      let matchedCount: number;
+      try {
+        // Taking only an empty seat means two negotiators taking the same seat at once can't both succeed.
+        ({ matchedCount } = await this.seats.updateOne(
+          { _id: seat._id, negotiator: { $exists: false } },
+          { $set: { negotiator } },
+        ));
+      } catch (error) {
+        if (isDuplicate(error)) throw new AlreadySeated("You already have a seat at this table.");
+        throw error;
+      }
+      if (matchedCount === 1) return { table, role: seat.role };
+    }
+    // Every seat tried was taken in the meantime: the chosen one, or, without a choice, every empty one.
+    if (chosen !== undefined) throw new RoleTaken("Someone already has that role at this table.");
+    throw tableFull();
   }
 
-  async begin({ table, now }: { table: Table; now: Date }) {
-    const found = await this.#preparing(table);
+  async begin({ table, timeLimit, now }: { table: Table; timeLimit: number; now: Date }) {
+    if (!acceptableLimit(timeLimit)) throw invalidTimeLimit();
+    await this.#preparing(table);
     const seats = await this.seats.find({ table }).toArray();
     if (seats.length < 2) throw new NotEnoughSeats("A negotiation needs seats for at least two roles.");
     if (seats.some(({ negotiator }) => negotiator === undefined)) {
       throw new NotAllSeated("Not every role has a negotiator yet.");
     }
-    const deadline = new Date(new Date(now).getTime() + found.timeLimit * MINUTE);
+    const deadline = new Date(new Date(now).getTime() + timeLimit * MINUTE);
     const { matchedCount } = await this.tables.updateOne(
       { _id: table, status: "PREPARING" },
-      { $set: { status: "OPEN", deadline } },
+      { $set: { status: "OPEN", timeLimit, deadline } },
     );
     if (matchedCount === 0) throw alreadyBegun();
     return { table, deadline };
@@ -160,8 +167,9 @@ export class TablingConcept<Scenario extends string, Role extends string, Negoti
     if ((await this.seats.findOne({ table, negotiator })) === null) {
       throw new NotSeated("You don't have a seat at this table.");
     }
+    // Someone can leave a table before it begins, or walk away from one under way before its time is up.
     const { matchedCount } = await this.tables.updateOne(
-      { _id: table, status: "OPEN", deadline: { $gt: new Date(now) } },
+      { _id: table, $or: [{ status: "PREPARING" }, { status: "OPEN", deadline: { $gt: new Date(now) } }] },
       { $set: { status: "WITHDRAWN", withdrawnBy: negotiator } },
     );
     if (matchedCount === 0) throw await this.#endRefusal(table);
@@ -187,17 +195,34 @@ export class TablingConcept<Scenario extends string, Role extends string, Negoti
     return found === null ? [] : [{ timeLimit: found.recommendedTimeLimit }];
   }
 
+  async _acceptableTimeLimit({ timeLimit }: { timeLimit: number }) {
+    return { acceptable: acceptableLimit(timeLimit) };
+  }
+
   async _table({ table }: { table: Table }) {
     const found = await this.tables.findOne({ _id: table });
     if (found === null) return [];
     const { scenario, status, timeLimit, deadline, withdrawnBy } = found;
-    return [{ scenario, status, timeLimit, deadline, withdrawnBy }];
+    // An optional field is left out, rather than undefined, so that a read of it finds nothing until it is set.
+    const row: { scenario: Scenario; status: TableStatus; timeLimit?: number; deadline?: Date; withdrawnBy?: Negotiator } = {
+      scenario,
+      status,
+    };
+    if (timeLimit !== undefined) row.timeLimit = timeLimit;
+    if (deadline !== undefined) row.deadline = deadline;
+    if (withdrawnBy !== undefined) row.withdrawnBy = withdrawnBy;
+    return [row];
   }
 
   async _seats({ table }: { table: Table }) {
     // Each _id comes from an ObjectId, which starts with the time it was made, so sorting by _id keeps the order of adding.
     const seats = await this.seats.find({ table }).sort({ _id: 1 }).toArray();
-    return seats.map(({ role, negotiator }) => ({ role, negotiator }));
+    // An empty seat has no negotiator field at all, so that a read of the negotiator finds nothing there.
+    return seats.map(({ role, negotiator }) => {
+      const row: { role: Role; negotiator?: Negotiator } = { role };
+      if (negotiator !== undefined) row.negotiator = negotiator;
+      return row;
+    });
   }
 
   async _tablesOf({ negotiator }: { negotiator: Negotiator }) {
@@ -212,6 +237,14 @@ export class TablingConcept<Scenario extends string, Role extends string, Negoti
       scenario,
       status,
     }));
+  }
+
+  async _overdue({ now }: { now: Date }) {
+    const overdue = await this.tables
+      .find({ status: "OPEN", deadline: { $lte: new Date(now) } })
+      .sort({ deadline: 1 })
+      .toArray();
+    return overdue.map(({ _id }) => ({ table: _id }));
   }
 
   /** The table, when it exists and is still PREPARING; otherwise the refusal that applies. */
@@ -236,7 +269,18 @@ const invalidTimeLimit = () => new InvalidTimeLimit("The time limit must be a wh
 const unknownTable = () => new UnknownTable("There is no such negotiation.");
 const alreadyBegun = () => new AlreadyBegun("This negotiation has already started.");
 const notOpen = () => new NotOpen("This negotiation isn't under way.");
+const tableFull = () => new TableFull("Every seat at this table is taken.");
 const newId = <T extends string>() => new ObjectId().toHexString() as T;
+
+/** The items in a random order, so that someone who sits down without choosing a role gets a seat at random. */
+function shuffled<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index--) {
+    const other = Math.floor(Math.random() * (index + 1));
+    [result[index], result[other]] = [result[other]!, result[index]!];
+  }
+  return result;
+}
 
 /** Runs an upsert again when another upsert of the same document got there first and broke a unique index. */
 async function retryingDuplicates<T>(write: () => Promise<T>): Promise<T> {

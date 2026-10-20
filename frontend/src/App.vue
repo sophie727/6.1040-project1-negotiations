@@ -2,7 +2,9 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import type { TableId } from "./api/client.ts";
 import BakeryPage from "./bakery/BakeryPage.vue";
+import JoinPage from "./join/JoinPage.vue";
 import PasswordForm from "./reusable/PasswordForm.vue";
+import SettingsDialog from "./reusable/SettingsDialog.vue";
 import SignIn from "./reusable/SignIn.vue";
 import { useSession } from "./reusable/session.ts";
 import Menu from "./reusable/ui/Menu.vue";
@@ -11,6 +13,9 @@ import TablePage from "./table/TablePage.vue";
 
 const { me, checked, load, signOut } = useSession();
 onMounted(load);
+
+/** Whether the settings dialog is open. */
+const settingsOpen = ref(false);
 
 /** Whether the page has scrolled, when the navbar turns menu-board green; at the top, it blends into the page. */
 const scrolled = ref(false);
@@ -35,19 +40,29 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
         <span class="me">{{ me.username }}</span>
       </template>
       <p class="signed-in">Signed in as <strong>{{ me.username }}</strong></p>
+      <button type="button" @click="settingsOpen = true">Settings</button>
       <button type="button" @click="signOut">Sign out</button>
     </Menu>
   </header>
+  <SettingsDialog v-if="me && settingsOpen" @close="settingsOpen = false" />
   <main v-if="checked" class="content">
     <template v-if="me">
       <BakeryPage v-if="page.name === 'bakery'" />
       <TablePage v-else-if="page.name === 'table'" :key="page.table" :table="page.table as TableId" />
+      <JoinPage v-else-if="page.name === 'join'" :key="page.code" :code="page.code" />
       <section v-else class="notice">
         <h1>There's nothing here</h1>
         <a class="button primary" href="/" @click.prevent="go('/')">Back to the bakery</a>
       </section>
     </template>
-    <SignIn v-else lead="Practice negotiating against an AI counterpart, then see the whole pie: what you got, and what was possible.">
+    <SignIn
+      v-else
+      :lead="
+        page.name === 'join'
+          ? 'Someone invited you to negotiate. Sign up, or sign in, to join them.'
+          : 'Practice negotiating against an AI counterpart or other people, then see the whole pie: what you got, and what was possible.'
+      "
+    >
       <PasswordForm />
     </SignIn>
   </main>

@@ -3,22 +3,56 @@ import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 
-/** The time limit a new table gets when its scenario's author recommended none. */
+/** The time limit the bakery shows for a scenario whose author recommended none; the prep page suggests it too. */
 export const DEFAULT_TIME_LIMIT = 30;
+
+/** Who the person negotiates against: the AI counterpart, friends they invite with a link, or someone new. */
+export type Opponents = "ai" | "friends" | "strangers";
+
+const OPPONENTS_KEY = "wholepie-opponents";
+
+/** The choice the person made last time, in this browser, or the AI counterpart. */
+export function rememberedOpponents(): Opponents {
+  try {
+    const stored = localStorage.getItem(OPPONENTS_KEY);
+    if (stored === "ai" || stored === "friends" || stored === "strangers") return stored;
+  } catch {
+    // Without storage, as in a private window, the bakery starts with the AI counterpart.
+  }
+  return "ai";
+}
+
+export function rememberOpponents(opponents: Opponents) {
+  try {
+    localStorage.setItem(OPPONENTS_KEY, opponents);
+  } catch {
+    // Remembering the choice is a convenience; the bakery works without it.
+  }
+}
 
 /**
  * Opens a practice table for `scenario`, playing `role`, and goes to it. Returns the sentence to show when the request
- * is refused, or null once the table is open.
+ * is refused, or null once the table is open. How long to negotiate is chosen on the prep page.
  */
-export async function startPractice(
-  scenario: Scenario,
-  role: Scenario["roles"][number]["role"],
-  timeLimit: number,
-): Promise<string | null> {
-  const result = await api.practice.start({ scenario: scenario.scenario, role, timeLimit });
+export async function startPractice(scenario: Scenario, role: Scenario["roles"][number]["role"]): Promise<string | null> {
+  const result = await api.practice.start({ scenario: scenario.scenario, role });
   if ("error" in result) {
     if (result.error === "UNAUTHORIZED") useSession().sessionEnded();
     return messageFor("/practice/start", result.error);
+  }
+  go(`/tables/${result.table}`);
+  return null;
+}
+
+/**
+ * Opens a table for `scenario` where the person plays `role` and invites friends, and goes to it, where the link to
+ * share is. Returns the sentence to show when the request is refused, or null once the table is open.
+ */
+export async function startWithFriends(scenario: Scenario, role: Scenario["roles"][number]["role"]): Promise<string | null> {
+  const result = await api.friends.start({ scenario: scenario.scenario, role });
+  if ("error" in result) {
+    if (result.error === "UNAUTHORIZED") useSession().sessionEnded();
+    return messageFor("/friends/start", result.error);
   }
   go(`/tables/${result.table}`);
   return null;

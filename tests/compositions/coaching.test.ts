@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import hirosBrief from "../../src/seed/briefs/hiro.md" with { type: "text" };
-import { DEBRIEF_ASK } from "../../src/compositions/debrief.ts";
+import { DEBRIEF_ASK, JOINT_DEBRIEF_ASK } from "../../src/compositions/debrief.ts";
 import { START, startWholePie } from "../support/app.ts";
 import { eventually, ok } from "../support/reusable/results.ts";
 
@@ -10,7 +10,7 @@ describe("coaching", () => {
   test("when Nadia walks away, the coach writes her a debrief, and the debrief endpoint returns it", async () => {
     const { api, practice } = await startWholePie({ counterpart: null });
     const { session, table } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
     ok(await api.tables.withdraw({ session, table }));
 
     const [debrief] = await eventually(async () => {
@@ -27,7 +27,7 @@ describe("coaching", () => {
     const settled = await practice("nadia");
     const expired = await practice("leo");
     const withdrawn = await practice("ada");
-    for (const { session, table } of [settled, expired, withdrawn]) ok(await api.tables.begin({ session, table }));
+    for (const { session, table } of [settled, expired, withdrawn]) ok(await api.tables.start({ session, table, minutes: 30 }));
 
     const { proposal } = ok(
       await application.concepts.Proposing.propose({
@@ -52,7 +52,7 @@ describe("coaching", () => {
   test("the coach reads a table only through a debrief it took, after the negotiation ends", async () => {
     const { api, application, practice } = await startWholePie({ counterpart: null, coach: null });
     const nadia = await practice("nadia");
-    ok(await api.tables.begin({ session: nadia.session, table: nadia.table }));
+    ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
     ok(await api.tables.send({ session: nadia.session, table: nadia.table, body: "Hello, Manon." }));
     const session = ok(await application.concepts.AgentSessioning.start({ subject: "coach" })).session;
 
@@ -68,8 +68,29 @@ describe("coaching", () => {
     ok(await api.answers.take({ session, prompt: debrief.prompt }));
 
     const read = ok(await api.coach.table({ session, prompt: debrief.prompt }));
+    if (!("table" in read)) throw new Error("Expected the debrief of one person");
     expect(read.table).toMatchObject({ roleName: "Hiro", brief: hirosBrief, messages: [{ body: "Hello, Manon." }] });
     expect(read.debrief).toMatchObject({ outcome: "WITHDRAWN", walkedAway: nadia.role, bestJointPoints: 2200 });
     expect(read.debrief.roles.map(({ payoffs }) => payoffs.length)).toEqual([12, 12]);
+  });
+
+  test("when Nadia and Omar's negotiation ends, the coach writes one debrief of both sides, which both of them read", async () => {
+    const { api, application, hostFriends } = await startWholePie({ counterpart: null });
+    const nadia = await hostFriends("nadia", "Hiro");
+    const omar = await nadia.join("omar");
+    const { proposal } = ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
+    ok(await api.tables.agree({ session: omar.session, table: nadia.table, proposal }));
+    ok(await api.tables.withdraw({ session: omar.session, table: nadia.table }));
+    await application.whenIdle();
+
+    const questions = await application.concepts.Reasoning._about({ subject: nadia.table });
+    expect(questions.map(({ ask }) => ask)).toEqual([JOINT_DEBRIEF_ASK]);
+    for (const session of [nadia.session, omar.session]) {
+      await eventually(async () =>
+        expect(ok(await api.tables.debrief({ session, table: nadia.table })).coaching).toMatchObject([
+          { stage: "CONCLUDED", answer: expect.stringContaining("Manon walked away.") },
+        ]),
+      );
+    }
   });
 });

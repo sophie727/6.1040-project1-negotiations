@@ -24,7 +24,7 @@ async function answered(answer: string, ask: string, table: TableMaterial) {
 async function nadiasTable() {
   const app = await startWholePie({ counterpart: null, coach: null });
   const nadia = await app.practice("nadia");
-  ok(await app.api.tables.begin({ session: nadia.session, table: nadia.table }));
+  ok(await app.api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
   return { app, nadia };
 }
 

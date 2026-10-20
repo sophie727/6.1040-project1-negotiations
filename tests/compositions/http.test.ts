@@ -50,13 +50,14 @@ describe("over HTTP", () => {
     const { body: bakery } = await post("/bakery");
     const [jobOffer] = bakery.scenarios;
     const hiro = jobOffer.roles.find(({ name }: { name: string }) => name === "Hiro").role;
-    const started = await post("/practice/start", { scenario: jobOffer.scenario, role: hiro, timeLimit: 30 });
+    const started = await post("/practice/start", { scenario: jobOffer.scenario, role: hiro });
     expect(started.status).toBe(200);
     const { table } = started.body;
 
     expect(await post("/tables/send", { table, body: "Hi!" })).toEqual({ status: 409, body: { error: "CONFLICT" } });
-    expect(await post("/practice/start", { scenario: jobOffer.scenario, role: hiro, timeLimit: "thirty" })).toMatchObject({ status: 400 });
-    expect((await post("/tables/begin", { table })).status).toBe(200);
+    expect(await post("/tables/start", { table, minutes: "thirty" })).toMatchObject({ status: 400 });
+    expect(await post("/tables/start", { table, minutes: 500 })).toEqual({ status: 400, body: { error: "INVALID_REQUEST" } });
+    expect((await post("/tables/start", { table, minutes: 30 })).status).toBe(200);
     expect(await post("/tables/send", { table, body: " " })).toEqual({ status: 400, body: { error: "INVALID_REQUEST" } });
     expect((await post("/tables/send", { table, body: "Hi!" })).status).toBe(200);
 

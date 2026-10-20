@@ -2,11 +2,13 @@
 import { computed, onMounted, ref } from "vue";
 import { api, type Bakery, type Scenario } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
+import YourRatings from "../ratings/YourRatings.vue";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 import { pastryFor, statusLabels } from "./pastries.ts";
+import MatchmakingDialog from "./MatchmakingDialog.vue";
 import StartDialog from "./StartDialog.vue";
-import { DEFAULT_TIME_LIMIT, startPractice } from "./start.ts";
+import { DEFAULT_TIME_LIMIT, type Opponents, rememberOpponents, rememberedOpponents, startPractice, startWithFriends } from "./start.ts";
 
 const { sessionEnded } = useSession();
 const bakery = ref<Bakery | null>(null);
@@ -14,6 +16,23 @@ const error = ref<string | null>(null);
 /** The scenario whose start dialog is open. */
 const choosing = ref<Scenario | null>(null);
 const surprising = ref(false);
+
+/** Who the person wants to negotiate against, which decides what picking a scenario does. */
+const opponents = ref<Opponents>(rememberedOpponents());
+function choose(choice: Opponents) {
+  opponents.value = choice;
+  rememberOpponents(choice);
+}
+const choices: { value: Opponents; icon: string; label: string; hint: string }[] = [
+  { value: "ai", icon: "🤖", label: "An AI counterpart", hint: "Practice any time" },
+  { value: "friends", icon: "💌", label: "Friends", hint: "Get a link to send them" },
+  { value: "strangers", icon: "🎲", label: "Someone new", hint: "Get matched with someone who's looking too" },
+];
+const leads: Record<Opponents, string> = {
+  ai: "Pick a scenario to practice. You'll play one side, and an AI counterpart will play the other.",
+  friends: "Pick a scenario and a side, and you'll get a link to send your friends. Whoever follows it plays another side.",
+  strangers: "Pick a scenario, and we'll find someone else who wants to practice it.",
+};
 
 onMounted(async () => {
   const result = await api.bakery();
@@ -28,13 +47,17 @@ onMounted(async () => {
 const scenarios = computed(() => bakery.value?.scenarios ?? []);
 const tables = computed(() => bakery.value?.tables ?? []);
 
-/** "Surprise me!": a random scenario and side, with the recommended time limit. */
+/** "Surprise me!": a random scenario and side, or, with someone new, a random scenario to look for others to negotiate. */
 async function surprise() {
   const scenario = scenarios.value[Math.floor(Math.random() * scenarios.value.length)];
   const role = scenario?.roles[Math.floor(Math.random() * scenario.roles.length)];
   if (scenario === undefined || role === undefined) return;
+  if (opponents.value === "strangers") {
+    choosing.value = scenario;
+    return;
+  }
   surprising.value = true;
-  error.value = await startPractice(scenario, role.role, scenario.timeLimit ?? DEFAULT_TIME_LIMIT);
+  error.value = opponents.value === "friends" ? await startWithFriends(scenario, role.role) : await startPractice(scenario, role.role);
   surprising.value = false;
 }
 </script>
@@ -43,8 +66,25 @@ async function surprise() {
   <section class="page">
     <header class="page-head">
       <h1>The Bakery</h1>
-      <p class="lead">Pick a scenario to practice. You'll play one side, and an AI counterpart will play the other.</p>
+      <p class="lead">{{ leads[opponents] }}</p>
     </header>
+    <div class="opponents" role="radiogroup" aria-label="Who do you want to negotiate with?">
+      <button
+        v-for="choice in choices"
+        :key="choice.value"
+        type="button"
+        role="radio"
+        class="opponent"
+        :aria-checked="opponents === choice.value"
+        @click="choose(choice.value)"
+      >
+        <span class="icon" aria-hidden="true">{{ choice.icon }}</span>
+        <span>
+          <strong>{{ choice.label }}</strong>
+          <span class="muted">{{ choice.hint }}</span>
+        </span>
+      </button>
+    </div>
     <p v-if="error" class="refusal" role="alert">{{ error }}</p>
 
     <div v-if="bakery" class="gallery">
@@ -62,6 +102,8 @@ async function surprise() {
       </button>
     </div>
 
+    <YourRatings v-if="bakery?.ratings" :ratings="bakery.ratings" />
+
     <section v-if="tables.length > 0" class="panel">
       <h2>Your negotiations</h2>
       <ul class="tables">
@@ -69,7 +111,9 @@ async function surprise() {
           <a :href="`/tables/${table.table}`" @click.prevent="go(`/tables/${table.table}`)">
             <span aria-hidden="true">{{ pastryFor(table.scenarioName) }}</span>
             <strong>{{ table.scenarioName }}</strong>
-            <span class="muted">as {{ table.roleName }}</span>
+            <span class="muted">
+              as {{ table.roleName }}{{ table.opponents.length > 0 ? ` · with ${table.opponents.join(" and ")}` : "" }}
+            </span>
           </a>
           <span class="badge" :class="{ good: table.status === 'SETTLED', warm: table.status === 'OPEN' || table.status === 'PREPARING' }">
             {{ statusLabels[table.status] ?? table.status }}
@@ -78,11 +122,49 @@ async function surprise() {
       </ul>
     </section>
 
-    <StartDialog v-if="choosing" :scenario="choosing" @close="choosing = null" />
+    <MatchmakingDialog v-if="choosing && opponents === 'strangers'" :scenario="choosing" @close="choosing = null" />
+    <StartDialog
+      v-else-if="choosing"
+      :scenario="choosing"
+      :opponents="opponents === 'friends' ? 'friends' : 'ai'"
+      @close="choosing = null"
+    />
   </section>
 </template>
 
 <style scoped>
+.opponents {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+.opponent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+}
+.opponent > span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+.opponent .icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.opponent[aria-checked="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  box-shadow: var(--shadow-card);
+}
+.opponent:hover:not([aria-checked="true"]) {
+  border-color: var(--color-accent);
+}
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

@@ -18,6 +18,7 @@ import { createCoach, modelCoach, scriptedDebrief } from "../agents/coach.ts";
 import { createCounterpart, modelCounterpart, standIn } from "../agents/counterpart.ts";
 import { listModels, modelFromEnvironment } from "../agents/reusable/models.ts";
 import { scriptedReasoner } from "../agents/reusable/reasoners.ts";
+import { createTimekeeper } from "../agents/timekeeper.ts";
 import { assembleApplication } from "../assembly.ts";
 import { seed } from "../seed/seed.ts";
 import { connect } from "./database.ts";
@@ -37,6 +38,8 @@ const gateway = createGateway<TheWholePieWire>({ application });
 const api = createLocalClient<TheWholePieWire>({ invoker: gateway });
 void counterpart.start({ application, api });
 void coach.start({ application, api });
+// Every half minute, the timekeeper expires the tables whose time is up, even when nobody has their page open.
+void createTimekeeper().start({ application, api });
 const handleApi = createHttpHandler({ application, gateway, policy: wholePiePolicy(publicOrigin) });
 
 const server = Bun.serve({

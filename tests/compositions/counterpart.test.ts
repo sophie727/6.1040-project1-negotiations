@@ -23,7 +23,7 @@ describe("the counterpart", () => {
   test("it never accepts a proposal worth less than its BATNA, even when its answer says to", async () => {
     const { api, practice } = await startWholePie({ counterpart: pushover });
     const { session, table, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     const { proposal } = ok(await api.tables.propose({ session, table, terms: terms(GREEDY) }));
     await eventually(async () => expect((await show()).table.proposals).toMatchObject([{ proposal, status: "REJECTED" }]));
@@ -56,7 +56,7 @@ describe("the counterpart", () => {
     };
     const { api, practice } = await startWholePie({ counterpart: slow });
     const { session, table, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     const { proposal: greedy } = ok(await api.tables.propose({ session, table, terms: terms(GREEDY) }));
     await deciding;
@@ -81,7 +81,7 @@ describe("the counterpart", () => {
     };
     const { api, practice } = await startWholePie({ counterpart: flaky });
     const { session, table, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     ok(await api.tables.send({ session, table, body: "Hello, Manon." }));
     await eventually(async () =>
@@ -106,7 +106,7 @@ describe("the counterpart", () => {
     };
     const { api, practice } = await startWholePie({ counterpart: talkative });
     const { session, table, roles, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     ok(await api.tables.send({ session, table, body: "Hello, Manon." }));
     await eventually(async () => expect((await show()).table.messages).toHaveLength(4));

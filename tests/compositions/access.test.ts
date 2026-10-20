@@ -11,14 +11,14 @@ describe("access", () => {
     const { api, practice, register } = await startWholePie({ counterpart: null });
     const nadia = await practice("nadia");
     const sam = await register("sam");
-    ok(await api.tables.begin({ session: nadia.session, table: nadia.table }));
+    ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
     const { proposal } = ok(await api.tables.propose({ session: nadia.session, table: nadia.table, terms: nadia.terms(WHOLE_PIE) }));
 
     const session = sam.session;
     const table = nadia.table;
     const refused = { error: "NOT_FOUND" } as const;
     expect(await api.tables.show({ session, table })).toEqual(refused);
-    expect(await api.tables.begin({ session, table })).toEqual(refused);
+    expect(await api.tables.start({ session, table, minutes: 30 })).toEqual(refused);
     expect(await api.tables.send({ session, table, body: "Hi Nadia" })).toEqual(refused);
     expect(await api.tables.propose({ session, table, terms: nadia.terms(WHOLE_PIE) })).toEqual(refused);
     expect(await api.tables.accept({ session, table, proposal })).toEqual(refused);
@@ -36,8 +36,8 @@ describe("access", () => {
     const { api, practice } = await startWholePie({ counterpart: null });
     const nadia = await practice("nadia");
     const leo = await practice("leo");
-    ok(await api.tables.begin({ session: nadia.session, table: nadia.table }));
-    ok(await api.tables.begin({ session: leo.session, table: leo.table }));
+    ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
+    ok(await api.tables.start({ session: leo.session, table: leo.table, minutes: 30 }));
     const { proposal } = ok(await api.tables.propose({ session: leo.session, table: leo.table, terms: leo.terms(WHOLE_PIE) }));
 
     const seen = await nadia.show();
@@ -63,7 +63,7 @@ describe("the counterpart's endpoints", () => {
   test("only the agent's session reads a table, and only the table of a prompt the agent took", async () => {
     const { api, application, practice } = await startWholePie({ counterpart: null });
     const nadia = await practice("nadia");
-    ok(await api.tables.begin({ session: nadia.session, table: nadia.table }));
+    ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
     ok(await api.tables.send({ session: nadia.session, table: nadia.table, body: "Hello, Manon." }));
     const [question] = await application.concepts.Reasoning._about({ subject: nadia.table });
     const prompt = question!.prompt;

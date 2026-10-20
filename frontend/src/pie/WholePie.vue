@@ -5,9 +5,11 @@ import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 import { formatAgreed, formatPoints } from "../table/format.ts";
+import { hasCounterpart } from "../table/players.ts";
 import Markdown from "../table/Markdown.vue";
 import { issuePoints } from "../table/points.ts";
 import PieChart from "./PieChart.vue";
+import Reviews from "./Reviews.vue";
 import TotalValue from "./TotalValue.vue";
 
 /**
@@ -41,6 +43,9 @@ onUnmounted(() => {
   clearTimeout(timer);
 });
 
+/** Whether the person practiced with the AI, so the coach wrote to them alone, or negotiated with people, so it wrote to everyone. */
+const practiced = computed(() => hasCounterpart(props.view.table));
+
 /** The coach's latest debrief, if the coach was asked for one. */
 const coaching = computed(() => debriefView.value?.coaching.at(-1));
 const coachWriting = computed(() => coaching.value?.stage === "WAITING" || coaching.value?.stage === "FORMING");
@@ -48,7 +53,15 @@ const coachWriting = computed(() => coaching.value?.stage === "WAITING" || coach
 const debrief = computed(() => debriefView.value?.debrief);
 const me = computed(() => debrief.value?.roles.find(({ role }) => role === debriefView.value?.role));
 const others = computed(() => debrief.value?.roles.filter(({ role }) => role !== debriefView.value?.role) ?? []);
-const otherNames = computed(() => others.value.map(({ name }) => name).join(" and "));
+/** The other sides, by role, with each person's username at a table between people: "omar (Manon)". */
+const otherNames = computed(() =>
+  others.value
+    .map(({ role, name }) => {
+      const player = props.view.table.seats.find((seat) => seat.role === role)?.player ?? null;
+      return player === null ? name : `${player} (${name})`;
+    })
+    .join(" and "),
+);
 const rolesYouFirst = computed(() => (me.value ? [me.value, ...others.value] : others.value));
 
 /** What each role ends up with: its points from the agreement, or, without one, its BATNA. */
@@ -62,6 +75,8 @@ const headline = computed(() => {
   if (outcome === "SETTLED") return `You and ${otherNames.value} reached a deal.`;
   if (outcome === "WITHDRAWN") {
     const quitter = debrief.value?.walkedAway === me.value?.role ? "You" : otherNames.value;
+    // A table left before its clock started was never negotiated.
+    if (props.view.table.deadline === null) return `${quitter} left before the negotiation began, so each side gets its BATNA.`;
     return `${quitter} walked away, so each side gets its BATNA.`;
   }
   return "Time ran out before you reached a deal, so each side gets its BATNA.";
@@ -176,9 +191,11 @@ const lesson = computed(() => {
             </dl>
           </section>
 
+          <Reviews :table="view.table.table" :reviews="debriefView?.reviews ?? []" @changed="load" />
+
           <section v-if="coaching" class="panel coach" aria-live="polite">
-            <h2>Your coach's debrief</h2>
-            <p v-if="coaching.stage === 'WAITING'" class="muted">Your coach is reading through your negotiation…</p>
+            <h2>{{ practiced ? "Your coach's debrief" : "The coach's debrief, for everyone at the table" }}</h2>
+            <p v-if="coaching.stage === 'WAITING'" class="muted">The coach is reading through your negotiation…</p>
             <p v-else-if="coaching.stage === 'ABANDONED'" class="refusal">
               Your coach couldn't write a debrief this time: {{ coaching.reason ?? "something went wrong." }}
             </p>

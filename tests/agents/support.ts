@@ -1,5 +1,5 @@
 import type { Model } from "../../src/agents/reusable/models.ts";
-import { DEBRIEF_ASK } from "../../src/compositions/debrief.ts";
+import { DEBRIEF_ASK, JOINT_DEBRIEF_ASK } from "../../src/compositions/debrief.ts";
 import type { startWholePie } from "../support/app.ts";
 import { ok } from "../support/reusable/results.ts";
 
@@ -33,8 +33,18 @@ export async function counterpartMaterial(app: App, table: string) {
   return ok(await app.api.counterpart.table({ session, prompt })).table;
 }
 
-/** What the coach reads for the debrief of `table`, which has ended. */
+/** What the coach reads for the debrief of `table`, a practice negotiation that has ended. */
 export async function coachMaterial(app: App, table: string) {
   const { session, prompt } = await takeNewest(app, table, "coach", DEBRIEF_ASK);
-  return ok(await app.api.coach.table({ session, prompt }));
+  const read = ok(await app.api.coach.table({ session, prompt }));
+  if (!("table" in read)) throw new Error("Expected the debrief of one person");
+  return read;
+}
+
+/** What the coach reads for the debrief of every side of `table`, a negotiation between people that has ended. */
+export async function jointCoachMaterial(app: App, table: string) {
+  const { session, prompt } = await takeNewest(app, table, "coach", JOINT_DEBRIEF_ASK);
+  const read = ok(await app.api.coach.table({ session, prompt }));
+  if (!("sides" in read)) throw new Error("Expected the debrief of every side");
+  return read;
 }

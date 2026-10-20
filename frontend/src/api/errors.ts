@@ -3,11 +3,27 @@
  * `src/host/http.ts`, so several refusals can share one sentence here.
  */
 const messages: Record<string, Record<string, string>> = {
-  "/practice/start": {
-    NOT_FOUND: "That scenario or role isn't available.",
-    INVALID_REQUEST: "The time limit must be a whole number of minutes from 1 to 180.",
+  "/practice/start": { NOT_FOUND: "That scenario or role isn't available." },
+  "/friends/start": { NOT_FOUND: "That scenario or role isn't available." },
+  "/friends/invitation": {
+    NOT_FOUND: "This invitation link doesn't work. Check that you copied all of it.",
+    CONFLICT: "Every seat at this table is taken, or its negotiation has already started.",
   },
-  "/tables/begin": { CONFLICT: "This negotiation has already started." },
+  "/matchmaking/find": { NOT_FOUND: "That scenario isn't available." },
+  "/matchmaking/wait": { NOT_FOUND: "That search isn't yours, or doesn't exist." },
+  "/friends/join": {
+    NOT_FOUND: "This invitation link doesn't work. Check that you copied all of it.",
+    CONFLICT: "Someone took that seat a moment ago, or the negotiation has already started.",
+  },
+  "/tables/start": {
+    INVALID_REQUEST: "Choose a whole number of minutes from 1 to 180.",
+    CONFLICT: "You can't start now: fill in your plan first, or the negotiation has already started or ended.",
+  },
+  "/tables/agree": {
+    NOT_FOUND: "That suggestion isn't from this negotiation.",
+    CONFLICT: "You can't agree now: fill in your plan first, or that suggestion was replaced, or the negotiation started.",
+  },
+  "/tables/plan": { INVALID_REQUEST: "Each part of your plan can have at most 2,000 characters." },
   "/tables/send": {
     INVALID_REQUEST: "A message must have 1 to 2,000 characters.",
     CONFLICT: "This negotiation is over.",
@@ -28,7 +44,12 @@ const messages: Record<string, Record<string, string>> = {
     CONFLICT: "That proposal is no longer waiting for an answer.",
     NOT_FOUND: "That proposal isn't from this negotiation.",
   },
-  "/tables/withdraw": { CONFLICT: "This negotiation isn't under way." },
+  "/tables/withdraw": { CONFLICT: "This negotiation has already ended." },
+  "/tables/review": {
+    INVALID_REQUEST: "Give 1 to 5 stars.",
+    CONFLICT: "You've already reviewed them for this negotiation.",
+    NOT_FOUND: "There's nobody to review in that seat.",
+  },
   "/tables/notes": { INVALID_REQUEST: "Notes can have at most 20,000 characters." },
   "/tables/debrief": { CONFLICT: "This negotiation hasn't ended yet." },
 };

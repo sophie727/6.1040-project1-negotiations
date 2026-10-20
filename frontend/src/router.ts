@@ -1,6 +1,9 @@
 import { computed, ref } from "vue";
 
-/** The pages: the bakery at `/`, and each table at `/tables/<table>`. Anything else is an unknown page. */
+/**
+ * The pages: the bakery at `/`, each table at `/tables/<table>`, and each invitation at `/join/<code>`. Anything else
+ * is an unknown page.
+ */
 const path = ref(window.location.pathname);
 window.addEventListener("popstate", () => {
   path.value = window.location.pathname;
@@ -19,5 +22,7 @@ export const page = computed(() => {
   if (path.value === "/") return { name: "bakery" } as const;
   const table = /^\/tables\/([A-Za-z0-9]+)$/.exec(path.value)?.[1];
   if (table !== undefined) return { name: "table", table } as const;
+  const code = /^\/join\/([A-Za-z0-9_-]+)$/.exec(path.value)?.[1];
+  if (code !== undefined) return { name: "join", code } as const;
   return { name: "unknown" } as const;
 });

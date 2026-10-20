@@ -2,9 +2,10 @@ import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { each, former, no, view, whether, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
 import { COUNTERPART } from "./counterpart.ts";
-import { inputOf, textInput } from "./reusable/inputs.ts";
+import { textInput } from "./reusable/inputs.ts";
+import { ratingsOf, seatedAs } from "./table.ts";
 
-const { Briefing, Sessioning, Tabling } = concepts;
+const { Briefing, Registering, Sessioning, Tabling } = concepts;
 
 // Choosing
 
@@ -20,13 +21,26 @@ const scenarios = former("the published scenarios", (_input, { scenario, name, t
     }),
 );
 
-/** The tables (user) has a seat at, most recently opened first, with the scenario and the role they play. */
+/**
+ * The tables (user) has a seat at, most recently opened first, with the scenario, the role they play, and the usernames
+ * of the other people at the table. The counterpart has no username, so a practice table lists nobody.
+ */
 const tablesOf = former(
   "the tables (user) has a seat at",
-  ({ user }, { table, role, scenario, status, scenarioName, roleName }) =>
+  ({ user }, { table, role, scenario, status, scenarioName, roleName, seat, other, username }) =>
     each(Tabling._tablesOf({ negotiator: user }).is({ table, role, scenario, status }))
       .where(Briefing._scenario({ scenario }).is({ name: scenarioName }), Briefing._role({ role }).is({ name: roleName }))
-      .form({ table, scenario, scenarioName, role, roleName, status }),
+      .form({
+        table,
+        scenario,
+        scenarioName,
+        role,
+        roleName,
+        status,
+        opponents: each(Tabling._seats({ table }).is({ role: seat, negotiator: other }))
+          .where(no(seatedAs({ user, table }).is({ role: seat })), Registering._username({ user: other }).is({ username }))
+          .distinct(username),
+      }),
 );
 
 const ShowBakery = endpoint(
@@ -34,24 +48,24 @@ const ShowBakery = endpoint(
   ({ session, user }) =>
     receive({ session })
       .then(Sessioning.use({ session }).responds({ subject: user }))
-      .then(respond({ scenarios: scenarios({}), tables: tablesOf({ user }) })),
+      .then(respond({ scenarios: scenarios({}), tables: tablesOf({ user }), ratings: ratingsOf({ user }) })),
   { validators: { input: textInput } },
 );
 
 // Starting
 
 /** (role) belongs to (scenario), and (scenario) is published, so people can practice it. */
-const playable = view("(role) of (scenario) can be practiced", ({ scenario, role }) =>
+export const playable = view("(role) of (scenario) can be practiced", ({ scenario, role }) =>
   where(Briefing._role({ role }).is({ scenario }), Briefing._scenario({ scenario }).is({ published: true })),
 ).holds();
 
 const StartPractice = endpoint(
   "/practice/start",
-  ({ session, scenario, role, timeLimit, user, table, other }) =>
-    receive({ session, scenario, role, timeLimit })
+  ({ session, scenario, role, user, table, other }) =>
+    receive({ session, scenario, role })
       .where(playable({ scenario, role }))
       .then(Sessioning.use({ session }).responds({ subject: user }))
-      .then(Tabling.open({ scenario, timeLimit }).responds({ table }))
+      .then(Tabling.open({ scenario }).responds({ table }))
       // A reaction in the table composition adds a seat for each role; once it has, take the chosen one.
       .afterFlowSettles()
       .then(Tabling.seat({ table, negotiator: user, role }).responds({}))
@@ -64,11 +78,11 @@ const StartPractice = endpoint(
       // Once both seats have joined the table's proposals, the table is ready.
       .afterFlowSettles()
       .then(respond({ table })),
-  { validators: { input: inputOf({ timeLimit: "number" }) } },
+  { validators: { input: textInput } },
 );
 
-const RefuseUnplayable = endpoint("/practice/start", ({ session, scenario, role, timeLimit }) =>
-  receive({ session, scenario, role, timeLimit })
+const RefuseUnplayable = endpoint("/practice/start", ({ session, scenario, role }) =>
+  receive({ session, scenario, role })
     .where(no(playable({ scenario, role })))
     .then(respond({ error: "NOT_FOUND" })),
 );

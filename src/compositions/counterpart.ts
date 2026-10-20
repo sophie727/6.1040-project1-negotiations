@@ -1,25 +1,17 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { is, no, now, reaction, view, when, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
+import { DECISION_ASK, REPLY_ASK } from "./asks.ts";
 import { textInput } from "./reusable/inputs.ts";
 import { tableAsSeenBy, underWay } from "./table.ts";
 
-const { AgentSessioning, Briefing, Conversing, Proposing, Reasoning, Tabling } = concepts;
+const { AgentSessioning, Briefing, Conversing, Proposing, Reasoning, Tabling, TimeLimitProposing } = concepts;
 
 /** The player that takes the other seats at a practice table. The agent named `counterpart` plays it. */
 export const COUNTERPART = "bot:counterpart";
 
-/**
- * The two questions the counterpart answers. The reactions below and the agent in `src/agents/counterpart.ts` match
- * prompts by this exact text, so rewording a question leaves its waiting prompts unanswered.
- */
-export const REPLY_ASK = "What do you say next to the other side?";
-/**
- * The answer's lines are ACCEPT or REJECT, the proposal it answers, and then what the counterpart says about it, one
- * message per line. The agent writes the proposal from what it read, so a decision can't apply to a newer proposal
- * than the one decided on.
- */
-export const DECISION_ASK = "Do you accept the proposal waiting for your answer?";
+/** The two questions the counterpart answers, defined with every agent's questions in `./asks.ts`. */
+export { DECISION_ASK, REPLY_ASK } from "./asks.ts";
 
 /** The role the counterpart plays at (table), if it has a seat there. */
 export const counterpartRole = view("the role the counterpart plays at (table)", ({ table }, { role }) =>
@@ -53,6 +45,18 @@ const AskForDecision = reaction(({ table, proposer }) =>
       no(hasWaitingQuestion({ table, ask: DECISION_ASK })),
     )
     .then(Reasoning.prompt({ subject: table, ask: DECISION_ASK })),
+);
+
+// Starting
+
+/**
+ * When someone else suggests how long to negotiate, the counterpart agrees at once: it has nothing to read, so it is
+ * always ready, and at a practice table the person's suggestion starts the clock.
+ */
+const AgreeToAnyStart = reaction(({ table, proposer, proposal, role }) =>
+  when(TimeLimitProposing.propose({ subject: table, proposer }).responds({ proposal }))
+    .where(counterpartRole({ table }).is({ role }), no(counterpartRole({ table }).is({ role: proposer })))
+    .then(TimeLimitProposing.accept({ proposal, party: role })),
 );
 
 // Reading
@@ -155,6 +159,7 @@ const RejectForCounterpart = reaction(({ prompt, table, proposal, terms, role, p
 
 export const composition = {
   asking: { counterpartRole, hasWaitingQuestion, AskForReply, AskForDecision },
+  starting: { AgreeToAnyStart },
   reading: { ReadTable },
   answering: { SendReply, SayWhy, AcceptForCounterpart, RejectForCounterpart },
 };

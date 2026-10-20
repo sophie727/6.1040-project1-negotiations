@@ -2,8 +2,12 @@ import { assemble, type LogSink, type OperationalObserver } from "@mit-sdg/sync-
 import type { Db } from "mongodb";
 import { composition as counterpart } from "./compositions/counterpart.ts";
 import { composition as debrief } from "./compositions/debrief.ts";
+import { composition as friends } from "./compositions/friends.ts";
+import { composition as matchmaking } from "./compositions/matchmaking.ts";
 import { composition as practice } from "./compositions/practice.ts";
+import { composition as preparing } from "./compositions/preparing.ts";
 import { composition as proposals } from "./compositions/proposals.ts";
+import { composition as ratings } from "./compositions/ratings.ts";
 import { composition as accounts } from "./compositions/reusable/accounts.ts";
 import { composition as answering } from "./compositions/reusable/answering.ts";
 import { composition as passwords } from "./compositions/reusable/passwords.ts";
@@ -25,10 +29,14 @@ export function assembleApplication(
     composition: {
       reusable: { accounts, passwords, answering },
       practice,
+      friends,
+      matchmaking,
       table,
       proposals,
       counterpart,
       debrief,
+      ratings,
+      preparing,
     },
   });
 }

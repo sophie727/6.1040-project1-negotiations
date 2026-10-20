@@ -19,7 +19,7 @@ describe("the journey", () => {
     expect(bakery.scenarios).toMatchObject([{ name: "The Job Offer", timeLimit: 30, roles: [{ name: "Manon" }, { name: "Hiro" }] }]);
     const jobOffer = bakery.scenarios[0]!;
     const hiro = jobOffer.roles.find(({ name }) => name === "Hiro")!.role;
-    const { table } = ok(await api.practice.start({ session, scenario: jobOffer.scenario, role: hiro, timeLimit: 30 }));
+    const { table } = ok(await api.practice.start({ session, scenario: jobOffer.scenario, role: hiro }));
     const show = async () => ok(await api.tables.show({ session, table }));
 
     // She reads her brief before the clock starts.
@@ -38,7 +38,7 @@ describe("the journey", () => {
       );
 
     // She begins at 2:00 pm, so time is up at 2:30 pm. The counterpart, playing Manon, waits for her to open.
-    expect(ok(await api.tables.begin({ session, table })).deadline).toBe("2026-10-15T14:30:00.000Z");
+    expect(ok(await api.tables.start({ session, table, minutes: 30 })).deadline).toBe("2026-10-15T14:30:00.000Z");
     expect((await show()).openQuestions).toBe(0);
 
     // When she says something, Manon answers.
@@ -98,7 +98,7 @@ describe("how a negotiation ends", () => {
   test("Nadia accepts Manon's proposal, and the table settles on it", async () => {
     const { api, application, practice } = await startWholePie({ counterpart: null });
     const { session, table, roles, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
     // The stand-in never proposes, so Manon's proposal goes straight to Proposing.
     const { proposal } = ok(
       await application.concepts.Proposing.propose({ subject: table, proposer: roles.Manon!, terms: terms(WHOLE_PIE), now: START }),
@@ -113,7 +113,7 @@ describe("how a negotiation ends", () => {
   test("when time runs out, her next message is refused, the table expires, and each side gets its BATNA", async () => {
     const { api, advance, practice } = await startWholePie();
     const { session, table, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     advance(29);
     ok(await api.tables.send({ session, table, body: "Can we meet in the middle?" }));
@@ -133,7 +133,7 @@ describe("how a negotiation ends", () => {
   test("the countdown expires the table only once time is up, and only once", async () => {
     const { api, advance, practice } = await startWholePie();
     const { session, table, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     expect(await api.tables.expire({ session, table })).toEqual({ error: "NOT_DUE" });
     advance(30);
@@ -145,12 +145,25 @@ describe("how a negotiation ends", () => {
   test("Nadia walks away, and the debrief says she did", async () => {
     const { api, practice } = await startWholePie();
     const { session, table, role, show } = await practice("nadia");
-    expect(await api.tables.withdraw({ session, table })).toEqual({ error: "NOT_OPEN" });
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
 
     ok(await api.tables.withdraw({ session, table }));
     expect((await show()).table.status).toBe("WITHDRAWN");
+    expect(await api.tables.withdraw({ session, table })).toEqual({ error: "NOT_OPEN" });
     expect(ok(await api.tables.debrief({ session, table })).debrief).toMatchObject({ outcome: "WITHDRAWN", walkedAway: role, agreed: null });
+  });
+
+  test("Nadia can leave a table before it begins, and nobody coaches a negotiation that never happened", async () => {
+    const { api, application, practice } = await startWholePie();
+    const { session, table, role, show } = await practice("nadia");
+    ok(await api.tables.withdraw({ session, table }));
+    await application.whenIdle();
+    expect((await show()).table).toMatchObject({ status: "WITHDRAWN", deadline: null });
+    const { debrief, coaching } = ok(await api.tables.debrief({ session, table }));
+    expect(debrief).toMatchObject({ outcome: "WITHDRAWN", walkedAway: role });
+    expect(coaching).toEqual([]);
+    // A table that has ended can't start.
+    expect(await api.tables.start({ session, table, minutes: 30 })).toEqual({ error: "NOT_OPEN" });
   });
 });
 
@@ -161,15 +174,15 @@ describe("rules at the table", () => {
     expect(await api.tables.send({ session, table, body: "Hi!" })).toEqual({ error: "NOT_OPEN" });
     expect(await api.tables.propose({ session, table, terms: terms(WHOLE_PIE) })).toEqual({ error: "NOT_OPEN" });
     expect(await api.tables.debrief({ session, table })).toEqual({ error: "NOT_OVER" });
-    ok(await api.tables.begin({ session, table }));
-    expect(await api.tables.begin({ session, table })).toEqual({ error: "ALREADY_BEGUN" });
+    ok(await api.tables.start({ session, table, minutes: 30 }));
+    expect(await api.tables.start({ session, table, minutes: 30 })).toEqual({ error: "ALREADY_AGREED" });
     expect(await api.tables.debrief({ session, table })).toEqual({ error: "NOT_OVER" });
   });
 
   test("a proposal must agree on every issue, within its range or on one of its options", async () => {
     const { api, practice } = await startWholePie({ counterpart: null });
     const { session, table, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
     const tooRich = { ...terms(WHOLE_PIE) };
     tooRich[Object.keys(tooRich)[1]!] = 130000;
     expect(await api.tables.propose({ session, table, terms: tooRich })).toEqual({ error: "INVALID_TERMS" });
@@ -181,7 +194,7 @@ describe("rules at the table", () => {
   test("Nadia can retract her own proposal, but not accept it", async () => {
     const { api, practice } = await startWholePie({ counterpart: null });
     const { session, table, terms, show } = await practice("nadia");
-    ok(await api.tables.begin({ session, table }));
+    ok(await api.tables.start({ session, table, minutes: 30 }));
     const { proposal } = ok(await api.tables.propose({ session, table, terms: terms(GREEDY) }));
     expect(await api.tables.accept({ session, table, proposal })).toMatchObject({ error: "NOT_PENDING_FOR_YOU" });
     ok(await api.tables.retract({ session, table, proposal }));
@@ -198,20 +211,25 @@ describe("rules at the table", () => {
     expect(await api.tables.notes({ session, table, body: "x".repeat(20_001) })).toEqual({ error: "TOO_LONG" });
   });
 
-  test("a practice table needs a role of a published scenario and a time limit from 1 to 180 minutes", async () => {
-    const { api, application, practice } = await startWholePie({ counterpart: null });
-    const { session, scenario, role } = await practice("nadia");
+  test("a practice table needs a role of a published scenario, and starts with a time limit from 1 to 180 minutes", async () => {
+    const { api, application, practice } = await startWholePie();
+    const { session, scenario, role, table, show } = await practice("nadia");
     const { Briefing, Registering } = application.concepts;
     const author = ok(await Registering.register({ username: "author" })).user;
     const draft = ok(await Briefing.create({ author, name: "A draft" })).scenario;
     const drafted = ok(await Briefing.addRole({ scenario: draft, name: "Buyer", batna: 0 })).role;
 
-    expect(await api.practice.start({ session, scenario: draft, role: drafted, timeLimit: 30 })).toEqual({ error: "NOT_FOUND" });
-    expect(await api.practice.start({ session, scenario: draft, role, timeLimit: 30 })).toEqual({ error: "NOT_FOUND" });
-    expect(await api.practice.start({ session, scenario, role, timeLimit: 0 })).toMatchObject({ error: "INVALID_TIME_LIMIT" });
-    expect(await api.practice.start({ session: "not-a-session" as Session, scenario, role, timeLimit: 30 })).toEqual({
-      error: "NOT_SIGNED_IN",
-    });
-    expect(ok(await api.practice.start({ session, scenario, role, timeLimit: 45 })).table).toEqual(expect.any(String));
+    expect(await api.practice.start({ session, scenario: draft, role: drafted })).toEqual({ error: "NOT_FOUND" });
+    expect(await api.practice.start({ session, scenario: draft, role })).toEqual({ error: "NOT_FOUND" });
+    expect(await api.practice.start({ session: "not-a-session" as Session, scenario, role })).toEqual({ error: "NOT_SIGNED_IN" });
+
+    // The page suggests the recommended 30 minutes; a time limit outside 1 to 180 minutes is refused, and changes nothing.
+    expect((await show()).table).toMatchObject({ status: "PREPARING", recommendedTimeLimit: 30, timeLimit: null });
+    for (const minutes of [0, 181, 2.5]) {
+      expect(await api.tables.start({ session, table, minutes })).toEqual({ error: "INVALID_TIME_LIMIT" });
+    }
+    expect((await show()).start).toEqual([]);
+    expect(ok(await api.tables.start({ session, table, minutes: 45 })).deadline).toBe("2026-10-15T14:45:00.000Z");
+    expect((await show()).table).toMatchObject({ status: "OPEN", timeLimit: 45 });
   });
 });

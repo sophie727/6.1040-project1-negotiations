@@ -12,6 +12,8 @@ import Countdown from "./Countdown.vue";
 import { formatTime } from "./format.ts";
 import Notes from "./Notes.vue";
 import PictureADeal from "./PictureADeal.vue";
+import PrepSheet from "./PrepSheet.vue";
+import { hasCounterpart, othersAt } from "./players.ts";
 import ProposalCard from "./ProposalCard.vue";
 
 /**
@@ -25,12 +27,9 @@ const { sessionEnded } = useSession();
 
 const table = computed(() => props.view.table);
 const names = computed(() => new Map(table.value.seats.map(({ role, name }) => [role, name])));
-const others = computed(() =>
-  table.value.seats
-    .filter(({ role }) => role !== table.value.role)
-    .map(({ name }) => name)
-    .join(" and "),
-);
+/** The other seats, as a sentence: the AI by its role's name, and each person by their username and role. */
+const others = computed(() => othersAt(table.value));
+const withCounterpart = computed(() => hasCounterpart(table.value));
 
 /** Messages and proposals together, oldest first. */
 type Entry = { kind: "message"; at: string; message: Message } | { kind: "proposal"; at: string; proposal: Proposal };
@@ -110,7 +109,7 @@ async function walkAway() {
   emit("changed");
 }
 
-const tab = ref<"brief" | "notes">("brief");
+const tab = ref<"brief" | "notes" | "plan">("brief");
 
 // Sharing the room
 
@@ -155,7 +154,10 @@ const materialsId = useId();
           <h2>Chat</h2>
           <div ref="scroller" class="timeline" aria-live="polite">
             <p v-if="timeline.length === 0" class="empty muted">
-              The clock is running. Say hello, ask a question, or make an offer: {{ others }} is waiting for you to open.
+              <template v-if="withCounterpart">
+                The clock is running. Say hello, ask a question, or make an offer: {{ others }} is waiting for you to open.
+              </template>
+              <template v-else>The clock is running. Say hello, ask a question, or make an offer.</template>
             </p>
             <template v-for="entry in timeline" :key="entry.kind === 'message' ? entry.message.message : entry.proposal.proposal">
               <div v-if="entry.kind === 'message'" class="message" :class="{ mine: entry.message.sender === table.role }">
@@ -205,9 +207,13 @@ const materialsId = useId();
           <div class="tabs" role="tablist">
             <button type="button" role="tab" :aria-selected="tab === 'brief'" @click="tab = 'brief'">Brief</button>
             <button type="button" role="tab" :aria-selected="tab === 'notes'" @click="tab = 'notes'">Notes</button>
+            <button v-if="view.plan.on || view.plan.target !== null" type="button" role="tab" :aria-selected="tab === 'plan'" @click="tab = 'plan'">
+              Plan
+            </button>
           </div>
           <div class="tab-body">
             <Markdown v-if="tab === 'brief'" :markdown="table.brief" />
+            <PrepSheet v-else-if="tab === 'plan'" :view="view" readonly />
             <Notes v-else :table="table.table" :saved="view.notes.body" :rows="9" />
           </div>
         </section>

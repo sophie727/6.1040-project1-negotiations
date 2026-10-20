@@ -1,12 +1,13 @@
 // Adapted from conceptbox (https://github.com/mit-sdg/conceptbox), MIT License, Copyright (c) 2026 Eagon Meng.
-// The Whole Pie adds fields that hold a number, such as a time limit, or a term sheet.
+// The Whole Pie adds fields that hold a number, such as a time limit, a term sheet, or a flag, such as a setting.
 import type { EndpointValidator } from "@mit-sdg/sync-engine/boundary";
 
 /** What a field of a request body may hold instead of text. */
-export type FieldKind = "number" | "terms";
+export type FieldKind = "number" | "terms" | "flag";
 
 const fits: Record<FieldKind, (value: unknown) => boolean> = {
   number: (value) => typeof value === "number" && Number.isFinite(value),
+  flag: (value) => typeof value === "boolean",
   // A term sheet agrees on an option of each discrete issue, by its identity, and a universal value on each continuous one.
   terms: (value) =>
     typeof value === "object" &&
@@ -30,7 +31,7 @@ export function inputOf(kinds: Readonly<Record<string, FieldKind>> = {}): Endpoi
           ? fits[kinds[name]!](field)
           : typeof field === "string" || (field === null && name === "session"),
       );
-    return ok ? { ok: true } : { ok: false, detail: "expected text fields, and numbers or term sheets where named" };
+    return ok ? { ok: true } : { ok: false, detail: "expected text fields, and numbers, term sheets, or flags where named" };
   };
 }
 

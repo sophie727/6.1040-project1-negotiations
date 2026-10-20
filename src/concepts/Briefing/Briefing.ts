@@ -328,6 +328,12 @@ export class BriefingConcept<Author extends string> {
     return [{ jointPoints: sum(model.roles.map((role) => pointsFor(model, role, terms))) }];
   }
 
+  async _jointBatna({ scenario }: { scenario: Scenario }) {
+    if ((await this.scenarios.findOne({ _id: scenario })) === null) return [];
+    const roles = await this.roles.find({ scenario }).toArray();
+    return [{ jointBatna: sum(roles.map(({ batna }) => batna)) }];
+  }
+
   async _wholePie({ scenario }: { scenario: Scenario }): Promise<WholePie[]> {
     if (!(await this.#isPublished(scenario))) return [];
     const best = wholePie(await this.#model(scenario));

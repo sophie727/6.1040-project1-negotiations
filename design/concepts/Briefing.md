@@ -247,6 +247,9 @@ _dealJointPayoff(scenario: Scenario, terms: TermSheet) : optional (jointPoints: 
   Returns the total points of all the scenario's roles for the term sheet, added together.
   Returns no row when _dealValidity finds a problem with the term sheet for the scenario.
 
+_jointBatna(scenario: Scenario) : optional (jointBatna: Number)
+  Returns the BATNAs of all the scenario's roles added together, which is what they get together when nobody agrees, or no row for an unknown scenario.
+
 _wholePie(scenario: Scenario) : optional (terms: TermSheet, jointPoints: Number, jointBatna: Number)
   Returns, among the term sheets worth at least its BATNA to every role, one with the most points for all the scenario's roles together, along with those joint points and the roles' BATNAs added together; when several term sheets tie, it returns the same one every time.
   Returns no row for a scenario that isn't published, or when no term sheet is worth at least its BATNA to every role, which means no deal was possible.
