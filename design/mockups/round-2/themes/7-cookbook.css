@@ -1,0 +1,339 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap");
+
+
+/*
+ * Cookbook: an editorial recipe book. Ruled pages instead of boxes, numbered recipe cards, a running head, fleurons,
+ * a drop cap on the brief, the chat set like a play script, and the scores as a nutrition-facts label.
+ */
+html.t-cookbook {
+  --ink: #1f3a2e;
+  --teal: #507c68;
+  --rust: #aa420e;
+  --mint: #dbe7c5;
+  --lemon: #fdf8c3;
+  --text: "Newsreader", Georgia, serif;
+  --serif: "Fraunces", Georgia, serif;
+  --color-page: #f7f2df;
+  --color-surface: #fcf9ee;
+  --color-line: rgba(31, 58, 46, 0.14);
+  --color-border: rgba(31, 58, 46, 0.3);
+  --radius-lg: 0;
+  --radius-md: 0;
+  --shadow-card: none;
+}
+html.t-cookbook .smallcaps,
+html.t-cookbook .pastry-card > .muted,
+html.t-cookbook .who {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* The running head of the book. */
+html.t-cookbook .topbar,
+html.t-cookbook .topbar.scrolled {
+  height: 64px;
+  color: var(--ink);
+  background: var(--color-page);
+  box-shadow: 0 1px 0 var(--ink), 0 4px 0 var(--color-page), 0 5px 0 rgba(31, 58, 46, 0.4);
+}
+html.t-cookbook .brand {
+  gap: 12px;
+  font-family: "Figtree", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+html.t-cookbook .brand img {
+  display: none;
+}
+html.t-cookbook .brand::after {
+  content: "a cookbook of negotiations";
+  color: var(--rust);
+  font-family: var(--text);
+  font-size: 16px;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+html.t-cookbook .topbar .icon-button,
+html.t-cookbook .topbar .icon-button:hover,
+html.t-cookbook .topbar.scrolled .icon-button {
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Chapter openers. */
+html.t-cookbook .page-head h1::before {
+  content: "❧";
+  display: block;
+  margin-bottom: 4px;
+  color: var(--rust);
+  font-size: 26px;
+}
+html.t-cookbook .page-head h1,
+html.t-cookbook .top h1 {
+  font-family: var(--serif);
+  font-size: 60px;
+  font-weight: 300;
+  font-variation-settings: "opsz" 144;
+  letter-spacing: -0.02em;
+}
+html.t-cookbook .page-head .lead,
+html.t-cookbook .top .muted {
+  font-family: var(--text);
+  font-size: 19px;
+  font-style: italic;
+}
+
+/* Ruled sections instead of boxes. */
+html.t-cookbook .panel,
+html.t-cookbook .card {
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--color-border);
+}
+html.t-cookbook .panel > h2 {
+  font-family: "Figtree", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+html.t-cookbook .button {
+  border-radius: 0;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+html.t-cookbook .badge {
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid currentColor;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+html.t-cookbook .opponents {
+  gap: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+html.t-cookbook .opponent {
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+}
+html.t-cookbook .opponent[aria-checked="true"] {
+  background: var(--lemon);
+  box-shadow: none;
+}
+html.t-cookbook .opponent strong {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* The recipes: numbered cards, each with its "photo" on a mint plate. */
+html.t-cookbook .gallery {
+  counter-reset: recipe;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+html.t-cookbook .pastry-card {
+  counter-increment: recipe;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 0;
+  padding: 18px 24px 24px;
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+}
+html.t-cookbook .pastry-card:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  background: rgba(253, 248, 195, 0.5);
+}
+html.t-cookbook .pastry-card::before {
+  content: "No. " counter(recipe, decimal-leading-zero);
+  color: var(--rust);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+}
+html.t-cookbook .pastry-card .pastry {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 150px;
+  margin: 4px 0 8px;
+  background: radial-gradient(circle, #ffffff 0 44px, #e9efdb 45px 54px, transparent 55px), var(--mint);
+  font-size: 58px;
+}
+html.t-cookbook .pastry-card .name {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144;
+}
+html.t-cookbook .pastry-card.surprise {
+  border-style: none;
+  border-right: 0;
+  background: transparent;
+}
+html.t-cookbook .pastry-card.surprise .pastry {
+  background: radial-gradient(circle, #ffffff 0 44px, #f8efb7 45px 54px, transparent 55px), var(--lemon);
+}
+
+/* Reading: the brief opens with a drop cap. */
+html.t-cookbook .markdown {
+  font-family: var(--text);
+  font-size: 17px;
+  line-height: 1.6;
+}
+html.t-cookbook .markdown > p:first-of-type::first-letter {
+  float: left;
+  margin: 8px 10px 0 0;
+  color: var(--rust);
+  font-family: var(--serif);
+  font-size: 66px;
+  font-weight: 300;
+  line-height: 0.8;
+}
+html.t-cookbook .markdown h1 {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+}
+html.t-cookbook .markdown h2,
+html.t-cookbook .markdown h3 {
+  color: var(--rust);
+  font-family: "Figtree", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html.t-cookbook .banner.panel {
+  background: var(--lemon);
+}
+html.t-cookbook .banner h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 34px;
+}
+
+/* The chat, set like a play script. */
+html.t-cookbook .message,
+html.t-cookbook .message.mine {
+  flex-direction: row;
+  align-self: stretch;
+  align-items: baseline;
+  gap: 16px;
+  max-width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-line);
+}
+html.t-cookbook .who {
+  flex: 0 0 120px;
+  color: var(--teal);
+}
+html.t-cookbook .mine .who {
+  color: var(--rust);
+}
+html.t-cookbook .bubble,
+html.t-cookbook .mine .bubble {
+  padding: 0;
+  border-radius: 0;
+  color: var(--ink);
+  background: none;
+  font-family: var(--text);
+  font-size: 17px;
+}
+html.t-cookbook .proposal {
+  align-self: stretch;
+  max-width: none;
+  border: 1px solid var(--ink);
+  background: var(--color-surface);
+}
+html.t-cookbook .proposal header strong {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 400;
+}
+html.t-cookbook .countdown {
+  border-radius: 0;
+  border: 1px solid var(--ink);
+  box-shadow: none;
+  background: transparent;
+  font-family: var(--serif);
+  font-weight: 400;
+}
+html.t-cookbook .choices label {
+  border-radius: 0;
+}
+html.t-cookbook .choices label.chosen {
+  color: var(--lemon);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* The scores, as a nutrition-facts label. */
+html.t-cookbook .scores {
+  display: block;
+  padding: 8px 12px 10px;
+  border: 2px solid var(--ink);
+  background: #ffffff;
+}
+html.t-cookbook .scores::before {
+  content: "Negotiation Facts";
+  display: block;
+  padding-bottom: 4px;
+  border-bottom: 9px solid var(--ink);
+  font: 900 30px/1.1 "Figtree", sans-serif;
+  letter-spacing: -0.01em;
+}
+html.t-cookbook .scores > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--ink);
+}
+html.t-cookbook .scores > div:last-child {
+  border-bottom: 0;
+}
+html.t-cookbook .scores dt {
+  font-size: 15px;
+  font-weight: 800;
+}
+html.t-cookbook .scores dd {
+  color: var(--ink);
+  font: 900 26px/1 "Figtree", sans-serif;
+}
+html.t-cookbook .scores > div > p {
+  grid-column: 1 / -1;
+  font-size: 12px;
+}
+html.t-cookbook .headline {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 400;
+}

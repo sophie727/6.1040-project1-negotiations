@@ -8,6 +8,8 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     port: 5173,
+    // As the server does, so a browser on /auth/commons/callback?code=… sends no Referer header with the code in it.
+    headers: { "Referrer-Policy": "no-referrer" },
     proxy: { "/api": backend },
   },
 });

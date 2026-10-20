@@ -20,7 +20,7 @@ import {
   UnknownTable,
 } from "./Tabling.ts";
 
-/** Whoever sits at a table: a person's Registering user, or the name of an AI counterpart, such as `bot:obstinate`. */
+/** Whoever sits at a table: a person's Registering user, or the name of an AI counterpart, such as `bot:counterpart`. */
 export type Player = string;
 
 class Tabling extends TablingConcept<Scenario, Role, Player> {}

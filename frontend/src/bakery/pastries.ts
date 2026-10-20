@@ -1,6 +1,7 @@
 /** The pastry on each scenario's card, as in the bakery sketch; a scenario without one gets a cupcake. */
 const pastries: Record<string, string> = {
   "The Job Offer": "🥐",
+  "The Launch Room": "🥨",
   "Joint Venture": "🍰",
   "House Sale": "🥖",
   "Legal Dispute": "🥧",

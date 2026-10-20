@@ -4,7 +4,7 @@
 
 Give each side of a negotiation scenario a confidential brief that says what every possible agreement is worth to them and when they should walk away, so that any agreement can be scored for each side and compared with the most valuable one possible.
 
-_Prevents:_ someone negotiates a scenario that is missing an issue, a payoff, or a brief; a scenario changes after people have negotiated it; an agreement is scored on a value its issue doesn't allow.
+_Prevents:_ someone negotiates a scenario that is missing an issue, a payoff, or a brief; a scenario changes after people have negotiated it; an agreement is scored on a value its issue doesn't allow; a payoff outlives the option or role it was for.
 
 ## Principle
 
@@ -19,6 +19,8 @@ She then adds two roles:
 
 - Hiro, the candidate, whose payoffs give $80K 0 points and $120K 600 points. For Health Insurance, Not included gets 0 points, Half Coverage 150 points, and Full Coverage 300 points. His BATNA is 1,000 points. A role's BATNA, the Best Alternative To A Negotiated Agreement, is what that role would get if no deal is reached, so Hiro should turn down any agreement worth less than 1,000 points to him.
 - Manon, the employer, with payoffs and a BATNA of her own. She also gives Manon a brief--that is, a confidential description of Hiro's situation and priorities.
+
+While the scenario is a draft, Sophie can still change her mind. She first called the bonus issue "Signing bonus", and renames it "Bonus". She added a fourth title, "Intern", and removes it, along with the points each role had for it. She first made the position title a continuous issue, and changing it to discrete removes the options it had, since an option of a range has a universal value that a discrete option can't have. She raises Manon's BATNA, and she could rename the scenario, remove a role, or discard the whole draft.
 
 Sophie tries to publish, but she can't because Hiro doesn't have a brief yet: she's only allowed to publish the scenario when there are at least two roles, each with a brief and payoffs for all issues and options. She gives Hiro a brief, and then publishes the scenario. After publishing, she's no longer able to change the scenario, and instead, Briefing scores and compares deals. In particular, Briefing can now score any term sheet for this scenario. A term sheet with a salary of 100000 and health insurance Full Coverage is worth 600 points to Hiro: 300 for salary, halfway between 0 and 600, and 300 for insurance. A term sheet can't agree on anything between Half Coverage and Full Coverage, because health insurance is discrete. Finally, Briefing finds the whole pie: a term sheet with the most points for Hiro and Manon together that satisfies both BATNAs, showing what the "best" agreement might be.
 
@@ -73,7 +75,7 @@ a set of Payoffs with
 Rule: every name and unit is trimmed (spaces at the start/end removed) before being stored, measured, and compared.
 Rule: only a continuous issue has a unit.
 Rule: an option has a universalValue exactly when its issue is continuous, and no two options of one issue share a universalValue.
-Rule: a payoff's role and option belong to the same scenario.
+Rule: a payoff's role and option belong to the same scenario, and a payoff goes when its role or option does.
 Rule: a published scenario has at least one issue and at least two roles, each of its issues has at least two options, and each of its roles has a brief and a payoff for every option of the scenario.
 Rule: nothing about a published scenario changes.
 ```
@@ -189,6 +191,139 @@ setBrief(role: Role, brief: String) : returns ()
     set the role's brief to brief
     returns
 
+rename(scenario: Scenario, name: String) : returns ()
+  where scenario is not in Scenarios
+  then
+    refuses UNKNOWN_SCENARIO "There is no such scenario."
+  where scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_SCENARIO_NAME "A scenario name must have 1 to 100 characters."
+  where scenario is unpublished, name is accepted, and another scenario has that name
+  then
+    refuses NAME_TAKEN "A scenario with that name already exists."
+  where scenario is unpublished, name is accepted, and no other scenario has that name
+  then
+    set the scenario's name to name
+    returns
+
+discard(scenario: Scenario) : returns ()
+  where scenario is not in Scenarios
+  then
+    refuses UNKNOWN_SCENARIO "There is no such scenario."
+  where scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where scenario is unpublished
+  then
+    remove the scenario, with its issues, their options, its roles, and their payoffs
+    returns
+
+updateIssue(issue: Issue, name: String, kind: IssueKind, unit?: String) : returns ()
+  where issue is not in Issues
+  then
+    refuses UNKNOWN_ISSUE "There is no such issue."
+  where the issue's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the issue's scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_ISSUE_NAME "An issue name must have 1 to 100 characters."
+  where the issue's scenario is unpublished, name is accepted, and another issue of the scenario has that name
+  then
+    refuses ISSUE_EXISTS "This scenario already has an issue with that name."
+  where the issue's scenario is unpublished, name is accepted, no other issue of the scenario has that name, kind is DISCRETE, and a unit that isn't blank is given
+  then
+    refuses UNIT_NOT_ALLOWED "Only a continuous issue has a unit."
+  where the issue's scenario is unpublished, name is accepted, no other issue of the scenario has that name, and kind is CONTINUOUS or no unit that isn't blank is given
+  then
+    set the issue's name, kind, and unit, leaving out a blank unit
+    when kind is not the issue's kind before, remove the issue's options and their payoffs
+    returns
+
+removeIssue(issue: Issue) : returns ()
+  where issue is not in Issues
+  then
+    refuses UNKNOWN_ISSUE "There is no such issue."
+  where the issue's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the issue's scenario is unpublished
+  then
+    remove the issue, its options, and their payoffs
+    returns
+
+updateOption(option: Option, name: String, universalValue?: Number) : returns ()
+  where option is not in Options
+  then
+    refuses UNKNOWN_OPTION "There is no such option."
+  where the option's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the option's scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_OPTION_NAME "An option name must have 1 to 100 characters."
+  where the option's scenario is unpublished, name is accepted, and another option of its issue has that name
+  then
+    refuses OPTION_EXISTS "This issue already has an option with that name."
+  where the option's scenario is unpublished, name is accepted, no other option of its issue has that name, its issue is continuous, and no universalValue is given
+  then
+    refuses VALUE_REQUIRED "An option of a continuous issue needs a universal value."
+  where the option's scenario is unpublished, name is accepted, no other option of its issue has that name, its issue is discrete, and a universalValue is given
+  then
+    refuses VALUE_NOT_ALLOWED "An option of a discrete issue has no universal value."
+  where the option's scenario is unpublished, name is accepted, no other option of its issue has that name, its issue is continuous, a universalValue is given, and another option of its issue is at that universalValue
+  then
+    refuses VALUE_TAKEN "This issue already has an option at that universal value."
+  where the option's scenario is unpublished, name is accepted, no other option of its issue has that name, and either its issue is discrete and no universalValue is given, or its issue is continuous and no other option of it is at the given universalValue
+  then
+    set the option's name, and its universalValue if given
+    returns
+
+removeOption(option: Option) : returns ()
+  where option is not in Options
+  then
+    refuses UNKNOWN_OPTION "There is no such option."
+  where the option's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the option's scenario is unpublished
+  then
+    remove the option and its payoffs
+    returns
+
+updateRole(role: Role, name: String, batna: Number) : returns ()
+  where role is not in Roles
+  then
+    refuses UNKNOWN_ROLE "There is no such role."
+  where the role's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the role's scenario is unpublished and name is blank or longer than 100 characters
+  then
+    refuses INVALID_ROLE_NAME "A role name must have 1 to 100 characters."
+  where the role's scenario is unpublished, name is accepted, and another role of the scenario has that name
+  then
+    refuses ROLE_EXISTS "This scenario already has a role with that name."
+  where the role's scenario is unpublished, name is accepted, and no other role of the scenario has that name
+  then
+    set the role's name and batna
+    returns
+
+removeRole(role: Role) : returns ()
+  where role is not in Roles
+  then
+    refuses UNKNOWN_ROLE "There is no such role."
+  where the role's scenario is in Published Scenarios
+  then
+    refuses PUBLISHED "A published scenario can't be changed."
+  where the role's scenario is unpublished
+  then
+    remove the role, with its brief and its payoffs
+    returns
+
 publish(scenario: Scenario) : returns (scenario: Scenario)
   where scenario is not in Scenarios
   then
@@ -214,6 +349,16 @@ _published() : many (scenario: Scenario, name: String)
 
 _scenario(scenario: Scenario) : optional (name: String, author: Author, published: Flag)
   Returns the scenario's name and author, and whether it is published, or no row for an unknown scenario.
+
+_authoredBy(author: Author) : many (scenario: Scenario, name: String, published: Flag)
+  Returns every scenario the author created, drafts and published ones alike, with its name and whether it is published, or no rows when they have created none.
+  Orders rows by when each scenario was created, newest first.
+
+_issue(issue: Issue) : optional (scenario: Scenario, name: String, kind: IssueKind, unit?: String)
+  Returns the issue's scenario, name, kind, and unit if it has one, or no row for an unknown issue.
+
+_option(option: Option) : optional (scenario: Scenario, issue: Issue, name: String, universalValue?: Number)
+  Returns the option's scenario, issue, name, and universal value if it has one, or no row for an unknown option.
 
 _issues(scenario: Scenario) : many (issue: Issue, name: String, kind: IssueKind, unit?: String)
   Returns the scenario's issues, or no rows when it has none.

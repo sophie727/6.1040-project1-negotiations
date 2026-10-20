@@ -74,8 +74,9 @@ describe("the counterpart's endpoints", () => {
     expect(await api.counterpart.table({ session, prompt })).toEqual({ error: "NOT_TAKEN" });
     ok(await api.answers.take({ session, prompt }));
 
-    const { table } = ok(await api.counterpart.table({ session, prompt }));
-    expect(table).toMatchObject({ table: nadia.table, roleName: "Manon", batna: 1000 });
-    expect(table.brief).toBe(manonsBrief);
+    const { tables } = ok(await api.counterpart.table({ session, prompt }));
+    expect(tables).toHaveLength(1);
+    expect(tables[0]).toMatchObject({ table: nadia.table, roleName: "Manon", batna: 1000 });
+    expect(tables[0]!.brief).toBe(manonsBrief);
   });
 });

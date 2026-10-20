@@ -6,6 +6,7 @@ import { createCounterpart, standIn, type TableMaterial } from "../../src/agents
 import type { Reasoner } from "../../src/agents/reusable/agent.ts";
 import { scriptedReasoner } from "../../src/agents/reusable/reasoners.ts";
 import { assembleApplication } from "../../src/assembly.ts";
+import { type Identity, MemoryProvider } from "../../src/concepts/Federating/provider.ts";
 import { seed } from "../../src/seed/seed.ts";
 import { testDatabase } from "./reusable/mongo.ts";
 import { ok } from "./reusable/results.ts";
@@ -45,7 +46,8 @@ export async function startWholePie({
   const agents = [counterpart === null ? undefined : createCounterpart(counterpart), coach === null ? undefined : createCoach(coach)].filter(
     (agent) => agent !== undefined,
   );
-  const application = assembleApplication({ database }, { clock: () => now, observers: agents.map(({ observer }) => observer) });
+  const commons = new MemoryProvider();
+  const application = assembleApplication({ database, commons }, { clock: () => now, observers: agents.map(({ observer }) => observer) });
   await seed(application);
   const api = createLocalClient<TheWholePieWire>({ invoker: createGateway<TheWholePieWire>({ application }) });
   for (const agent of agents) void agent.start({ application, api });
@@ -54,19 +56,32 @@ export async function startWholePie({
     return ok(await api.auth.register({ username, password: "correct horse" }));
   }
 
-  /** Signs `username` up and opens a table where they practice The Job Offer as `roleName`, with the counterpart in the other seat. */
-  async function practice(username: string, roleName = "Hiro") {
+  /**
+   * Signs in with Commons the way the browser does: start an attempt, approve The Whole Pie on Commons as `identity`,
+   * and finish the attempt with the code and state Commons sends back.
+   */
+  async function signInWithCommons(identity: Identity) {
+    const { attempt, address } = ok(await api.auth.commons.start({}));
+    const { code, state } = commons.approve(address, identity);
+    return { attempt, result: await api.auth.commons.finish({ attempt, state, code }) };
+  }
+
+  /**
+   * Signs `username` up and opens a table where they practice `scenarioName`, The Job Offer unless a test says
+   * otherwise, as `roleName`, with a counterpart in each other seat.
+   */
+  async function practice(username: string, roleName = "Hiro", scenarioName = "The Job Offer") {
     const { session } = await register(username);
-    const [jobOffer] = ok(await api.bakery({ session })).scenarios;
-    const role = jobOffer!.roles.find(({ name }) => name === roleName)!.role;
-    const { table } = ok(await api.practice.start({ session, scenario: jobOffer!.scenario, role }));
+    const scenario = ok(await api.bakery({ session })).scenarios.find(({ name }) => name === scenarioName)!;
+    const role = scenario.roles.find(({ name }) => name === roleName)!.role;
+    const { table } = ok(await api.practice.start({ session, scenario: scenario.scenario, role }));
     const { seats, issues } = ok(await api.tables.show({ session, table })).table;
     /** The role ids at the table, by role name. */
     const roles = Object.fromEntries(seats.map(({ role, name }) => [name, role]));
     const terms = termSheets(issues);
     /** The table as `username` sees it now. */
     const show = async () => ok(await api.tables.show({ session, table }));
-    return { session, scenario: jobOffer!.scenario, table, role, roles, terms, show };
+    return { session, scenario: scenario.scenario, table, role, roles, terms, show };
   }
 
   /**
@@ -97,5 +112,5 @@ export async function startWholePie({
     return { session, scenario: jobOffer!.scenario, table, code, role, roles, terms, show, join };
   }
 
-  return { database, application, api, advance, register, practice, hostFriends };
+  return { database, commons, application, api, advance, register, signInWithCommons, practice, hostFriends };
 }

@@ -1,8 +1,8 @@
 # The Whole Pie types
 
-Every person in The Whole Pie is a Registering user, who signs in with a password through Authenticating and stays signed in through Sessioning. People write scenarios in Briefing, and negotiate them at tables in Tabling.
+Every person in The Whole Pie is a Registering user, who signs in with a password through Authenticating, or with Commons through CommonsFederating, and stays signed in through Sessioning. CommonsFederating is Federating with Commons, the class's site, as the other site, so a Commons account is linked to the user it first registered, and reaches that user each time. People write scenarios in Briefing, and negotiate them at tables in Tabling.
 
-A seat at a table belongs to a player: either a person, or one of the AI counterparts. The counterparts are a fixed set of bots, each with its own persona, named like `bot:obstinate`; the agent process that plays them keeps their persona prompts, so a bot's name is all a table needs to record.
+A seat at a table belongs to a player: either a person, or one of the AI counterparts. A counterpart is a bot whose name starts with `bot:`: `bot:counterpart` takes a seat at each practice table, and at a scenario with more than two roles, a counterpart named for its role, `bot:counterpart:` followed by the role, takes each other seat the person doesn't. The agent process that plays them reads each role's brief from the table, so a bot's name is all a table needs to record.
 
 Everything said and offered at a table is said and offered by a role, not by a player, so the AI counterpart needs no account: its messages in Conversing and its proposals in Proposing come from the role it plays. A proposal offers a term sheet, which Proposing keeps without reading, and which Briefing scores. Each person keeps their own notes about each table in Noting.
 
@@ -14,11 +14,11 @@ Negotiating with other people is rated, as on chess.com, and negotiating with th
 
 Someone who wants to prepare deliberately turns on prep sheets, a feature in Preferring, which keeps each person's settings. Then they write a plan for each negotiation before they can start it: their target, their walkaway, and their priorities. Each part is a note they keep about the table, so each is its own instance of Noting: TargetNoting, WalkawayNoting, and PrioritiesNoting.
 
-Two agents answer questions: the counterpart, which plays the other side, and the coach, which writes the debrief. A third agent, the timekeeper, answers none: every half minute, it asks the app to expire the tables whose time is up, which matters once people negotiate each other and may both close the page. Each signs in to its own instance of Sessioning, AgentSessioning, under its name, `counterpart`, `coach`, or `timekeeper`, and the first two are the reasoners that Reasoning records for their answers. For now, every question to an agent is about a table: what the counterpart says next, whether it accepts a proposal, and the debrief. Once people can write scenarios in the app, generating their briefs will need questions about scenarios and roles too.
+Two agents answer questions: the counterpart, which plays the other side, and the coach, which writes the debrief. A third agent, the timekeeper, answers none: every half minute, it asks the app to expire the tables whose time is up, which matters once people negotiate each other and may both close the page. Each signs in to its own instance of Sessioning, AgentSessioning, under its name, `counterpart`, `coach`, or `timekeeper`, and the first two are the reasoners that Reasoning records for their answers. For now, every question to an agent is about a table: what a counterpart says next, whether another counterpart adds something, whether a counterpart accepts a proposal, and the debrief. Once people can write scenarios in the app, generating their briefs will need questions about scenarios and roles too.
 
 ```types
 concrete Player
-  Whoever sits at a negotiation table: a person's Registering user, or the name of an AI counterpart, such as `bot:obstinate`.
+  Whoever sits at a negotiation table: a person's Registering user, or the name of an AI counterpart, such as `bot:counterpart`.
 
 concrete TermSheet
   One agreed universal value for each issue of a scenario, in the form Briefing reads.
@@ -34,6 +34,9 @@ concrete Agent
 instantiate Registering
 
 instantiate Authenticating with
+  User is Registering.User
+
+instantiate Federating as CommonsFederating with
   User is Registering.User
 
 instantiate Sessioning with

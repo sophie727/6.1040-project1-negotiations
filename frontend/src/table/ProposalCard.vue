@@ -5,6 +5,7 @@ import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import type { Worth } from "./conversation.ts";
 import { formatAgreed, formatPoints, formatTime } from "./format.ts";
+import { inWords } from "./players.ts";
 
 /**
  * A proposal in the chat: its terms, what it's worth to the person, its status, and the answers they can give. In the
@@ -30,6 +31,20 @@ const status = computed(() =>
     : (statuses[props.proposal.status] ?? { label: props.proposal.status, tone: "" }),
 );
 const belowBatna = computed(() => props.proposal.points !== null && props.proposal.points < props.table.batna);
+const accepted = computed(() => props.proposal.acceptedBy.includes(props.table.role));
+
+/**
+ * At a table of three or more, who has accepted a proposal that is still waiting, and whose answer it waits for, since
+ * it holds only once everyone but its proposer accepts it.
+ */
+const answers = computed(() => {
+  if (!pending.value || props.transcript || props.table.seats.length <= 2) return null;
+  const answerers = props.table.seats.filter(({ role }) => role !== props.proposal.proposer);
+  const named = (seats: typeof answerers) => inWords(seats.map(({ role, name }) => (role === props.table.role ? "you" : name)));
+  const yes = answerers.filter(({ role }) => props.proposal.acceptedBy.includes(role));
+  const waiting = `Waiting for ${named(answerers.filter((seat) => !yes.includes(seat)))}.`;
+  return yes.length === 0 ? waiting : `Accepted by ${named(yes)}. ${waiting}`;
+});
 
 const working = ref(false);
 const error = ref<string | null>(null);
@@ -75,13 +90,14 @@ async function answer(path: "/tables/accept" | "/tables/reject" | "/tables/retra
     <footer>
       <span class="badge" :class="status.tone">{{ status.label }}</span>
       <div v-if="pending && !transcript" class="actions">
-        <template v-if="!mine">
+        <template v-if="!mine && !accepted">
           <button type="button" class="button outline" :disabled="working" @click="answer('/tables/reject')">Reject</button>
           <button type="button" class="button good" :disabled="working" @click="answer('/tables/accept')">Accept</button>
         </template>
-        <button v-else type="button" class="button outline" :disabled="working" @click="answer('/tables/retract')">Take it back</button>
+        <button v-else-if="mine" type="button" class="button outline" :disabled="working" @click="answer('/tables/retract')">Take it back</button>
       </div>
     </footer>
+    <p v-if="answers" class="muted answers">{{ answers }}</p>
     <p v-if="error" class="refusal" role="alert">{{ error }}</p>
   </article>
 </template>
@@ -135,5 +151,8 @@ footer {
 .actions {
   display: flex;
   gap: var(--space-2);
+}
+.answers {
+  font-size: var(--text-sm);
 }
 </style>

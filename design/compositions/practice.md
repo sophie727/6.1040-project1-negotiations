@@ -1,6 +1,6 @@
 # Practice
 
-The bakery is where a person picks something to negotiate. A practice table seats them in the role they choose, and the counterpart, an AI player, in the other.
+The bakery is where a person picks something to negotiate. A practice table seats them in the role they choose, and the counterpart, an AI player, in every other.
 
 ## Choosing a scenario
 
@@ -27,7 +27,12 @@ spiceLevel(jointPoints?: Number, jointBatna: Number) : Number
 
 ## Starting a practice table
 
-The [start endpoint](reaction:practice.starting.StartPractice) takes a scenario and one of its roles. The endpoint opens a table in Tabling, and a reaction in [the table](table.md#seating) adds an empty seat for each of the scenario's roles. The endpoint waits until the flow has settled, so those seats exist, and then seats the person in their role and the counterpart, the player `bot:counterpart`, in every other one. Once both seats have joined the table's proposals, it responds with the table. The table is `PREPARING`: its clock doesn't run until the person [suggests how long to negotiate](table.md#starting), which the counterpart agrees to at once, so they can read their brief first.
+The [start endpoint](reaction:practice.starting.StartPractice) takes a scenario and one of its roles. The endpoint opens a table in Tabling, and a reaction in [the table](table.md#seating) adds an empty seat for each of the scenario's roles. The endpoint waits until the flow has settled, so those seats exist, and then seats the person in their role and [the counterpart](counterpart.md), the player `bot:counterpart`, in another, whichever Tabling gives it. At a scenario with more than two roles, such as The Launch Room, seats are still empty then, so when the counterpart sits down, a reaction [seats another counterpart in each of them](reaction:practice.starting.SeatMoreCounterparts). Tabling seats each player only once at a table, so each of these is a player of its own, [named for the role it plays](computation:counterpartFor). The reaction follows only the seat `bot:counterpart` takes, not the ones it fills, so it seats each counterpart once, and nothing it asks for is refused. Once every seat has joined the table's proposals, the endpoint responds with the table. The table is `PREPARING`: its clock doesn't run until the person [suggests how long to negotiate](table.md#starting), which every counterpart agrees to at once, so they can read their brief first.
+
+```computations
+counterpartFor(role: String) : String
+  Names the AI counterpart that plays a role at a practice table beside `bot:counterpart`: `bot:counterpart:` followed by the role.
+```
 
 Only [a role of a published scenario can be practiced](view:practice.starting.playable). [A second endpoint at the same path](reaction:practice.starting.RefuseUnplayable) refuses anything else with `NOT_FOUND`, such as a role of another scenario, or a scenario its author hasn't published. It needs no session, since anyone can see which scenarios are published.
 
@@ -35,5 +40,3 @@ Only [a role of a published scenario can be practiced](view:practice.starting.pl
 practice.starting.StartPractice at /practice/start
 practice.starting.RefuseUnplayable at /practice/start
 ```
-
-Tabling lets a player take only one seat at a table, so at a scenario with three roles, the counterpart's second seat would be refused with `ALREADY_SEATED`, and so would the request. Every built-in scenario has two roles; practicing a larger one will need more than one counterpart.

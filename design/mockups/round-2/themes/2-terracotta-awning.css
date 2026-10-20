@@ -1,0 +1,160 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap");
+
+
+/* The storefront: a sign board (the navbar itself) with an awning along its bottom edge, and a valance hanging below. */
+html.t-terracotta-awning {
+  --topbar-height: 94px;
+  --awning: 30px;
+  --fascia: #fbf6e2;
+  --gild: linear-gradient(180deg, #fbe7a4 0%, #ecbd38 36%, #c38e0b 52%, #f0c544 76%, #d6a116 100%);
+  --teal: #507c68;
+  --lemon: #fdf8c3;
+  --mint: #dbe7c5;
+  --rust: #aa420e;
+  --ink: #1f3a2e;
+}
+html.t-terracotta-awning .topbar {
+  padding-bottom: var(--awning);
+  box-shadow: none;
+  transition: height 0.25s ease, padding 0.25s ease;
+}
+html.t-terracotta-awning .topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  pointer-events: none;
+}
+html.t-terracotta-awning .brand img {
+  display: none;
+}
+html.t-terracotta-awning .topbar .icon-button,
+html.t-terracotta-awning .topbar .icon-button:hover {
+  height: 32px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid rgba(80, 124, 104, 0.38);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-terracotta-awning .topbar.scrolled {
+  height: 58px;
+  padding-bottom: 0;
+}
+html.t-terracotta-awning .topbar.scrolled .icon-button {
+  color: var(--lemon);
+  border-color: rgba(253, 248, 195, 0.45);
+}
+html.t-terracotta-awning .content {
+  padding-top: 48px;
+}
+
+/*
+ * Terracotta awning, after a classic white storefront: the same gilded sign, over terracotta stripes in two close
+ * shades, with a straight valance. Scrolling folds it down to the awning.
+ */
+html.t-terracotta-awning .topbar {
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.16)) bottom / 100% var(--awning) no-repeat,
+    repeating-linear-gradient(90deg, #aa420e 0 24px, #b8521c 24px 48px) bottom / 100% var(--awning) no-repeat,
+    linear-gradient(#e2d6ab, #e2d6ab) left 0 bottom var(--awning) / 100% 3px no-repeat,
+    var(--fascia);
+  box-shadow: inset 0 4px 0 #a03d0c;
+}
+html.t-terracotta-awning .topbar::after {
+  height: 13px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.05)),
+    repeating-linear-gradient(90deg, #a03d0c 0 24px, #ae4b18 24px 48px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 7px 10px -7px rgba(31, 58, 46, 0.5);
+}
+html.t-terracotta-awning .topbar.scrolled {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.16)),
+    repeating-linear-gradient(90deg, #aa420e 0 24px, #b8521c 24px 48px);
+}
+
+/* The name in gilded capitals, inside a thin molded frame. */
+html.t-terracotta-awning .brand {
+  padding: 6px 26px 7px calc(26px + 0.24em);
+  border: 1px solid rgba(196, 143, 10, 0.55);
+  outline: 1px solid rgba(196, 143, 10, 0.3);
+  outline-offset: 3px;
+  color: transparent;
+  background: var(--gild);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 1px 0 rgba(31, 58, 46, 0.22));
+  font-family: "Fraunces", serif;
+  font-size: 23px;
+  font-weight: 600;
+  font-variation-settings: "opsz" 72;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+html.t-terracotta-awning .topbar.scrolled .brand {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent;
+  outline-color: transparent;
+  font-size: 18px;
+}
+
+/* Arched windows for the scenarios, from Patisserie: a teal hairline, a gold inner rule, and a mint plate. */
+html.t-terracotta-awning .gallery {
+  grid-template-columns: repeat(auto-fit, 236px);
+  gap: 30px;
+}
+html.t-terracotta-awning .pastry-card {
+  min-height: 340px;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 30px 18px 28px;
+  border: 1px solid rgba(80, 124, 104, 0.42);
+  border-radius: 118px 118px 4px 4px;
+  outline: 1px solid rgba(248, 186, 18, 0.75);
+  outline-offset: -9px;
+  background: #fffdf6;
+}
+html.t-terracotta-awning .pastry-card:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 30px -22px rgba(31, 58, 46, 0.6);
+}
+html.t-terracotta-awning .pastry-card .pastry {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: #dbe7c5;
+  box-shadow: 0 0 0 6px #fffdf6, 0 0 0 7px rgba(248, 186, 18, 0.75);
+  font-size: 54px;
+}
+html.t-terracotta-awning .pastry-card .name {
+  font-size: 22px;
+}
+html.t-terracotta-awning .pastry-card > .muted {
+  color: #507c68;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+html.t-terracotta-awning .pastry-card.surprise {
+  border-style: solid;
+  color: #fdf8c3;
+  background: #507c68;
+  outline-color: rgba(253, 248, 195, 0.55);
+}
+html.t-terracotta-awning .pastry-card.surprise .pastry {
+  background: rgba(253, 248, 195, 0.16);
+  box-shadow: 0 0 0 6px #507c68, 0 0 0 7px rgba(253, 248, 195, 0.55);
+}
+html.t-terracotta-awning .pastry-card.surprise > .muted {
+  color: #dbe7c5;
+}

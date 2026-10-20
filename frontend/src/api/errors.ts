@@ -52,13 +52,61 @@ const messages: Record<string, Record<string, string>> = {
   },
   "/tables/notes": { INVALID_REQUEST: "Notes can have at most 20,000 characters." },
   "/tables/debrief": { CONFLICT: "This negotiation hasn't ended yet." },
+  "/scenarios/show": { NOT_FOUND: "This scenario isn't yours, or doesn't exist." },
+  "/scenarios/create": {
+    INVALID_REQUEST: "A name must have 1 to 100 characters.",
+    CONFLICT: "A scenario with that name already exists.",
+  },
+  "/scenarios/rename": {
+    INVALID_REQUEST: "A name must have 1 to 100 characters.",
+    CONFLICT: "A scenario with that name already exists.",
+  },
+  "/scenarios/limit": {
+    INVALID_REQUEST: "Choose a whole number of minutes from 1 to 180.",
+    CONFLICT: "A published scenario can't change.",
+  },
+  "/scenarios/discard": { CONFLICT: "A published scenario can't be discarded." },
+  "/scenarios/publish": {
+    CONFLICT: "It isn't ready yet: it needs an issue, two options for every issue, two roles, and a brief for every role.",
+  },
+  "/scenarios/issues/add": {
+    INVALID_REQUEST: "An issue name must have 1 to 100 characters.",
+    CONFLICT: "This scenario already has an issue with that name.",
+  },
+  "/scenarios/issues/update": {
+    INVALID_REQUEST: "An issue name must have 1 to 100 characters.",
+    CONFLICT: "This scenario already has an issue with that name.",
+  },
+  "/scenarios/issues/remove": { CONFLICT: "A published scenario can't change." },
+  "/scenarios/options/add": {
+    INVALID_REQUEST: "An option name must have 1 to 100 characters.",
+    CONFLICT: "This issue already has an option with that name or value.",
+  },
+  "/scenarios/options/update": {
+    INVALID_REQUEST: "An option name must have 1 to 100 characters.",
+    CONFLICT: "This issue already has an option with that name or value.",
+  },
+  "/scenarios/options/remove": { CONFLICT: "A published scenario can't change." },
+  "/scenarios/roles/add": {
+    INVALID_REQUEST: "A role name must have 1 to 100 characters.",
+    CONFLICT: "This scenario already has a role with that name.",
+  },
+  "/scenarios/roles/update": {
+    INVALID_REQUEST: "A role name must have 1 to 100 characters.",
+    CONFLICT: "This scenario already has a role with that name.",
+  },
+  "/scenarios/roles/remove": { CONFLICT: "A published scenario can't change." },
+  "/scenarios/roles/brief": { INVALID_REQUEST: "A brief must have 1 to 20,000 characters." },
+  "/scenarios/payoffs/set": { CONFLICT: "A published scenario can't change." },
 };
 
 /** The sentence to show when the endpoint at `path` returns `error`. */
 export function messageFor(path: string, error: string): string {
   const fallback =
     error === "NOT_FOUND"
-      ? "This negotiation isn't yours, or doesn't exist."
+      ? path.startsWith("/scenarios/")
+        ? "This scenario isn't yours, or doesn't exist."
+        : "This negotiation isn't yours, or doesn't exist."
       : error === "TRANSPORT_ERROR"
         ? "The server couldn't be reached. Check your connection and try again."
         : "Something went wrong. Try again.";

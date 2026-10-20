@@ -1,12 +1,12 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
-import { compute, each, former, no, view, whether, where } from "@mit-sdg/sync-engine/language";
+import { compute, each, former, no, reaction, view, when, whether, where } from "@mit-sdg/sync-engine/language";
 import { computations, concepts } from "../concepts.ts";
 import { COUNTERPART } from "./counterpart.ts";
 import { textInput } from "./reusable/inputs.ts";
-import { ratingsOf, seatedAs } from "./table.ts";
+import { openSeats, ratingsOf, seatedAs } from "./table.ts";
 
 const { Briefing, Registering, Sessioning, Tabling } = concepts;
-const { spiceLevel } = computations;
+const { counterpartFor, spiceLevel } = computations;
 
 // Choosing
 
@@ -78,7 +78,7 @@ export const playable = view("(role) of (scenario) can be practiced", ({ scenari
 
 const StartPractice = endpoint(
   "/practice/start",
-  ({ session, scenario, role, user, table, other }) =>
+  ({ session, scenario, role, user, table }) =>
     receive({ session, scenario, role })
       .where(playable({ scenario, role }))
       .then(Sessioning.use({ session }).responds({ subject: user }))
@@ -86,16 +86,22 @@ const StartPractice = endpoint(
       // A reaction in the table composition adds a seat for each role; once it has, take the chosen one.
       .afterFlowSettles()
       .then(Tabling.seat({ table, negotiator: user, role }).responds({}))
-      .then(
-        where(
-          Tabling._seats({ table }).is({ role: other }),
-          no(Tabling._seats({ table }).is({ role: other, negotiator: user })),
-        ).then(Tabling.seat({ table, negotiator: COUNTERPART, role: other }).responds({})),
-      )
-      // Once both seats have joined the table's proposals, the table is ready.
+      // The counterpart takes one of the other seats, and `SeatMoreCounterparts` fills any left.
+      .then(Tabling.seat({ table, negotiator: COUNTERPART }).responds({}))
+      // Once every seat has joined the table's proposals, the table is ready.
       .afterFlowSettles()
       .then(respond({ table })),
   { validators: { input: textInput } },
+);
+
+/**
+ * When the counterpart takes a seat, another counterpart takes each seat still empty, as at a scenario with three
+ * roles. Tabling seats each player only once at a table, so each is its own player, named for the role it plays.
+ */
+const SeatMoreCounterparts = reaction(({ table, other, player }) =>
+  when(Tabling.seat({ table, negotiator: COUNTERPART }).responds({}))
+    .where(openSeats({ table }).is({ role: other }), compute(counterpartFor, { role: other }, player))
+    .then(Tabling.seat({ table, negotiator: player, role: other })),
 );
 
 const RefuseUnplayable = endpoint("/practice/start", ({ session, scenario, role }) =>
@@ -106,5 +112,5 @@ const RefuseUnplayable = endpoint("/practice/start", ({ session, scenario, role 
 
 export const composition = {
   choosing: { spiceOf, scenarios, tablesOf, ShowBakery },
-  starting: { playable, StartPractice, RefuseUnplayable },
+  starting: { playable, StartPractice, SeatMoreCounterparts, RefuseUnplayable },
 };

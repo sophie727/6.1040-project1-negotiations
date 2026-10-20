@@ -16,7 +16,11 @@ describe("the journey", () => {
     // In the bakery, she picks The Job Offer and the role of Hiro, and keeps the recommended 30 minutes.
     const bakery = ok(await api.bakery({ session }));
     expect(bakery.tables).toEqual([]);
-    expect(bakery.scenarios).toMatchObject([{ name: "The Job Offer", timeLimit: 30, roles: [{ name: "Manon" }, { name: "Hiro" }] }]);
+    // The Job Offer's whole pie adds 10% to what its roles get by walking away, so it's hot; The Launch Room's adds 31%.
+    expect(bakery.scenarios).toMatchObject([
+      { name: "The Job Offer", timeLimit: 30, spice: 3, roles: [{ name: "Manon" }, { name: "Hiro" }] },
+      { name: "The Launch Room", timeLimit: 45, spice: 2, roles: [{ name: "Mandy" }, { name: "Presley" }, { name: "Sally" }] },
+    ]);
     const jobOffer = bakery.scenarios[0]!;
     const hiro = jobOffer.roles.find(({ name }) => name === "Hiro")!.role;
     const { table } = ok(await api.practice.start({ session, scenario: jobOffer.scenario, role: hiro }));

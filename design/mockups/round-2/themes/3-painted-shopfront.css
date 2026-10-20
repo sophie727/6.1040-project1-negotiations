@@ -1,0 +1,160 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap");
+
+
+/* The storefront: a sign board (the navbar itself) with an awning along its bottom edge, and a valance hanging below. */
+html.t-painted-shopfront {
+  --topbar-height: 94px;
+  --awning: 30px;
+  --fascia: #fbf6e2;
+  --gild: linear-gradient(180deg, #fbe7a4 0%, #ecbd38 36%, #c38e0b 52%, #f0c544 76%, #d6a116 100%);
+  --teal: #507c68;
+  --lemon: #fdf8c3;
+  --mint: #dbe7c5;
+  --rust: #aa420e;
+  --ink: #1f3a2e;
+}
+html.t-painted-shopfront .topbar {
+  padding-bottom: var(--awning);
+  box-shadow: none;
+  transition: height 0.25s ease, padding 0.25s ease;
+}
+html.t-painted-shopfront .topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  pointer-events: none;
+}
+html.t-painted-shopfront .brand img {
+  display: none;
+}
+html.t-painted-shopfront .topbar .icon-button,
+html.t-painted-shopfront .topbar .icon-button:hover {
+  height: 32px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid rgba(80, 124, 104, 0.38);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-painted-shopfront .topbar.scrolled {
+  height: 58px;
+  padding-bottom: 0;
+}
+html.t-painted-shopfront .topbar.scrolled .icon-button {
+  color: var(--lemon);
+  border-color: rgba(253, 248, 195, 0.45);
+}
+html.t-painted-shopfront .content {
+  padding-top: 48px;
+}
+
+/*
+ * Painted shopfront, after a corner boulangerie: a teal cornice over a pale mint awning with the name lettered on it in
+ * lowercase serif, and scallops piped in teal. Scrolling folds it down to a slimmer awning.
+ */
+html.t-painted-shopfront {
+  --topbar-height: 98px;
+}
+html.t-painted-shopfront .topbar {
+  padding-top: 14px;
+  padding-bottom: 0;
+  color: var(--rust);
+  background:
+    linear-gradient(var(--fascia), var(--fascia)) 0 14px / 100% 2px no-repeat,
+    linear-gradient(180deg, #628d79, var(--teal)) top / 100% 14px no-repeat,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 40%, rgba(80, 124, 104, 0.12)),
+    var(--mint);
+}
+html.t-painted-shopfront .topbar::after {
+  height: 12px;
+  background: radial-gradient(circle at 15px 0, #cfddb9 14.5px, transparent 15.5px) 0 0 / 30px 12px repeat-x;
+  filter: drop-shadow(0 1.5px 0 rgba(80, 124, 104, 0.75)) drop-shadow(0 4px 3px rgba(31, 58, 46, 0.14));
+}
+html.t-painted-shopfront .brand {
+  color: var(--rust);
+  font-family: "Fraunces", serif;
+  font-size: 34px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 144;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+html.t-painted-shopfront .topbar .icon-button {
+  color: var(--teal);
+  border-color: rgba(80, 124, 104, 0.45);
+}
+html.t-painted-shopfront .topbar.scrolled {
+  height: 62px;
+  padding-top: 6px;
+  background:
+    linear-gradient(var(--fascia), var(--fascia)) 0 6px / 100% 2px no-repeat,
+    linear-gradient(180deg, #628d79, var(--teal)) top / 100% 6px no-repeat,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 40%, rgba(80, 124, 104, 0.12)),
+    var(--mint);
+}
+html.t-painted-shopfront .topbar.scrolled .brand {
+  font-size: 26px;
+}
+html.t-painted-shopfront .topbar.scrolled .icon-button {
+  color: var(--teal);
+  border-color: rgba(80, 124, 104, 0.45);
+}
+
+/* Arched windows for the scenarios, from Patisserie: a teal hairline, a gold inner rule, and a mint plate. */
+html.t-painted-shopfront .gallery {
+  grid-template-columns: repeat(auto-fit, 236px);
+  gap: 30px;
+}
+html.t-painted-shopfront .pastry-card {
+  min-height: 340px;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 30px 18px 28px;
+  border: 1px solid rgba(80, 124, 104, 0.42);
+  border-radius: 118px 118px 4px 4px;
+  outline: 1px solid rgba(248, 186, 18, 0.75);
+  outline-offset: -9px;
+  background: #fffdf6;
+}
+html.t-painted-shopfront .pastry-card:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 30px -22px rgba(31, 58, 46, 0.6);
+}
+html.t-painted-shopfront .pastry-card .pastry {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: #dbe7c5;
+  box-shadow: 0 0 0 6px #fffdf6, 0 0 0 7px rgba(248, 186, 18, 0.75);
+  font-size: 54px;
+}
+html.t-painted-shopfront .pastry-card .name {
+  font-size: 22px;
+}
+html.t-painted-shopfront .pastry-card > .muted {
+  color: #507c68;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+html.t-painted-shopfront .pastry-card.surprise {
+  border-style: solid;
+  color: #fdf8c3;
+  background: #507c68;
+  outline-color: rgba(253, 248, 195, 0.55);
+}
+html.t-painted-shopfront .pastry-card.surprise .pastry {
+  background: rgba(253, 248, 195, 0.16);
+  box-shadow: 0 0 0 6px #507c68, 0 0 0 7px rgba(253, 248, 195, 0.55);
+}
+html.t-painted-shopfront .pastry-card.surprise > .muted {
+  color: #dbe7c5;
+}

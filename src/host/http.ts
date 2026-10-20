@@ -1,5 +1,6 @@
 import { httpPolicy, type HttpPolicy } from "@mit-sdg/sync-engine-http/policy";
 import { accountsHttp } from "../compositions/reusable/accounts.ts";
+import { commonsHttp } from "../compositions/reusable/commons.ts";
 import { passwordsHttp } from "../compositions/reusable/passwords.ts";
 
 /**
@@ -39,14 +40,46 @@ const publicErrors = {
   NOT_PENDING_FOR_YOU: "CONFLICT",
   ALREADY_ACCEPTED: "CONFLICT",
   NOT_PENDING_FROM_YOU: "CONFLICT",
+  // Writing a scenario.
+  INVALID_SCENARIO_NAME: "INVALID_REQUEST",
+  NAME_TAKEN: "CONFLICT",
+  PUBLISHED: "CONFLICT",
+  ALREADY_PUBLISHED: "CONFLICT",
+  INCOMPLETE: "CONFLICT",
+  INVALID_KIND: "INVALID_REQUEST",
+  INVALID_ISSUE_NAME: "INVALID_REQUEST",
+  ISSUE_EXISTS: "CONFLICT",
+  UNIT_NOT_ALLOWED: "INVALID_REQUEST",
+  INVALID_OPTION_NAME: "INVALID_REQUEST",
+  OPTION_EXISTS: "CONFLICT",
+  VALUE_REQUIRED: "INVALID_REQUEST",
+  VALUE_NOT_ALLOWED: "INVALID_REQUEST",
+  VALUE_TAKEN: "CONFLICT",
+  INVALID_ROLE_NAME: "INVALID_REQUEST",
+  ROLE_EXISTS: "CONFLICT",
+  INVALID_BRIEF: "INVALID_REQUEST",
+  // A draft, or part of one, that another request removed a moment before.
+  UNKNOWN_SCENARIO: "NOT_FOUND",
+  UNKNOWN_ISSUE: "NOT_FOUND",
+  UNKNOWN_OPTION: "NOT_FOUND",
+  UNKNOWN_ROLE: "NOT_FOUND",
+  UNKNOWN_ROLE_OR_OPTION: "NOT_FOUND",
+  DIFFERENT_SCENARIOS: "NOT_FOUND",
 } as const;
 
-/** The HTTP settings: the API under /api, each refusal returned as an HTTP category, and the session in an HttpOnly cookie that signing up or in sets and signing out clears. */
+/**
+ * The HTTP settings: the API under /api, each refusal returned as an HTTP category, the session in an HttpOnly cookie
+ * that signing up or in, with a password or with Commons, sets and signing out clears, and a Commons sign-in attempt in
+ * a second cookie that only the browser that started it holds.
+ */
 export function wholePiePolicy(publicOrigin: string): HttpPolicy {
   return httpPolicy({
     publicOrigin,
     basePath: "/api",
-    publicErrors: { ...accountsHttp.publicErrors, ...passwordsHttp.publicErrors, ...publicErrors },
-    cookies: { session: accountsHttp.sessionCookie("wholepie-session", passwordsHttp.startingSessions) },
+    publicErrors: { ...accountsHttp.publicErrors, ...passwordsHttp.publicErrors, ...commonsHttp.publicErrors, ...publicErrors },
+    cookies: {
+      session: accountsHttp.sessionCookie("wholepie-session", [...passwordsHttp.startingSessions, ...commonsHttp.startingSessions]),
+      signIn: commonsHttp.signInCookie("wholepie-sign-in"),
+    },
   });
 }

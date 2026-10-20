@@ -65,6 +65,42 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
   - Refuses `UNKNOWN_ROLE`: There is no such role.
   - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_BRIEF`: A brief must have 1 to 20,000 characters.
+- `rename(scenario: Scenario, name: String) : returns ()`
+  - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+  - Refuses `INVALID_SCENARIO_NAME`: A scenario name must have 1 to 100 characters.
+  - Refuses `NAME_TAKEN`: A scenario with that name already exists.
+- `discard(scenario: Scenario) : returns ()`
+  - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+- `updateIssue(issue: Issue, name: String, kind: IssueKind, unit?: String) : returns ()`
+  - Refuses `UNKNOWN_ISSUE`: There is no such issue.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+  - Refuses `INVALID_ISSUE_NAME`: An issue name must have 1 to 100 characters.
+  - Refuses `ISSUE_EXISTS`: This scenario already has an issue with that name.
+  - Refuses `UNIT_NOT_ALLOWED`: Only a continuous issue has a unit.
+- `removeIssue(issue: Issue) : returns ()`
+  - Refuses `UNKNOWN_ISSUE`: There is no such issue.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+- `updateOption(option: Option, name: String, universalValue?: Number) : returns ()`
+  - Refuses `UNKNOWN_OPTION`: There is no such option.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+  - Refuses `INVALID_OPTION_NAME`: An option name must have 1 to 100 characters.
+  - Refuses `OPTION_EXISTS`: This issue already has an option with that name.
+  - Refuses `VALUE_REQUIRED`: An option of a continuous issue needs a universal value.
+  - Refuses `VALUE_NOT_ALLOWED`: An option of a discrete issue has no universal value.
+  - Refuses `VALUE_TAKEN`: This issue already has an option at that universal value.
+- `removeOption(option: Option) : returns ()`
+  - Refuses `UNKNOWN_OPTION`: There is no such option.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+- `updateRole(role: Role, name: String, batna: Number) : returns ()`
+  - Refuses `UNKNOWN_ROLE`: There is no such role.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
+  - Refuses `INVALID_ROLE_NAME`: A role name must have 1 to 100 characters.
+  - Refuses `ROLE_EXISTS`: This scenario already has a role with that name.
+- `removeRole(role: Role) : returns ()`
+  - Refuses `UNKNOWN_ROLE`: There is no such role.
+  - Refuses `PUBLISHED`: A published scenario can't be changed.
 - `publish(scenario: Scenario) : returns (scenario: Scenario)`
   - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
   - Refuses `ALREADY_PUBLISHED`: This scenario is already published.
@@ -74,6 +110,9 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
 
 - `_published() : many (scenario: Scenario, name: String)`
 - `_scenario(scenario: Scenario) : optional (name: String, author: Author, published: Flag)`
+- `_authoredBy(author: Author) : many (scenario: Scenario, name: String, published: Flag)`
+- `_issue(issue: Issue) : optional (scenario: Scenario, name: String, kind: IssueKind, unit?: String)`
+- `_option(option: Option) : optional (scenario: Scenario, issue: Issue, name: String, universalValue?: Number)`
 - `_issues(scenario: Scenario) : many (issue: Issue, name: String, kind: IssueKind, unit?: String)`
 - `_options(issue: Issue) : many (option: Option, name: String, universalValue?: Number)`
 - `_roles(scenario: Scenario) : many (role: Role, name: String)`
@@ -87,8 +126,8 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
 
 #### Instances
 
-- `Briefing` — instance of `Briefing` — [The Whole Pie types](../design/types.md), line 45.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 46.
+- `Briefing` — instance of `Briefing` — [The Whole Pie types](../design/types.md), line 48.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 49.
 
 ### Conversing
 
@@ -105,9 +144,33 @@ Defined in [Conversing](../design/concepts/Conversing.md), line 1.
 
 #### Instances
 
-- `Conversing` — instance of `Conversing` — [The Whole Pie types](../design/types.md), line 53.
-  - `Speaker` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 55.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 54.
+- `Conversing` — instance of `Conversing` — [The Whole Pie types](../design/types.md), line 56.
+  - `Speaker` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 58.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 57.
+
+### Federating
+
+Defined in [Federating](../design/concepts/Federating.md), line 1.
+
+#### Actions
+
+- `start() : returns (attempt: Attempt, expiresAt: DateTime, address: String)`
+- `finish(attempt: Attempt, nonce: String, code: String) : returns (username: String)`
+  - Refuses `SIGN_IN_EXPIRED`: This sign-in has expired. Start again.
+  - Refuses `SIGN_IN_REFUSED`: The other site didn't confirm this sign-in. Start again.
+- `link(attempt: Attempt, user: User) : returns (user: User)`
+  - Refuses `NOT_CONFIRMED`: This sign-in hasn't been confirmed.
+  - Refuses `ALREADY_LINKED`: This account on the other site is already linked.
+
+#### Queries
+
+- `_user(attempt: Attempt) : optional (user: User)`
+- `_linkable(attempt: Attempt) : one (linkable: Flag)`
+
+#### Instances
+
+- `CommonsFederating` — instance of `Federating` — [The Whole Pie types](../design/types.md), line 39.
+  - `User` is `Registering.User` — [The Whole Pie types](../design/types.md), line 40.
 
 ### Inviting
 
@@ -124,9 +187,9 @@ Defined in [Inviting](../design/concepts/Inviting.md), line 1.
 
 #### Instances
 
-- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 75.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 77.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 76.
+- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 78.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 80.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 79.
 
 ### Matchmaking
 
@@ -155,10 +218,10 @@ Defined in [Matchmaking](../design/concepts/Matchmaking.md), line 1.
 
 #### Instances
 
-- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 79.
-  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 82.
-  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 81.
-  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 80.
+- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 82.
+  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 85.
+  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 84.
+  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 83.
 
 ### Noting
 
@@ -175,18 +238,18 @@ Defined in [Noting](../design/concepts/Noting.md), line 1.
 
 #### Instances
 
-- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 67.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 68.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 69.
-- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 100.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 101.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 102.
-- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 92.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 93.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 94.
-- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 96.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 97.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 98.
+- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 70.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 71.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 72.
+- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 103.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 104.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 105.
+- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 95.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 96.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 97.
+- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 99.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 100.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 101.
 
 ### Preferring
 
@@ -203,8 +266,8 @@ Defined in [Preferring](../design/concepts/Preferring.md), line 1.
 
 #### Instances
 
-- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 104.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 105.
+- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 107.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 108.
 
 ### Proposing
 
@@ -237,14 +300,14 @@ Defined in [Proposing](../design/concepts/Proposing.md), line 1.
 
 #### Instances
 
-- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 57.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 59.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 58.
-  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 60.
-- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 62.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 64.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 63.
-  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 65.
+- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 60.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 62.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 61.
+  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 63.
+- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 65.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 67.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 66.
+  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 68.
 
 ### Rating
 
@@ -262,9 +325,9 @@ Defined in [Rating](../design/concepts/Rating.md), line 1.
 
 #### Instances
 
-- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 88.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 89.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 90.
+- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 91.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 92.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 93.
 
 ### Reasoning
 
@@ -306,9 +369,9 @@ Defined in [Reasoning](../design/concepts/Reasoning.md), line 1.
 
 #### Instances
 
-- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 71.
-  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 73.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 72.
+- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 74.
+  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 76.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 75.
 
 ### Registering
 
@@ -347,9 +410,9 @@ Defined in [Reviewing](../design/concepts/Reviewing.md), line 1.
 
 #### Instances
 
-- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 84.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 86.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 85.
+- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 87.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 89.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 88.
 
 ### Sessioning
 
@@ -365,10 +428,10 @@ Defined in [Sessioning](../design/concepts/Sessioning.md), line 1.
 
 #### Instances
 
-- `AgentSessioning` — instance of `Sessioning` — [The Whole Pie types](../design/types.md), line 42.
-  - `Subject` is `Agent` — [The Whole Pie types](../design/types.md), line 43.
-- `Sessioning` — instance of `Sessioning` — [The Whole Pie types](../design/types.md), line 39.
-  - `Subject` is `Registering.User` — [The Whole Pie types](../design/types.md), line 40.
+- `AgentSessioning` — instance of `Sessioning` — [The Whole Pie types](../design/types.md), line 45.
+  - `Subject` is `Agent` — [The Whole Pie types](../design/types.md), line 46.
+- `Sessioning` — instance of `Sessioning` — [The Whole Pie types](../design/types.md), line 42.
+  - `Subject` is `Registering.User` — [The Whole Pie types](../design/types.md), line 43.
 
 ### Tabling
 
@@ -421,10 +484,10 @@ Defined in [Tabling](../design/concepts/Tabling.md), line 1.
 
 #### Instances
 
-- `Tabling` — instance of `Tabling` — [The Whole Pie types](../design/types.md), line 48.
-  - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 51.
-  - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 50.
-  - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 49.
+- `Tabling` — instance of `Tabling` — [The Whole Pie types](../design/types.md), line 51.
+  - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 54.
+  - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 53.
+  - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 52.
 
 ## Application types
 
@@ -437,17 +500,29 @@ Concrete types:
 
 ## Computations
 
+- `counterpartFor(role: String) : String` — [Practice](../design/compositions/practice.md), line 33.
+- `isCounterpart(negotiator: String) : Boolean` — [The counterpart](../design/compositions/counterpart.md), line 16.
 - `spiceLevel(jointPoints?: Number, jointBatna: Number) : Number` — [Practice](../design/compositions/practice.md), line 24.
 
 ## Views
 
 _Views name reusable conditions. Multiple `where` blocks are alternatives._
 
+### (kind) is a kind of issue
+
+Authored path: `authoring.access.isIssueKind`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+
+```view
+(kind) is a kind of issue — inputs (kind); outputs (); bindings ()
+  where kind is among ["CONTINUOUS", "DISCRETE"]
+```
+
 ### (role) of (scenario) can be practiced
 
 Authored path: `practice.starting.playable`.
 - Covered by [Friends](../design/compositions/friends.md), line 7.
-- Covered by [Practice](../design/compositions/practice.md), line 32.
+- Covered by [Practice](../design/compositions/practice.md), line 37.
 
 ```view
 (role) of (scenario) can be practiced — inputs (scenario, role); outputs (); bindings ()
@@ -564,6 +639,77 @@ Authored path: `table.access.preparedFor`.
     PrioritiesNoting._note (author: user, subject: table) and not (body: "")
 ```
 
+### (user) wrote (scenario)
+
+Authored path: `authoring.access.wrote`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 7.
+
+```view
+(user) wrote (scenario) — inputs (user, scenario); outputs (); bindings ()
+  where Briefing._scenario (scenario) has (author: user)
+```
+
+### (user) wrote the scenario of (issue)
+
+Authored path: `authoring.access.wroteIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 7.
+
+```view
+(user) wrote the scenario of (issue) — inputs (user, issue); outputs (); bindings (scenario)
+  where
+    Briefing._issue (issue) has (scenario)
+    view "(user) wrote (scenario)" with (scenario, user)
+```
+
+### (user) wrote the scenario of (option)
+
+Authored path: `authoring.access.wroteOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 7.
+
+```view
+(user) wrote the scenario of (option) — inputs (user, option); outputs (); bindings (scenario)
+  where
+    Briefing._option (option) has (scenario)
+    view "(user) wrote (scenario)" with (scenario, user)
+```
+
+### (user) wrote the scenario of (role)
+
+Authored path: `authoring.access.wroteRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 7.
+
+```view
+(user) wrote the scenario of (role) — inputs (user, role); outputs (); bindings (scenario)
+  where
+    Briefing._role (role) has (scenario)
+    view "(user) wrote (scenario)" with (scenario, user)
+```
+
+### a role a counterpart plays at (table)
+
+Authored path: `counterpart.asking.counterpartRole`.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 9.
+
+```view
+a role a counterpart plays at (table) — inputs (table); outputs (role); bindings (negotiator) — answers any number of (role)
+  where
+    Tabling._seats (table) has (negotiator, role)
+    isCounterpart (negotiator)
+```
+
+### a counterpart at (table) has yet to answer (proposal)
+
+Authored path: `counterpart.asking.owesAnswer`.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 13.
+
+```view
+a counterpart at (table) has yet to answer (proposal) — inputs (table, proposal); outputs (); bindings (role)
+  where
+    view "a role a counterpart plays at (table)" with (table) has (role)
+    Proposing._proposal (proposal) and not (proposer: role)
+    no Proposing._acceptances (proposal) has (party: role)
+```
+
 ### a question that asks (ask) about (table) is waiting
 
 Authored path: `counterpart.asking.hasWaitingQuestion`.
@@ -629,16 +775,6 @@ the role that walked away from (table) — inputs (table); outputs (role); bindi
     Tabling._seats (table) has (negotiator, role)
 ```
 
-### the role the counterpart plays at (table)
-
-Authored path: `counterpart.asking.counterpartRole`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 9.
-
-```view
-the role the counterpart plays at (table) — inputs (table); outputs (role); bindings () — answers at most one (role)
-  where Tabling._seats (table) has (negotiator: "bot:counterpart", role)
-```
-
 ### the role the person plays at (table)
 
 Authored path: `debrief.coaching.personRole`.
@@ -648,7 +784,7 @@ Authored path: `debrief.coaching.personRole`.
 the role the person plays at (table) — inputs (table); outputs (role); bindings () — answers at most one (role)
   where
     Tabling._seats (table) has (role)
-    no view "the role the counterpart plays at (table)" with (table) has (role)
+    no view "a role a counterpart plays at (table)" with (table) has (role)
 ```
 
 ### the table of the debrief (prompt) that (agent) took
@@ -748,6 +884,35 @@ Former "the issues of (scenario)" — inputs (scenario); bindings (issue, name, 
       unit
 ```
 
+### (scenario) as its author writes it
+
+Authored path: `authoring.showing.draftOf`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+
+```former
+Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, timeLimit, role, roleName, batna, brief, option, points); promises exactly one record — forms:
+  a record of
+    where Briefing._scenario (scenario) has (name, published)
+    where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
+    issues: former "the issues of (scenario)" with (scenario)
+    name
+    published
+    roles: each Briefing._roles (scenario) has (name: roleName, role)
+      where Briefing._role (role) has (batna)
+      where whether Briefing._role (role) has (brief)
+      form a record of
+        batna
+        brief
+        name: roleName
+        payoffs: each Briefing._payoffs (role) has (option, points)
+          form a record of
+            option
+            points
+        role
+    scenario
+    timeLimit
+```
+
 ### the ratings of (user)
 
 Authored path: `table.showing.ratingsOf`.
@@ -774,7 +939,7 @@ Authored path: `table.showing.tableAsSeenBy`.
 - Covered by [The table](../design/compositions/table.md), line 23.
 
 ```former
-Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario, scenarioName, status, timeLimit, recommendedTimeLimit, deadline, roleName, batna, brief, seat, seatName, sitter, player, open, message, sender, body, sentAt, proposal, proposer, terms, proposalStatus, proposedAt, points, option, optionPoints); promises exactly one record — forms:
+Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario, scenarioName, status, timeLimit, recommendedTimeLimit, deadline, roleName, batna, brief, seat, seatName, sitter, player, open, message, sender, body, sentAt, proposal, proposer, terms, proposalStatus, proposedAt, points, accepter, option, optionPoints); promises exactly one record — forms:
   a record of
     where Tabling._table (table) has (scenario, status)
     where whether Tabling._table (table) has (timeLimit)
@@ -800,6 +965,7 @@ Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario,
     proposals: each Proposing._proposals (subject: table) has (proposal, proposedAt, proposer, status: proposalStatus, terms)
       where whether Briefing._dealPayoff (role, terms) has (points)
       form a record of
+        acceptedBy: the distinct accepter of each Proposing._acceptances (proposal) has (party: accepter)
         points
         proposal
         proposedAt
@@ -823,6 +989,18 @@ Former "(table) as (role) sees it" — inputs (table, role); bindings (scenario,
     status
     table
     timeLimit
+```
+
+### (table) as each counterpart there sees it
+
+Authored path: `counterpart.reading.tablesAsCounterpartsSeeIt`.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 26.
+
+```former
+Former "(table) as each counterpart there sees it" — inputs (table); bindings (role); promises exactly one record — forms:
+  each view "a role a counterpart plays at (table)" with (table) has (role)
+    form a record of
+      … former "(table) as (role) sees it" with (role, table)
 ```
 
 ### every side of (table), as each saw it
@@ -941,7 +1119,7 @@ Authored path: `table.showing.questionsOpenAt`.
 ```former
 Former "the open questions about (table)" — inputs (table); bindings (prompt, ask, stage); promises exactly one record — forms:
   the count of Reasoning._about (subject: table) has (ask, prompt, stage)
-    where ask is among ["What do you say next to the other side?", "Do you accept the proposal waiting for your answer?"]
+    where ask is among ["What do you say next to the other side?", "Does anyone else at the table add something?", "Do you accept the proposal waiting for your answer?"]
     where stage is among ["WAITING", "FORMING"]
 ```
 
@@ -1021,11 +1199,25 @@ Authored path: `table.showing.questionsAbout`.
 ```former
 Former "the questions about (table)" — inputs (table); bindings (prompt, ask, stage, reason); promises exactly one record — forms:
   each Reasoning._about (subject: table) has (ask, prompt, stage)
-    where ask is among ["What do you say next to the other side?", "Do you accept the proposal waiting for your answer?"]
+    where ask is among ["What do you say next to the other side?", "Does anyone else at the table add something?", "Do you accept the proposal waiting for your answer?"]
     where whether Reasoning._reason (prompt) has (reason)
     form a record of
       reason
       stage
+```
+
+### the scenarios (user) wrote
+
+Authored path: `authoring.showing.scenariosBy`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+
+```former
+Former "the scenarios (user) wrote" — inputs (user); bindings (scenario, name, published); promises exactly one record — forms:
+  each Briefing._authoredBy (author: user) has (name, published, scenario)
+    form a record of
+      name
+      published
+      scenario
 ```
 
 ### the suggestion to start (table)
@@ -1100,19 +1292,1084 @@ then
   RequestBoundary.respond (error: message, requestId)
 ```
 
+### authoring.drafting.Create
+
+Authored path: `authoring.drafting.Create`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 25.
+
+```reaction
+when RequestBoundary.request (name, path: "/scenarios/create", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.drafting.Create#2
+
+Authored path: `authoring.drafting.Create`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 25.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Create
+where
+  earlier, RequestBoundary.request (name, path: "/scenarios/create", requestId, session)
+then
+  Briefing.create (author: user, name)
+```
+
+### authoring.drafting.Create#3
+
+Authored path: `authoring.drafting.Create`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 25.
+
+```reaction
+when Briefing.create (author: user, name, scenario), asked by authoring.drafting.Create#2
+where
+  earlier, RequestBoundary.request (name, path: "/scenarios/create", requestId, session)
+then
+  RequestBoundary.respond (requestId, scenario)
+```
+
+### authoring.drafting.Discard
+
+Authored path: `authoring.drafting.Discard`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.drafting.Discard:author#2
+
+Authored path: `authoring.drafting.Discard`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Discard
+where
+  earlier, RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  Briefing.discard (scenario)
+```
+
+### authoring.drafting.Discard:author#3
+
+Authored path: `authoring.drafting.Discard`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+
+```reaction
+when Briefing.discard (scenario), asked by authoring.drafting.Discard:author#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.drafting.Discard:not-author#2
+
+Authored path: `authoring.drafting.Discard`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Discard
+where
+  earlier, RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.drafting.Publish
+
+Authored path: `authoring.drafting.Publish`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.drafting.Publish:author#2
+
+Authored path: `authoring.drafting.Publish`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Publish
+where
+  earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  Briefing.publish (scenario)
+```
+
+### authoring.drafting.Publish:author#3
+
+Authored path: `authoring.drafting.Publish`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+
+```reaction
+when Briefing.publish (scenario), asked by authoring.drafting.Publish:author#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId, scenario)
+```
+
+### authoring.drafting.Publish:not-author#2
+
+Authored path: `authoring.drafting.Publish`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Publish
+where
+  earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.drafting.RecommendTimeLimit
+
+Authored path: `authoring.drafting.RecommendTimeLimit`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+
+```reaction
+when RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.drafting.RecommendTimeLimit:draft#2
+
+Authored path: `authoring.drafting.RecommendTimeLimit`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.RecommendTimeLimit
+where
+  earlier, RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  Briefing._scenario (scenario) has (published: false)
+then
+  Tabling.recommendTimeLimit (scenario, timeLimit: minutes)
+```
+
+### authoring.drafting.RecommendTimeLimit:draft#3
+
+Authored path: `authoring.drafting.RecommendTimeLimit`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+
+```reaction
+when Tabling.recommendTimeLimit (scenario, timeLimit: minutes), asked by authoring.drafting.RecommendTimeLimit:draft#2
+where
+  earlier, RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.drafting.RecommendTimeLimit:not-author#2
+
+Authored path: `authoring.drafting.RecommendTimeLimit`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.RecommendTimeLimit
+where
+  earlier, RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.drafting.RecommendTimeLimit:published#2
+
+Authored path: `authoring.drafting.RecommendTimeLimit`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.RecommendTimeLimit
+where
+  earlier, RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  Briefing._scenario (scenario) has (published: true)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
+### authoring.drafting.Rename
+
+Authored path: `authoring.drafting.Rename`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+
+```reaction
+when RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.drafting.Rename:author#2
+
+Authored path: `authoring.drafting.Rename`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Rename
+where
+  earlier, RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  Briefing.rename (name, scenario)
+```
+
+### authoring.drafting.Rename:author#3
+
+Authored path: `authoring.drafting.Rename`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+
+```reaction
+when Briefing.rename (name, scenario), asked by authoring.drafting.Rename:author#2
+where
+  earlier, RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.drafting.Rename:not-author#2
+
+Authored path: `authoring.drafting.Rename`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Rename
+where
+  earlier, RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.issues.AddIssue
+
+Authored path: `authoring.issues.AddIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+
+```reaction
+when RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
+then
+  Sessioning.use (session)
+```
+
+### authoring.issues.AddIssue:author#2
+
+Authored path: `authoring.issues.AddIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
+where
+  earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
+  view "(user) wrote (scenario)" with (scenario, user)
+  view "(kind) is a kind of issue" with (kind)
+then
+  Briefing.addIssue (kind, name, scenario, unit)
+```
+
+### authoring.issues.AddIssue:author#3
+
+Authored path: `authoring.issues.AddIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+
+```reaction
+when Briefing.addIssue (kind, name, scenario, unit, issue), asked by authoring.issues.AddIssue:author#2
+where
+  earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
+then
+  RequestBoundary.respond (issue, requestId)
+```
+
+### authoring.issues.AddIssue:invalid-kind#2
+
+Authored path: `authoring.issues.AddIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
+where
+  earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "(kind) is a kind of issue" with (kind)
+then
+  RequestBoundary.respond (error: "INVALID_KIND", requestId)
+```
+
+### authoring.issues.AddIssue:not-author#2
+
+Authored path: `authoring.issues.AddIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
+where
+  earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.issues.AddOption
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+then
+  Sessioning.use (session)
+```
+
+### authoring.issues.AddOption:continuous#2
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
+where
+  earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  Briefing._issue (issue) has (kind: "CONTINUOUS")
+then
+  Briefing.addOption (issue, name, universalValue)
+```
+
+### authoring.issues.AddOption:continuous#3
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Briefing.addOption (issue, name, universalValue, option), asked by authoring.issues.AddOption:continuous#2
+where
+  earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+then
+  RequestBoundary.respond (option, requestId)
+```
+
+### authoring.issues.AddOption:discrete#2
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
+where
+  earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  Briefing._issue (issue) has (kind: "DISCRETE")
+then
+  Briefing.addOption (issue, name)
+```
+
+### authoring.issues.AddOption:discrete#3
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Briefing.addOption (issue, name, option), asked by authoring.issues.AddOption:discrete#2
+where
+  earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+then
+  RequestBoundary.respond (option, requestId)
+```
+
+### authoring.issues.AddOption:not-author#2
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
+where
+  earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+  no view "(user) wrote the scenario of (issue)" with (issue, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.issues.RemoveIssue
+
+Authored path: `authoring.issues.RemoveIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.issues.RemoveIssue:author#2
+
+Authored path: `authoring.issues.RemoveIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveIssue
+where
+  earlier, RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+then
+  Briefing.removeIssue (issue)
+```
+
+### authoring.issues.RemoveIssue:author#3
+
+Authored path: `authoring.issues.RemoveIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Briefing.removeIssue (issue), asked by authoring.issues.RemoveIssue:author#2
+where
+  earlier, RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.issues.RemoveIssue:not-author#2
+
+Authored path: `authoring.issues.RemoveIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveIssue
+where
+  earlier, RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
+  no view "(user) wrote the scenario of (issue)" with (issue, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.issues.RemoveOption
+
+Authored path: `authoring.issues.RemoveOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+
+```reaction
+when RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.issues.RemoveOption:author#2
+
+Authored path: `authoring.issues.RemoveOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveOption
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
+  view "(user) wrote the scenario of (option)" with (option, user)
+then
+  Briefing.removeOption (option)
+```
+
+### authoring.issues.RemoveOption:author#3
+
+Authored path: `authoring.issues.RemoveOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+
+```reaction
+when Briefing.removeOption (option), asked by authoring.issues.RemoveOption:author#2
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.issues.RemoveOption:not-author#2
+
+Authored path: `authoring.issues.RemoveOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveOption
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
+  no view "(user) wrote the scenario of (option)" with (option, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.issues.UpdateIssue
+
+Authored path: `authoring.issues.UpdateIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+
+```reaction
+when RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
+then
+  Sessioning.use (session)
+```
+
+### authoring.issues.UpdateIssue:author#2
+
+Authored path: `authoring.issues.UpdateIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
+where
+  earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  view "(kind) is a kind of issue" with (kind)
+then
+  Briefing.updateIssue (issue, kind, name, unit)
+```
+
+### authoring.issues.UpdateIssue:author#3
+
+Authored path: `authoring.issues.UpdateIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+
+```reaction
+when Briefing.updateIssue (issue, kind, name, unit), asked by authoring.issues.UpdateIssue:author#2
+where
+  earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.issues.UpdateIssue:invalid-kind#2
+
+Authored path: `authoring.issues.UpdateIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
+where
+  earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  no view "(kind) is a kind of issue" with (kind)
+then
+  RequestBoundary.respond (error: "INVALID_KIND", requestId)
+```
+
+### authoring.issues.UpdateIssue:not-author#2
+
+Authored path: `authoring.issues.UpdateIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
+where
+  earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
+  no view "(user) wrote the scenario of (issue)" with (issue, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.issues.UpdateOption
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+
+```reaction
+when RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+then
+  Sessioning.use (session)
+```
+
+### authoring.issues.UpdateOption:continuous#2
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
+where
+  earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+  view "(user) wrote the scenario of (option)" with (option, user)
+  Briefing._option (option) has (issue)
+  Briefing._issue (issue) has (kind: "CONTINUOUS")
+then
+  Briefing.updateOption (name, option, universalValue)
+```
+
+### authoring.issues.UpdateOption:continuous#3
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+
+```reaction
+when Briefing.updateOption (name, option, universalValue), asked by authoring.issues.UpdateOption:continuous#2
+where
+  earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.issues.UpdateOption:discrete#2
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
+where
+  earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+  view "(user) wrote the scenario of (option)" with (option, user)
+  Briefing._option (option) has (issue)
+  Briefing._issue (issue) has (kind: "DISCRETE")
+then
+  Briefing.updateOption (name, option)
+```
+
+### authoring.issues.UpdateOption:discrete#3
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+
+```reaction
+when Briefing.updateOption (name, option), asked by authoring.issues.UpdateOption:discrete#2
+where
+  earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.issues.UpdateOption:not-author#2
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
+where
+  earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+  no view "(user) wrote the scenario of (option)" with (option, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.roles.AddRole
+
+Authored path: `authoring.roles.AddRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+
+```reaction
+when RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.roles.AddRole:author#2
+
+Authored path: `authoring.roles.AddRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.AddRole
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  Briefing.addRole (batna, name, scenario)
+```
+
+### authoring.roles.AddRole:author#3
+
+Authored path: `authoring.roles.AddRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+
+```reaction
+when Briefing.addRole (batna, name, scenario, role), asked by authoring.roles.AddRole:author#2
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId, role)
+```
+
+### authoring.roles.AddRole:not-author#2
+
+Authored path: `authoring.roles.AddRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.AddRole
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.roles.RemoveRole
+
+Authored path: `authoring.roles.RemoveRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.roles.RemoveRole:author#2
+
+Authored path: `authoring.roles.RemoveRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.RemoveRole
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+then
+  Briefing.removeRole (role)
+```
+
+### authoring.roles.RemoveRole:author#3
+
+Authored path: `authoring.roles.RemoveRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+
+```reaction
+when Briefing.removeRole (role), asked by authoring.roles.RemoveRole:author#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.roles.RemoveRole:not-author#2
+
+Authored path: `authoring.roles.RemoveRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.RemoveRole
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
+  no view "(user) wrote the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.roles.SetPayoff
+
+Authored path: `authoring.roles.SetPayoff`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.roles.SetPayoff:author#2
+
+Authored path: `authoring.roles.SetPayoff`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+then
+  Briefing.setPayoff (option, points, role)
+```
+
+### authoring.roles.SetPayoff:author#3
+
+Authored path: `authoring.roles.SetPayoff`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when Briefing.setPayoff (option, points, role), asked by authoring.roles.SetPayoff:author#2
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.roles.SetPayoff:not-author#2
+
+Authored path: `authoring.roles.SetPayoff`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
+  no view "(user) wrote the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.roles.UpdateRole
+
+Authored path: `authoring.roles.UpdateRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+
+```reaction
+when RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.roles.UpdateRole:author#2
+
+Authored path: `authoring.roles.UpdateRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.UpdateRole
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+then
+  Briefing.updateRole (batna, name, role)
+```
+
+### authoring.roles.UpdateRole:author#3
+
+Authored path: `authoring.roles.UpdateRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+
+```reaction
+when Briefing.updateRole (batna, name, role), asked by authoring.roles.UpdateRole:author#2
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.roles.UpdateRole:not-author#2
+
+Authored path: `authoring.roles.UpdateRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.UpdateRole
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
+  no view "(user) wrote the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.roles.WriteBrief
+
+Authored path: `authoring.roles.WriteBrief`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+
+```reaction
+when RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.roles.WriteBrief:author#2
+
+Authored path: `authoring.roles.WriteBrief`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.WriteBrief
+where
+  earlier, RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+then
+  Briefing.setBrief (brief, role)
+```
+
+### authoring.roles.WriteBrief:author#3
+
+Authored path: `authoring.roles.WriteBrief`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+
+```reaction
+when Briefing.setBrief (brief, role), asked by authoring.roles.WriteBrief:author#2
+where
+  earlier, RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.roles.WriteBrief:not-author#2
+
+Authored path: `authoring.roles.WriteBrief`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.WriteBrief
+where
+  earlier, RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
+  no view "(user) wrote the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.showing.ShowDraft
+
+Authored path: `authoring.showing.ShowDraft`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 15.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/show", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.showing.ShowDraft:author#2
+
+Authored path: `authoring.showing.ShowDraft`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 15.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.showing.ShowDraft
+where
+  earlier, RequestBoundary.request (path: "/scenarios/show", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (draft: former "(scenario) as its author writes it" with (scenario), requestId)
+```
+
+### authoring.showing.ShowDraft:not-author#2
+
+Authored path: `authoring.showing.ShowDraft`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 15.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.showing.ShowDraft
+where
+  earlier, RequestBoundary.request (path: "/scenarios/show", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.showing.ShowMine
+
+Authored path: `authoring.showing.ShowMine`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 14.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/mine", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.showing.ShowMine#2
+
+Authored path: `authoring.showing.ShowMine`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 14.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.showing.ShowMine
+where
+  earlier, RequestBoundary.request (path: "/scenarios/mine", requestId, session)
+then
+  RequestBoundary.respond (requestId, scenarios: former "the scenarios (user) wrote" with (user))
+```
+
 ### counterpart.answering.AcceptForCounterpart
 
 Authored path: `counterpart.answering.AcceptForCounterpart`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 38.
 
 ```reaction
 when Reasoning.conclude (prompt, ask: "Do you accept the proposal waiting for your answer?", subject: table)
 where
   instant is the current flow's instant
-  Reasoning._lines (prompt) has (line: "ACCEPT", position: 0)
-  Reasoning._lines (prompt) has (line: proposal, position: 1)
+  Reasoning._lines (prompt) has (line: role, position: 0)
+  Reasoning._lines (prompt) has (line: "ACCEPT", position: 1)
+  Reasoning._lines (prompt) has (line: proposal, position: 2)
+  view "a role a counterpart plays at (table)" with (table) has (role)
   Proposing._proposal (proposal) has (status: "PENDING", subject: table, terms)
-  view "the role the counterpart plays at (table)" with (table) has (role)
+  no Proposing._acceptances (proposal) has (party: role)
   Briefing._dealPayoff (role, terms) has (points)
   Briefing._role (role) has (batna)
   points is at least batna
@@ -1124,17 +2381,18 @@ then
 ### counterpart.answering.RejectForCounterpart:below-batna
 
 Authored path: `counterpart.answering.RejectForCounterpart`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 38.
 
 ```reaction
 when Reasoning.conclude (prompt, ask: "Do you accept the proposal waiting for your answer?", subject: table)
 where
   instant is the current flow's instant
-  Reasoning._lines (prompt) has (line: proposal, position: 1)
+  Reasoning._lines (prompt) has (line: role, position: 0)
+  Reasoning._lines (prompt) has (line: proposal, position: 2)
+  view "a role a counterpart plays at (table)" with (table) has (role)
   Proposing._proposal (proposal) has (status: "PENDING", subject: table)
-  view "the role the counterpart plays at (table)" with (table) has (role)
   view "(table) is under way at (instant)" with (instant, table)
-  Reasoning._lines (prompt) has (line: "ACCEPT", position: 0)
+  Reasoning._lines (prompt) has (line: "ACCEPT", position: 1)
   Proposing._proposal (proposal) has (terms)
   Briefing._dealPayoff (role, terms) has (points)
   Briefing._role (role) has (batna)
@@ -1146,17 +2404,18 @@ then
 ### counterpart.answering.RejectForCounterpart:decided
 
 Authored path: `counterpart.answering.RejectForCounterpart`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 38.
 
 ```reaction
 when Reasoning.conclude (prompt, ask: "Do you accept the proposal waiting for your answer?", subject: table)
 where
   instant is the current flow's instant
-  Reasoning._lines (prompt) has (line: proposal, position: 1)
+  Reasoning._lines (prompt) has (line: role, position: 0)
+  Reasoning._lines (prompt) has (line: proposal, position: 2)
+  view "a role a counterpart plays at (table)" with (table) has (role)
   Proposing._proposal (proposal) has (status: "PENDING", subject: table)
-  view "the role the counterpart plays at (table)" with (table) has (role)
   view "(table) is under way at (instant)" with (instant, table)
-  Reasoning._lines (prompt) has (line: "REJECT", position: 0)
+  Reasoning._lines (prompt) has (line: "REJECT", position: 1)
 then
   Proposing.reject (party: role, proposal)
 ```
@@ -1164,15 +2423,16 @@ then
 ### counterpart.answering.SayWhy
 
 Authored path: `counterpart.answering.SayWhy`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 38.
 
 ```reaction
 when Reasoning.conclude (prompt, ask: "Do you accept the proposal waiting for your answer?", subject: table)
 where
   instant is the current flow's instant
+  Reasoning._lines (prompt) has (line: role, position: 0)
+  view "a role a counterpart plays at (table)" with (table) has (role)
   Reasoning._lines (prompt) has (line: remark, position)
-  position is at least 2
-  view "the role the counterpart plays at (table)" with (table) has (role)
+  position is at least 3
   view "(table) is under way at (instant)" with (instant, table)
 then
   Conversing.send (body: remark, now: instant, sender: role, subject: table)
@@ -1181,14 +2441,17 @@ then
 ### counterpart.answering.SendReply
 
 Authored path: `counterpart.answering.SendReply`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 25.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 34.
 
 ```reaction
-when Reasoning.conclude (prompt, ask: "What do you say next to the other side?", subject: table)
+when Reasoning.conclude (prompt, ask, subject: table)
 where
+  ask is among ["What do you say next to the other side?", "Does anyone else at the table add something?"]
   instant is the current flow's instant
-  Reasoning._lines (prompt) has (line: part)
-  view "the role the counterpart plays at (table)" with (table) has (role)
+  Reasoning._lines (prompt) has (line: role, position: 0)
+  view "a role a counterpart plays at (table)" with (table) has (role)
+  Reasoning._lines (prompt) has (line: part, position)
+  position is at least 1
   view "(table) is under way at (instant)" with (instant, table)
 then
   Conversing.send (body: part, now: instant, sender: role, subject: table)
@@ -1202,8 +2465,42 @@ Authored path: `counterpart.asking.AskForDecision`.
 ```reaction
 when Proposing.propose (proposer, subject: table)
 where
-  view "the role the counterpart plays at (table)" with (table)
-  no view "the role the counterpart plays at (table)" with (table) has (role: proposer)
+  view "a role a counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table) has (role: proposer)
+  no view "a question that asks (ask) about (table) is waiting" with (ask: "Do you accept the proposal waiting for your answer?", table)
+then
+  Reasoning.prompt (ask: "Do you accept the proposal waiting for your answer?", subject: table)
+```
+
+### counterpart.asking.AskForFollowUp
+
+Authored path: `counterpart.asking.AskForFollowUp`.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 11.
+
+```reaction
+when Reasoning.conclude (prompt, ask, subject: table)
+at the flow's settlement frontier
+where
+  ask is among ["What do you say next to the other side?", "Does anyone else at the table add something?"]
+  Reasoning._lines (prompt) has (line: role, position: 0)
+  view "a role a counterpart plays at (table)" with (table) has (role)
+  view "a role a counterpart plays at (table)" with (table) and not (role)
+  no view "a question that asks (ask) about (table) is waiting" with (ask: "Does anyone else at the table add something?", table)
+then
+  Reasoning.prompt (ask: "Does anyone else at the table add something?", subject: table)
+```
+
+### counterpart.asking.AskForNextDecision
+
+Authored path: `counterpart.asking.AskForNextDecision`.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 13.
+
+```reaction
+when Proposing.accept (party, proposal, status: "PENDING", subject: table)
+at the flow's settlement frontier
+where
+  view "a role a counterpart plays at (table)" with (table) has (role: party)
+  view "a counterpart at (table) has yet to answer (proposal)" with (proposal, table)
   no view "a question that asks (ask) about (table) is waiting" with (ask: "Do you accept the proposal waiting for your answer?", table)
 then
   Reasoning.prompt (ask: "Do you accept the proposal waiting for your answer?", subject: table)
@@ -1217,8 +2514,8 @@ Authored path: `counterpart.asking.AskForReply`.
 ```reaction
 when Conversing.send (sender, subject: table)
 where
-  view "the role the counterpart plays at (table)" with (table)
-  no view "the role the counterpart plays at (table)" with (table) has (role: sender)
+  view "a role a counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table) has (role: sender)
   no view "a question that asks (ask) about (table) is waiting" with (ask: "What do you say next to the other side?", table)
 then
   Reasoning.prompt (ask: "What do you say next to the other side?", subject: table)
@@ -1227,8 +2524,8 @@ then
 ### counterpart.reading.ReadTable
 
 Authored path: `counterpart.reading.ReadTable`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 17.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 20.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 26.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
 
 ```reaction
 when RequestBoundary.request (path: "/counterpart/table", prompt, requestId, session)
@@ -1239,14 +2536,14 @@ then
 ### counterpart.reading.ReadTable:not-seated#2
 
 Authored path: `counterpart.reading.ReadTable`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 17.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 20.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 26.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
 
 ```reaction
 when AgentSessioning.use (session, subject: agent), asked by counterpart.reading.ReadTable
 where
   Reasoning._taken (reasoner: agent) has (prompt, subject: table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   earlier, RequestBoundary.request (path: "/counterpart/table", prompt, requestId, session)
 then
   RequestBoundary.respond (error: "NOT_SEATED", requestId)
@@ -1255,8 +2552,8 @@ then
 ### counterpart.reading.ReadTable:not-taken#2
 
 Authored path: `counterpart.reading.ReadTable`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 17.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 20.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 26.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
 
 ```reaction
 when AgentSessioning.use (session, subject: agent), asked by counterpart.reading.ReadTable
@@ -1270,29 +2567,29 @@ then
 ### counterpart.reading.ReadTable:seated#2
 
 Authored path: `counterpart.reading.ReadTable`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 17.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 20.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 26.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 29.
 
 ```reaction
 when AgentSessioning.use (session, subject: agent), asked by counterpart.reading.ReadTable
 where
   Reasoning._taken (reasoner: agent) has (prompt, subject: table)
-  view "the role the counterpart plays at (table)" with (table) has (role)
+  view "a role a counterpart plays at (table)" with (table)
   earlier, RequestBoundary.request (path: "/counterpart/table", prompt, requestId, session)
 then
-  RequestBoundary.respond (requestId, table: former "(table) as (role) sees it" with (role, table))
+  RequestBoundary.respond (requestId, tables: former "(table) as each counterpart there sees it" with (table))
 ```
 
 ### counterpart.starting.AgreeToAnyStart
 
 Authored path: `counterpart.starting.AgreeToAnyStart`.
-- Covered by [The counterpart](../design/compositions/counterpart.md), line 13.
+- Covered by [The counterpart](../design/compositions/counterpart.md), line 22.
 
 ```reaction
 when TimeLimitProposing.propose (proposer, subject: table, proposal)
 where
-  view "the role the counterpart plays at (table)" with (table) has (role)
-  no view "the role the counterpart plays at (table)" with (table) has (role: proposer)
+  view "a role a counterpart plays at (table)" with (table) has (role)
+  no view "a role a counterpart plays at (table)" with (table) has (role: proposer)
 then
   TimeLimitProposing.accept (party: role, proposal)
 ```
@@ -1306,7 +2603,7 @@ Authored path: `debrief.coaching.CoachWhenEnded.Expired`.
 when Tabling.expire (table)
 where
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
 then
   Reasoning.prompt (ask: "How did each side negotiate, and what could each do better next time?", subject: table)
 ```
@@ -1320,7 +2617,7 @@ Authored path: `debrief.coaching.CoachWhenEnded.Expired`.
 when Tabling.expire (table)
 where
   view "when the time is up at (table), once it began" with (table)
-  view "the role the counterpart plays at (table)" with (table)
+  view "a role a counterpart plays at (table)" with (table)
 then
   Reasoning.prompt (ask: "How did the person negotiate, and what could they do better next time?", subject: table)
 ```
@@ -1334,7 +2631,7 @@ Authored path: `debrief.coaching.CoachWhenEnded.Settled`.
 when Tabling.settle (table)
 where
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
 then
   Reasoning.prompt (ask: "How did each side negotiate, and what could each do better next time?", subject: table)
 ```
@@ -1348,7 +2645,7 @@ Authored path: `debrief.coaching.CoachWhenEnded.Settled`.
 when Tabling.settle (table)
 where
   view "when the time is up at (table), once it began" with (table)
-  view "the role the counterpart plays at (table)" with (table)
+  view "a role a counterpart plays at (table)" with (table)
 then
   Reasoning.prompt (ask: "How did the person negotiate, and what could they do better next time?", subject: table)
 ```
@@ -1362,7 +2659,7 @@ Authored path: `debrief.coaching.CoachWhenEnded.Withdrawn`.
 when Tabling.withdraw (table)
 where
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
 then
   Reasoning.prompt (ask: "How did each side negotiate, and what could each do better next time?", subject: table)
 ```
@@ -1376,7 +2673,7 @@ Authored path: `debrief.coaching.CoachWhenEnded.Withdrawn`.
 when Tabling.withdraw (table)
 where
   view "when the time is up at (table), once it began" with (table)
-  view "the role the counterpart plays at (table)" with (table)
+  view "a role a counterpart plays at (table)" with (table)
 then
   Reasoning.prompt (ask: "How did the person negotiate, and what could they do better next time?", subject: table)
 ```
@@ -2041,8 +3338,8 @@ then
 ### practice.starting.RefuseUnplayable
 
 Authored path: `practice.starting.RefuseUnplayable`.
-- Covered by [Practice](../design/compositions/practice.md), line 32.
-- Covered by [Practice](../design/compositions/practice.md), line 36.
+- Covered by [Practice](../design/compositions/practice.md), line 37.
+- Covered by [Practice](../design/compositions/practice.md), line 41.
 
 ```reaction
 when RequestBoundary.request (path: "/practice/start", requestId, role, scenario, session)
@@ -2052,11 +3349,25 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### practice.starting.SeatMoreCounterparts
+
+Authored path: `practice.starting.SeatMoreCounterparts`.
+- Covered by [Practice](../design/compositions/practice.md), line 30.
+
+```reaction
+when Tabling.seat (negotiator: "bot:counterpart", table)
+where
+  view "the empty seats at (table)" with (table) has (role: other)
+  player is counterpartFor (role: other)
+then
+  Tabling.seat (negotiator: player, role: other, table)
+```
+
 ### practice.starting.StartPractice
 
 Authored path: `practice.starting.StartPractice`.
 - Covered by [Practice](../design/compositions/practice.md), line 30.
-- Covered by [Practice](../design/compositions/practice.md), line 35.
+- Covered by [Practice](../design/compositions/practice.md), line 40.
 
 ```reaction
 when RequestBoundary.request (path: "/practice/start", requestId, role, scenario, session)
@@ -2070,7 +3381,7 @@ then
 
 Authored path: `practice.starting.StartPractice`.
 - Covered by [Practice](../design/compositions/practice.md), line 30.
-- Covered by [Practice](../design/compositions/practice.md), line 35.
+- Covered by [Practice](../design/compositions/practice.md), line 40.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by practice.starting.StartPractice
@@ -2084,7 +3395,7 @@ then
 
 Authored path: `practice.starting.StartPractice`.
 - Covered by [Practice](../design/compositions/practice.md), line 30.
-- Covered by [Practice](../design/compositions/practice.md), line 35.
+- Covered by [Practice](../design/compositions/practice.md), line 40.
 
 ```reaction
 when Tabling.open (scenario, table), asked by practice.starting.StartPractice#2
@@ -2100,25 +3411,22 @@ then
 
 Authored path: `practice.starting.StartPractice`.
 - Covered by [Practice](../design/compositions/practice.md), line 30.
-- Covered by [Practice](../design/compositions/practice.md), line 35.
+- Covered by [Practice](../design/compositions/practice.md), line 40.
 
 ```reaction
 when Tabling.seat (negotiator: user, role, table), asked by practice.starting.StartPractice#3
-where
-  Tabling._seats (table) has (role: other)
-  no Tabling._seats (table) has (negotiator: user, role: other)
 then
-  Tabling.seat (negotiator: "bot:counterpart", role: other, table)
+  Tabling.seat (negotiator: "bot:counterpart", table)
 ```
 
 ### practice.starting.StartPractice#5
 
 Authored path: `practice.starting.StartPractice`.
 - Covered by [Practice](../design/compositions/practice.md), line 30.
-- Covered by [Practice](../design/compositions/practice.md), line 35.
+- Covered by [Practice](../design/compositions/practice.md), line 40.
 
 ```reaction
-when Tabling.seat (negotiator: "bot:counterpart", role: other, table), asked by practice.starting.StartPractice#4
+when Tabling.seat (negotiator: "bot:counterpart", table), asked by practice.starting.StartPractice#4
 at the flow's settlement frontier
 where
   earlier, RequestBoundary.request (path: "/practice/start", requestId, role, scenario, session)
@@ -2834,7 +4142,7 @@ when Tabling.expire (table)
 where
   instant is the current flow's instant
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   Tabling._table (table) has (scenario)
   Tabling._seats (table) has (negotiator: person, role)
   Briefing._role (role) has (batna)
@@ -2857,7 +4165,7 @@ when Tabling.expire (table)
 where
   instant is the current flow's instant
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   Tabling._table (table) has (scenario)
   Tabling._seats (table) has (negotiator: person, role)
   Briefing._role (role) has (batna)
@@ -2878,7 +4186,7 @@ when Tabling.settle (table)
 where
   instant is the current flow's instant
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   Tabling._table (table) has (scenario)
   Tabling._seats (table) has (negotiator: person, role)
   Briefing._role (role) has (batna)
@@ -2901,7 +4209,7 @@ when Tabling.settle (table)
 where
   instant is the current flow's instant
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   Tabling._table (table) has (scenario)
   Tabling._seats (table) has (negotiator: person, role)
   Briefing._role (role) has (batna)
@@ -2922,7 +4230,7 @@ when Tabling.withdraw (table)
 where
   instant is the current flow's instant
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   Tabling._table (table) has (scenario)
   Tabling._seats (table) has (negotiator: person, role)
   Briefing._role (role) has (batna)
@@ -2945,7 +4253,7 @@ when Tabling.withdraw (table)
 where
   instant is the current flow's instant
   view "when the time is up at (table), once it began" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   Tabling._table (table) has (scenario)
   Tabling._seats (table) has (negotiator: person, role)
   Briefing._role (role) has (batna)
@@ -2980,7 +4288,7 @@ where
   earlier, RequestBoundary.request (path: "/tables/review", requestId, role, session, stars, table)
   view "the role (user) plays at (table)" with (table, user)
   view "(table) has ended" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   view "who sits in the seat for (role) at (table)" with (role, table) has (negotiator: reviewee)
 then
   Reviewing.review (reviewee, reviewer: user, stars, subject: table)
@@ -3012,7 +4320,7 @@ where
   earlier, RequestBoundary.request (path: "/tables/review", requestId, role, session, stars, table)
   view "the role (user) plays at (table)" with (table, user)
   view "(table) has ended" with (table)
-  no view "the role the counterpart plays at (table)" with (table)
+  no view "a role a counterpart plays at (table)" with (table)
   no view "who sits in the seat for (role) at (table)" with (role, table)
 then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
@@ -3061,7 +4369,7 @@ where
   earlier, RequestBoundary.request (path: "/tables/review", requestId, role, session, stars, table)
   view "the role (user) plays at (table)" with (table, user)
   view "(table) has ended" with (table)
-  view "the role the counterpart plays at (table)" with (table)
+  view "a role a counterpart plays at (table)" with (table)
 then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
@@ -3319,6 +4627,194 @@ where
   earlier, RequestBoundary.request (path: "/answers/take", prompt, requestId, session)
 then
   RequestBoundary.respond (prompt, requestId)
+```
+
+### reusable.commons.finishing.ChooseUsername:expired
+
+Authored path: `reusable.commons.finishing.ChooseUsername`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 22.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 26.
+
+```reaction
+when RequestBoundary.request (attempt, path: "/auth/commons/choose", requestId, username)
+where
+  CommonsFederating._linkable (attempt) has (linkable: false)
+then
+  RequestBoundary.respond (error: "SIGN_IN_EXPIRED", requestId)
+```
+
+### reusable.commons.finishing.ChooseUsername:linkable
+
+Authored path: `reusable.commons.finishing.ChooseUsername`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 22.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 26.
+
+```reaction
+when RequestBoundary.request (attempt, path: "/auth/commons/choose", requestId, username)
+where
+  CommonsFederating._linkable (attempt) has (linkable: true)
+then
+  Registering.register (username)
+```
+
+### reusable.commons.finishing.ChooseUsername:linkable#2
+
+Authored path: `reusable.commons.finishing.ChooseUsername`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 22.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 26.
+
+```reaction
+when Registering.register (username, user), asked by reusable.commons.finishing.ChooseUsername:linkable
+where
+  earlier, RequestBoundary.request (attempt, path: "/auth/commons/choose", requestId, username)
+then
+  CommonsFederating.link (attempt, user)
+```
+
+### reusable.commons.finishing.ChooseUsername:linkable#3
+
+Authored path: `reusable.commons.finishing.ChooseUsername`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 22.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 26.
+
+```reaction
+when CommonsFederating.link (attempt, user), asked by reusable.commons.finishing.ChooseUsername:linkable#2
+then
+  Sessioning.start (subject: user)
+```
+
+### reusable.commons.finishing.ChooseUsername:linkable#4
+
+Authored path: `reusable.commons.finishing.ChooseUsername`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 22.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 26.
+
+```reaction
+when Sessioning.start (subject: user, expiresAt, session), asked by reusable.commons.finishing.ChooseUsername:linkable#3
+where
+  earlier, RequestBoundary.request (attempt, path: "/auth/commons/choose", requestId, username)
+then
+  RequestBoundary.respond (expiresAt, requestId, session, user)
+```
+
+### reusable.commons.finishing.FinishCommons
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when RequestBoundary.request (attempt, code, path: "/auth/commons/finish", requestId, state)
+then
+  CommonsFederating.finish (attempt, code, nonce: state)
+```
+
+### reusable.commons.finishing.FinishCommons:new#2
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when CommonsFederating.finish (attempt, code, nonce: state, username), asked by reusable.commons.finishing.FinishCommons
+where
+  no CommonsFederating._user (attempt)
+then
+  Registering.register (username)
+```
+
+### reusable.commons.finishing.FinishCommons:new#3
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when Registering.register (username, user), asked by reusable.commons.finishing.FinishCommons:new#2
+where
+  earlier, CommonsFederating.finish (attempt, code, nonce: state, username), asked by reusable.commons.finishing.FinishCommons
+then
+  CommonsFederating.link (attempt, user)
+```
+
+### reusable.commons.finishing.FinishCommons:new#4
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when CommonsFederating.link (attempt, user), asked by reusable.commons.finishing.FinishCommons:new#3
+then
+  Sessioning.start (subject: user)
+```
+
+### reusable.commons.finishing.FinishCommons:new#5
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when Sessioning.start (subject: user, expiresAt, session), asked by reusable.commons.finishing.FinishCommons:new#4
+where
+  earlier, RequestBoundary.request (attempt, code, path: "/auth/commons/finish", requestId, state)
+then
+  RequestBoundary.respond (expiresAt, requestId, session, user)
+```
+
+### reusable.commons.finishing.FinishCommons:returning#2
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when CommonsFederating.finish (attempt, code, nonce: state, username), asked by reusable.commons.finishing.FinishCommons
+where
+  CommonsFederating._user (attempt) has (user)
+then
+  Sessioning.start (subject: user)
+```
+
+### reusable.commons.finishing.FinishCommons:returning#3
+
+Authored path: `reusable.commons.finishing.FinishCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 15.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 25.
+
+```reaction
+when Sessioning.start (subject: user, expiresAt, session), asked by reusable.commons.finishing.FinishCommons:returning#2
+where
+  earlier, RequestBoundary.request (attempt, code, path: "/auth/commons/finish", requestId, state)
+then
+  RequestBoundary.respond (expiresAt, requestId, session, user)
+```
+
+### reusable.commons.starting.StartCommons
+
+Authored path: `reusable.commons.starting.StartCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 7.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 10.
+
+```reaction
+when RequestBoundary.request (path: "/auth/commons/start", requestId)
+then
+  CommonsFederating.start ()
+```
+
+### reusable.commons.starting.StartCommons#2
+
+Authored path: `reusable.commons.starting.StartCommons`.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 7.
+- Covered by [Signing in with Commons](../design/compositions/reusable/commons.md), line 10.
+
+```reaction
+when CommonsFederating.start (address, attempt, expiresAt), asked by reusable.commons.starting.StartCommons
+where
+  earlier, RequestBoundary.request (path: "/auth/commons/start", requestId)
+then
+  RequestBoundary.respond (address, attempt, expiresAt, requestId)
 ```
 
 ### reusable.passwords.entering.Register:accepted
@@ -4190,6 +5686,8 @@ not listed here have no explicit input contract.
 - `/answers/extend` — requires `prompt`, `session`, `text`
 - `/answers/open` — requires `session`
 - `/answers/take` — requires `prompt`, `session`
+- `/auth/commons/choose` — requires `attempt`, `username`
+- `/auth/commons/finish` — requires `attempt`, `code`, `state`
 - `/auth/login` — requires `password`, `username`
 - `/auth/logout` — requires `session`
 - `/auth/me` — requires `session`
@@ -4204,6 +5702,24 @@ not listed here have no explicit input contract.
 - `/matchmaking/stop` — requires `request`, `session`
 - `/matchmaking/wait` — requires `request`, `session`
 - `/practice/start` — requires `role`, `scenario`, `session`
+- `/scenarios/create` — requires `name`, `session`
+- `/scenarios/discard` — requires `scenario`, `session`
+- `/scenarios/issues/add` — requires `kind`, `name`, `scenario`, `session`, `unit`
+- `/scenarios/issues/remove` — requires `issue`, `session`
+- `/scenarios/issues/update` — requires `issue`, `kind`, `name`, `session`, `unit`
+- `/scenarios/limit` — requires `minutes`, `scenario`, `session`
+- `/scenarios/mine` — requires `session`
+- `/scenarios/options/add` — requires `issue`, `name`, `session`, `universalValue`
+- `/scenarios/options/remove` — requires `option`, `session`
+- `/scenarios/options/update` — requires `name`, `option`, `session`, `universalValue`
+- `/scenarios/payoffs/set` — requires `option`, `points`, `role`, `session`
+- `/scenarios/publish` — requires `scenario`, `session`
+- `/scenarios/rename` — requires `name`, `scenario`, `session`
+- `/scenarios/roles/add` — requires `batna`, `name`, `scenario`, `session`
+- `/scenarios/roles/brief` — requires `brief`, `role`, `session`
+- `/scenarios/roles/remove` — requires `role`, `session`
+- `/scenarios/roles/update` — requires `batna`, `name`, `role`, `session`
+- `/scenarios/show` — requires `scenario`, `session`
 - `/settings/prep-sheet` — requires `on`, `session`
 - `/settings/show` — requires `session`
 - `/tables/accept` — requires `proposal`, `session`, `table`

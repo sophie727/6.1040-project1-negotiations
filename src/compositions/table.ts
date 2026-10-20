@@ -1,7 +1,7 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { each, former, is, no, now, reaction, view, when, whether, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
-import { DECISION_ASK, REPLY_ASK } from "./asks.ts";
+import { COUNTERPART_ASKS } from "./asks.ts";
 import { inputOf, textInput } from "./reusable/inputs.ts";
 
 const {
@@ -179,7 +179,7 @@ export const issuesOf = former(
  * begun, and the scenario's recommended one, which the page suggests until then), every seat's role and the username of
  * the person in it (null for the counterpart or an empty seat), the empty seats, the role's own brief,
  * BATNA, and points for each option, every seat's role, the issues, the conversation, and every proposal with what it
- * is worth to (role). Nothing here comes from another role's brief or points.
+ * is worth to (role) and the roles that have accepted it so far. Nothing here comes from another role's brief or points.
  */
 export const tableAsSeenBy = former(
   "(table) as (role) sees it",
@@ -210,6 +210,7 @@ export const tableAsSeenBy = former(
       proposalStatus,
       proposedAt,
       points,
+      accepter,
       option,
       optionPoints,
     },
@@ -251,7 +252,15 @@ export const tableAsSeenBy = former(
       }),
       proposals: each(Proposing._proposals({ subject: table }).is({ proposal, proposer, terms, status: proposalStatus, proposedAt }))
         .where(whether(Briefing._dealPayoff({ role, terms }).is({ points })))
-        .form({ proposal, proposer, terms, status: proposalStatus, proposedAt, points }),
+        .form({
+          proposal,
+          proposer,
+          terms,
+          status: proposalStatus,
+          proposedAt,
+          points,
+          acceptedBy: each(Proposing._acceptances({ proposal }).is({ party: accepter })).distinct(accepter),
+        }),
     }),
 );
 
@@ -263,7 +272,7 @@ const notesOf = former("the notes (user) wrote about (table)", ({ user, table },
 /** How many questions to the counterpart about (table) are waiting or being answered, so the screen can show that it is writing. */
 const questionsOpenAt = former("the open questions about (table)", ({ table }, { prompt, ask, stage }) =>
   each(Reasoning._about({ subject: table }).is({ prompt, ask, stage }))
-    .where(is.among(ask, [REPLY_ASK, DECISION_ASK]), is.among(stage, ["WAITING", "FORMING"]))
+    .where(is.among(ask, COUNTERPART_ASKS), is.among(stage, ["WAITING", "FORMING"]))
     .count(),
 );
 
@@ -273,7 +282,7 @@ const questionsOpenAt = former("the open questions about (table)", ({ table }, {
  */
 const questionsAbout = former("the questions about (table)", ({ table }, { prompt, ask, stage, reason }) =>
   each(Reasoning._about({ subject: table }).is({ prompt, ask, stage }))
-    .where(is.among(ask, [REPLY_ASK, DECISION_ASK]), whether(Reasoning._reason({ prompt }).is({ reason })))
+    .where(is.among(ask, COUNTERPART_ASKS), whether(Reasoning._reason({ prompt }).is({ reason })))
     .form({ stage, reason }),
 );
 

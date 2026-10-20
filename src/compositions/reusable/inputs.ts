@@ -18,7 +18,7 @@ const fits: Record<FieldKind, (value: unknown) => boolean> = {
 
 /**
  * Accepts a request body whose fields are all strings, except the fields named in `kinds`, which hold that kind of value.
- * `session` is null when the browser sent no cookie. The endpoint's receive clause names the required fields.
+ * `session` and `attempt` are null when the browser sent no cookie. The endpoint's receive clause names the required fields.
  */
 export function inputOf(kinds: Readonly<Record<string, FieldKind>> = {}): EndpointValidator {
   return (value) => {
@@ -29,11 +29,11 @@ export function inputOf(kinds: Readonly<Record<string, FieldKind>> = {}): Endpoi
       Object.entries(value).every(([name, field]) =>
         Object.hasOwn(kinds, name)
           ? fits[kinds[name]!](field)
-          : typeof field === "string" || (field === null && name === "session"),
+          : typeof field === "string" || (field === null && (name === "session" || name === "attempt")),
       );
     return ok ? { ok: true } : { ok: false, detail: "expected text fields, and numbers, term sheets, or flags where named" };
   };
 }
 
-/** Accepts a request body whose fields are all strings; `session` is null when the browser sent no cookie. */
+/** Accepts a request body whose fields are all strings; `session` and `attempt` are null when the browser sent no cookie. */
 export const textInput = inputOf();

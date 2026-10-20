@@ -1,11 +1,24 @@
 import { describe, expect, test } from "bun:test";
-import { asMessages, modelCounterpart, readDecision, type TableMaterial } from "../../src/agents/counterpart.ts";
-import { DECISION_ASK, REPLY_ASK } from "../../src/compositions/counterpart.ts";
+import {
+  answerer,
+  asMessages,
+  instructions,
+  modelCounterpart,
+  passes,
+  readDecision,
+  replyPrompt,
+  seated,
+  type TableMaterial,
+} from "../../src/agents/counterpart.ts";
+import { DECISION_ASK, FOLLOW_UP_ASK, REPLY_ASK } from "../../src/compositions/counterpart.ts";
 import hirosBrief from "../../src/seed/briefs/hiro.md" with { type: "text" };
+import mandysBrief from "../../src/seed/briefs/mandy.md" with { type: "text" };
 import manonsBrief from "../../src/seed/briefs/manon.md" with { type: "text" };
+import presleysBrief from "../../src/seed/briefs/presley.md" with { type: "text" };
+import sallysBrief from "../../src/seed/briefs/sally.md" with { type: "text" };
 import { startWholePie } from "../support/app.ts";
 import { ok } from "../support/reusable/results.ts";
-import { counterpartMaterial, fakeModel } from "./support.ts";
+import { counterpartMaterial, counterpartTables, fakeModel } from "./support.ts";
 
 const WHOLE_PIE = { "Start date": 0, Salary: 120000, "Health Insurance": "Full Coverage", Bonus: 0, "Position title": "Director" };
 const GREEDY = { "Start date": 59, Salary: 120000, "Health Insurance": "Full Coverage", Bonus: 10000, "Position title": "Director" };
@@ -93,5 +106,62 @@ describe("the counterpart, played by a model", () => {
     expect(readDecision("Line 1: ACCEPT\nLine 2: Great.")).toEqual({ accept: true, remark: "Great." });
     expect(readDecision("Reject.\n\nNot at that salary.")).toEqual({ accept: false, remark: "Not at that salary." });
     expect(readDecision("I think we're close.")).toEqual({ accept: false, remark: "" });
+  });
+});
+
+describe("the counterparts at a table of three", () => {
+  /** Mandy at The Launch Room, which has begun, with the counterpart not running, after she asks Presley something. */
+  async function mandysTable() {
+    const app = await startWholePie({ counterpart: null, coach: null });
+    const mandy = await app.practice("mandy", "Mandy", "The Launch Room");
+    ok(await app.api.tables.start({ session: mandy.session, table: mandy.table, minutes: 45 }));
+    ok(await app.api.tables.send({ session: mandy.session, table: mandy.table, body: "Presley, how much time does your team need?" }));
+    const tables: readonly TableMaterial[] = await counterpartTables(app, mandy.table);
+    return { tables, presley: tables[0]!, sally: tables[1]! };
+  }
+
+  test("each reads the table from its own seat, with its own brief, and speaks to the table", async () => {
+    const { tables, presley } = await mandysTable();
+    expect(tables.map(({ roleName }) => roleName)).toEqual(["Presley", "Sally"]);
+    expect(presley.seats.map(({ player }) => player)).toEqual(["mandy", null, null]);
+
+    const system = instructions(presley);
+    expect(system).toStartWith('You are Presley in a negotiation called "The Launch Room", with Mandy and Sally. Mandy is a person practicing');
+    expect(system).toContain(presleysBrief);
+    for (const theirs of [mandysBrief, sallysBrief]) expect(system).not.toContain(theirs.slice(0, 300));
+    expect(system).toContain("ask Mandy to propose the terms");
+    expect(replyPrompt(presley)).toContain("Write your next message to the table");
+    expect(replyPrompt(presley, FOLLOW_UP_ASK)).toContain("answer with just the word PASS");
+  });
+
+  test("the counterpart a message names replies, and a counterpart with nothing to add passes", async () => {
+    const { tables, presley, sally } = await mandysTable();
+    expect(answerer(REPLY_ASK, tables)).toBe(presley);
+    expect(answerer(FOLLOW_UP_ASK, tables)).toBe(presley);
+    // A question goes first to whoever it asks, even after a greeting that names someone else first.
+    const saying = (body: string) => tables.map((table) => ({ ...table, messages: [{ ...table.messages[0]!, body }] }));
+    expect(answerer(REPLY_ASK, saying("Hi Presley, hi Sally. Sally, what does Halvorsen need?"))?.roleName).toBe("Sally");
+    expect(answerer(REPLY_ASK, saying("Presley and Sally, thanks for coming."))?.roleName).toBe("Presley");
+    // Once Presley has replied, only Sally is left to add something, and after her, nobody is.
+    const replied = (table: TableMaterial, ...senders: string[]) => ({
+      ...table,
+      messages: [
+        ...table.messages,
+        ...senders.map((sender, i) => ({ message: `m${i}`, sender, body: "Six weeks.", sentAt: table.messages[0]!.sentAt })),
+      ],
+    });
+    expect(answerer(FOLLOW_UP_ASK, [replied(presley, presley.role), replied(sally, presley.role)])?.roleName).toBe("Sally");
+    expect(answerer(FOLLOW_UP_ASK, [replied(presley, presley.role, sally.role), replied(sally, presley.role, sally.role)])).toBe(undefined);
+
+    const write = (text: string[]) => async (piece: string) => {
+      text.push(piece);
+    };
+    const reply: string[] = [];
+    await seated(modelCounterpart(fakeModel("Six weeks would do it.").model)).answer(REPLY_ASK, tables, write(reply));
+    expect(reply.join("")).toBe(`${presley.role}\nSix weeks would do it.`);
+    const pass: string[] = [];
+    await seated(modelCounterpart(fakeModel("Pass.").model)).answer(FOLLOW_UP_ASK, tables, write(pass));
+    expect(pass.join("")).toBe("PASS");
+    expect([passes("PASS"), passes("**Pass.**"), passes("Pass on the price, but not the date.")]).toEqual([true, true, false]);
   });
 });

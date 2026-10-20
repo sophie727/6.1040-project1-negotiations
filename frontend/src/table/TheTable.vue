@@ -13,7 +13,7 @@ import Countdown from "./Countdown.vue";
 import Notes from "./Notes.vue";
 import PictureADeal from "./PictureADeal.vue";
 import PrepSheet from "./PrepSheet.vue";
-import { hasCounterpart, othersAt } from "./players.ts";
+import { hasCounterpart, othersAt, severalOthers } from "./players.ts";
 
 /**
  * The Table: the countdown and the conversation, with its proposals, on the left; on the right, the person's brief and
@@ -28,6 +28,8 @@ const table = computed(() => props.view.table);
 /** The other seats, as a sentence: the AI by its role's name, and each person by their username and role. */
 const others = computed(() => othersAt(table.value));
 const withCounterpart = computed(() => hasCounterpart(table.value));
+/** "is" for one other side, and "are" for several, as in "Presley and Sally are thinking". */
+const are = computed(() => (severalOthers(table.value) ? "are" : "is"));
 
 /** How many messages and proposals there are so far. */
 const said = computed(() => table.value.messages.length + table.value.proposals.length);
@@ -147,13 +149,13 @@ const materialsId = useId();
           <div ref="scroller" class="timeline" aria-live="polite">
             <p v-if="said === 0" class="empty muted">
               <template v-if="withCounterpart">
-                The clock is running. Say hello, ask a question, or make an offer: {{ others }} is waiting for you to open.
+                The clock is running. Say hello, ask a question, or make an offer: {{ others }} {{ are }} waiting for you to open.
               </template>
               <template v-else>The clock is running. Say hello, ask a question, or make an offer.</template>
             </p>
             <Conversation :table="table" @changed="emit('changed')" />
             <p v-if="view.openQuestions > 0" class="thinking muted">
-              {{ others }} is thinking<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
+              {{ others }} {{ are }} thinking<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
             </p>
             <p v-else-if="trouble" class="trouble" role="status">
               {{ others }} couldn't answer: {{ trouble }} Send another message, or propose again, to try again.

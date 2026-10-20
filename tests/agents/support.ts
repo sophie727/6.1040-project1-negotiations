@@ -27,10 +27,16 @@ async function takeNewest({ api, application }: App, table: string, agent: strin
   return { session, prompt };
 }
 
-/** The table as the counterpart reads it for its newest question. */
-export async function counterpartMaterial(app: App, table: string) {
+/** The table as each counterpart there reads it for the newest question. */
+export async function counterpartTables(app: App, table: string) {
   const { session, prompt } = await takeNewest(app, table, "counterpart");
-  return ok(await app.api.counterpart.table({ session, prompt })).table;
+  return ok(await app.api.counterpart.table({ session, prompt })).tables;
+}
+
+/** The table as the counterpart reads it for its newest question, at a table with one counterpart. */
+export async function counterpartMaterial(app: App, table: string) {
+  const [material] = await counterpartTables(app, table);
+  return material!;
 }
 
 /** What the coach reads for the debrief of `table`, a practice negotiation that has ended. */

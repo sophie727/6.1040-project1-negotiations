@@ -29,10 +29,15 @@ export function nameOf(table: TableMaterial, role: string): string {
   return table.seats.find((seat) => seat.role === role)?.name ?? "someone";
 }
 
+/** `names` in a sentence: "Presley", "Presley and Sally", or "Mandy, Presley, and Sally", or empty when there are none. */
+export function list(names: readonly string[]): string {
+  if (names.length <= 2) return names.join(" and ");
+  return `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
+}
+
 /** The names of every role at `table` except the reader's. */
 export function otherNames(table: TableMaterial): string {
-  const others = table.seats.filter(({ role }) => role !== table.role).map(({ name }) => name);
-  return others.length === 0 ? "the other side" : others.join(" and ");
+  return list(table.seats.filter(({ role }) => role !== table.role).map(({ name }) => name)) || "the other side";
 }
 
 const outcomes: Record<string, string> = {

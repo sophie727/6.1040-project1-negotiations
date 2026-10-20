@@ -28,20 +28,20 @@ The case is built so that the obvious move, splitting the difference on every is
     - option name: Not planned
     - option name: Within 60 days of launch
     - option name: Ready at launch
-- List price per seat per month (continuous)
+- List price, per seat per month (continuous)
     - option name: $30; universal value: 30
     - option name: $60; universal value: 60
 - Halvorsen's discount (continuous)
     - option name: 0%; universal value: 0
     - option name: 40%; universal value: 40
 - Early access (discrete, no universal values)
-    - option name: Halvorsen gets 8 weeks of exclusive early access
-    - option name: Open beta for all customers
-    - option name: No early access; the public reveal is the launch
+    - option name: Exclusive for Halvorsen (8 weeks of exclusive early access)
+    - option name: Open beta (for all customers)
+    - option name: None before launch (the public reveal is the launch)
 - Design authority (discrete, no universal values)
     - option name: Product decides alone
-    - option name: Product decides, with marketing and sales signing off on launch-facing pieces
-    - option name: Any of the three can veto
+    - option name: Shared sign-off (product decides, with marketing and sales signing off on what customers see at launch)
+    - option name: Anyone can veto (any of the three)
 
 **Roles:**
 
@@ -53,7 +53,7 @@ The case is built so that the obvious move, splitting the difference on every is
         - for Halvorsen's discount, Mandy weights 0% at 100 and 40% at 0.
         - for early access, Mandy weights exclusive early access at 100, open beta at 50, and no early access at 300.
         - for design authority, Mandy weights product decides alone at 0, sign-off at 150, and veto at 200.
-    - And a BATNA of 750.
+    - And a BATNA of 750: the plan she expects Sandra to impose (June 1, no integration, $60, 20% off, no early access, and product deciding alone).
 - Presley, the head of product
     - With the payoffs:
         - for launch date, Presley weights March 1 at 0, April 15 at 150, May 1 at 235, and June 1 at 400.
@@ -62,7 +62,7 @@ The case is built so that the obvious move, splitting the difference on every is
         - for Halvorsen's discount, Presley weights them all the same (0).
         - for early access, Presley weights exclusive early access at 150, open beta at 250, and no early access at 0.
         - for design authority, Presley weights product decides alone at 500, sign-off at 200, and veto at 0.
-    - And a BATNA of 800.
+    - And a BATNA of 800: the plan he expects Sandra to impose (June 1, the integration within 60 days, $45, 20% off, early access for Halvorsen, and a veto for everyone).
 - Sally, the head of sales
     - With the payoffs:
         - for launch date, Sally weights March 1 at 300, April 15 at 200, May 1 at 130, and June 1 at 0.
@@ -71,7 +71,7 @@ The case is built so that the obvious move, splitting the difference on every is
         - for Halvorsen's discount, Sally weights 0% at 0 and 40% at 350.
         - for early access, Sally weights exclusive early access at 300, open beta at 100, and no early access at 0.
         - for design authority, Sally weights product decides alone at 0, sign-off at 100, and veto at 150.
-    - And a BATNA of 850.
+    - And a BATNA of 850: the plan she expects Sandra to impose (June 1, the integration ready at launch, $60, no discount, early access for Halvorsen, and shared sign-off).
 
 ## Facts every brief must share
 
@@ -85,7 +85,7 @@ The briefs should give each role this same backstory, so that they agree with on
 
 ## Notes for the author (not for players)
 
-**The whole pie** is April 15, integration within 60 days of launch, a $60 list price, a 40% discount for Halvorsen, exclusive early access for Halvorsen, and product deciding alone. It's worth 3,150 points together: 1,000 to Mandy, 1,050 to Presley, and 1,100 to Sally, against BATNAs that add up to 2,400. Each person clears their BATNA by 200 to 250 points, so there's no single obvious winner.
+**The whole pie** is April 15, integration within 60 days of launch, a $60 list price, a 40% discount for Halvorsen, exclusive early access for Halvorsen, and product deciding alone. It's worth 3,150 points together: 1,000 to Mandy, 1,050 to Presley, and 1,100 to Sally, against BATNAs that add up to 2,400. Each person clears their BATNA by exactly 250 points, so there's no single obvious winner.
 
 The payoffs just add up issue by issue, so the whole pie takes the best option on each issue separately:
 
@@ -106,4 +106,4 @@ The payoffs just add up issue by issue, so the whole pie takes the best option o
 - Splitting everything down the middle (April 15, within 60 days, $45, 20%, open beta, shared sign-off) clears every BATNA but is worth only 2,725 together. That adds 325 points over the BATNAs, out of the 750 the best deal adds, so its create score is about 43%.
 - Three people need to agree, and every BATNA is real: a deal that gives Presley a June launch and full control leaves Mandy below her BATNA.
 
-**On the platform:** proposals need everyone to accept, invite links work for three, and matchmaking waits for three people, so a table between people works as it is. Practice mode probably doesn't, since the AI counterpart takes one seat, not two.
+**On the platform:** the case is seeded as a built-in scenario (`src/seed/theLaunchRoom.ts`, with the briefs in `src/seed/briefs/mandy.md`, `presley.md`, and `sally.md`), with a recommended time limit of 45 minutes. Proposals need everyone to accept, invite links work for three, and matchmaking waits for three people. When someone practices it against the AI, a counterpart takes each of the other two seats, each reading only its own brief.

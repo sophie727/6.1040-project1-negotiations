@@ -3,11 +3,12 @@ import type { Option } from "../concepts/Briefing/Briefing.ts";
 import type { User } from "../concepts/Registering/Registering.ts";
 import type { assembleApplication } from "../assembly.ts";
 import { type ScenarioDefinition, theJobOffer } from "./theJobOffer.ts";
+import { theLaunchRoom } from "./theLaunchRoom.ts";
 
 type Concepts = ReturnType<typeof assembleApplication>["concepts"];
 
 /** The scenarios The Whole Pie comes with. */
-export const builtInScenarios: ScenarioDefinition[] = [theJobOffer];
+export const builtInScenarios: ScenarioDefinition[] = [theJobOffer, theLaunchRoom];
 
 /**
  * The username that authors the built-in scenarios. It's a Registering user with no password in Authenticating,
@@ -16,12 +17,15 @@ export const builtInScenarios: ScenarioDefinition[] = [theJobOffer];
 const CASE_BANK = "wholepie";
 
 /**
- * Creates and publishes the built-in scenarios when no scenario is published yet, as on a server's first start with an
- * empty database. It goes through the concepts' actions, as an author would, so reactions see every step.
+ * Creates and publishes each built-in scenario that no published scenario is named after yet: every one on a server's
+ * first start with an empty database, and only those added since on a database that has the others. It goes through
+ * the concepts' actions, as an author would, so reactions see every step.
  */
 export async function seed({ concepts }: { concepts: Concepts }): Promise<void> {
-  if ((await concepts.Briefing._published()).length > 0) return;
-  for (const definition of builtInScenarios) await publishScenario({ concepts }, definition);
+  const published = new Set((await concepts.Briefing._published()).map(({ name }) => name));
+  for (const definition of builtInScenarios) {
+    if (!published.has(definition.name)) await publishScenario({ concepts }, definition);
+  }
 }
 
 /** Creates and publishes `definition`, authored by the case bank, as the built-in scenarios are. */

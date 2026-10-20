@@ -177,18 +177,18 @@ const lesson = computed(() => {
             <h2>Your slice</h2>
             <PieChart :slices="slices" />
             <p v-if="debrief.bestJointPoints === null" class="muted">
-              No deal could have given both of you at least your BATNAs, so there was no pie to share: walking away was right.
+              No deal could have given everyone at least their BATNA, so there was no pie to share: walking away was right.
             </p>
             <p v-else class="muted">
               The whole pie is {{ formatPoints(debrief.bestJointPoints) }} points: the most you and {{ otherNames }} could have
-              gotten together with a deal that beat both your BATNAs.
+              gotten together with a deal that beat everyone's BATNA.
             </p>
             <dl v-if="scores" class="scores">
               <div>
                 <dt>Value created</dt>
                 <dd class="display">{{ percent(scores.created) }}</dd>
                 <p v-if="scores.created !== null && scores.created < 0" class="muted">
-                  The deal was worth less to the two of you than walking away.
+                  Together, the deal was worth less to you than walking away.
                 </p>
                 <p v-else class="muted">of what a deal could add over walking away</p>
               </div>

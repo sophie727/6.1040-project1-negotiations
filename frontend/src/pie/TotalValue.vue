@@ -97,7 +97,7 @@ const markers = computed(() =>
       </li>
     </ul>
     <figcaption class="muted">
-      Each bar counts the possible deals whose points, added up for both sides, fall in that range.
+      Each bar counts the possible deals whose points, added up for every side, fall in that range.
     </figcaption>
   </figure>
 </template>

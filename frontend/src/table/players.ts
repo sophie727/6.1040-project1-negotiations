@@ -17,10 +17,19 @@ export function hasCounterpart(table: Table): boolean {
   return table.seats.some((seat) => isCounterpart(table, seat));
 }
 
-/** How the other seats read in a sentence: "omar (Manon)" for a person, the role's name for the AI, and "and" between them. */
+/** `names` in a sentence: "Presley", "Presley and Sally", or "Mandy, Presley, and Sally". */
+export function inWords(names: readonly string[]): string {
+  return names.length <= 2 ? names.join(" and ") : `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
+}
+
+/** How the other seats read in a sentence: "omar (Manon)" for a person, and the role's name for the AI. */
 export function othersAt(table: Table): string {
-  return table.seats
-    .filter(({ role }) => role !== table.role)
-    .map((seat) => (seat.player === null ? seat.name : `${seat.player} (${seat.name})`))
-    .join(" and ");
+  return inWords(
+    table.seats.filter(({ role }) => role !== table.role).map((seat) => (seat.player === null ? seat.name : `${seat.player} (${seat.name})`)),
+  );
+}
+
+/** Whether more than one other side sits at `table`, so a sentence about them takes a plural verb. */
+export function severalOthers(table: Table): boolean {
+  return table.seats.length > 2;
 }

@@ -20,6 +20,7 @@ import {
   type Scenario,
   UnitNotAllowed,
   UnknownIssue,
+  UnknownOption,
   UnknownRole,
   UnknownRoleOrOption,
   UnknownScenario,
@@ -252,9 +253,8 @@ describe("Briefing", () => {
     expect(await briefing._role({ role: offer.hiro })).toEqual([
       { scenario: offer.scenario, name: "Hiro", batna: 500, brief: "x".repeat(20000) },
     ]);
-    expect(await briefing._role({ role: offer.manon })).toEqual([
-      { scenario: offer.scenario, name: "Manon", batna: 300, brief: undefined },
-    ]);
+    // Without a brief yet, the row leaves the brief out.
+    expect(await briefing._role({ role: offer.manon })).toStrictEqual([{ scenario: offer.scenario, name: "Manon", batna: 300 }]);
   });
 
   test("publishing needs every payoff, and nothing about a published scenario can change", async () => {
@@ -355,5 +355,153 @@ describe("Briefing", () => {
       ValueTaken,
     );
     expect(await briefing._options({ issue })).toHaveLength(1);
+  });
+});
+
+describe("Briefing drafts", () => {
+  test("its principle: while The Job Offer is a draft, Sophie renames an issue, removes an option, changes a kind, and raises a BATNA", async () => {
+    const { briefing } = await setup();
+    const offer = await jobOffer(briefing);
+    const { issue: bonus } = await briefing.addIssue({ scenario: offer.scenario, name: "Signing bonus", kind: "DISCRETE" });
+    await briefing.updateIssue({ issue: bonus, name: " Bonus ", kind: "DISCRETE" });
+    expect(await briefing._issue({ issue: bonus })).toEqual([{ scenario: offer.scenario, name: "Bonus", kind: "DISCRETE" }]);
+
+    // Removing an option removes every role's points for it, too.
+    await briefing.removeOption({ option: offer.half });
+    expect((await briefing._options({ issue: offer.insurance })).map(({ name }) => name)).toEqual(["Not included", "Full Coverage"]);
+    expect((await briefing._payoffs({ role: offer.hiro })).map(({ option }) => option)).not.toContain(offer.half);
+
+    // A range's options have universal values that a list's can't, so changing the kind removes them and their points.
+    await briefing.updateIssue({ issue: offer.salary, name: "Salary", kind: "DISCRETE" });
+    expect(await briefing._options({ issue: offer.salary })).toEqual([]);
+    expect(await briefing._issue({ issue: offer.salary })).toEqual([{ scenario: offer.scenario, name: "Salary", kind: "DISCRETE" }]);
+    expect((await briefing._payoffs({ role: offer.manon })).map(({ issue }) => issue)).not.toContain(offer.salary);
+    // Changing only the name or unit keeps them.
+    const { option: low } = await briefing.addOption({ issue: offer.salary, name: "$80K" });
+    await briefing.updateIssue({ issue: offer.salary, name: "Base salary", kind: "DISCRETE" });
+    expect(await briefing._options({ issue: offer.salary })).toEqual([{ option: low, name: "$80K", universalValue: undefined }]);
+
+    await briefing.updateOption({ option: offer.full, name: "Full coverage" });
+    expect(await briefing._option({ option: offer.full })).toEqual([
+      { scenario: offer.scenario, issue: offer.insurance, name: "Full coverage" },
+    ]);
+    await briefing.updateRole({ role: offer.manon, name: "Manon", batna: 900 });
+    expect(await briefing._role({ role: offer.manon })).toMatchObject([{ name: "Manon", batna: 900 }]);
+    await briefing.rename({ scenario: offer.scenario, name: "The Offer" });
+    expect(await briefing._scenario({ scenario: offer.scenario })).toEqual([{ name: "The Offer", author: "sophie", published: false }]);
+  });
+
+  test("a continuous option moves to another universal value, and keeps the order of its range", async () => {
+    const { briefing } = await setup();
+    const offer = await jobOffer(briefing);
+    const { option: mid } = await briefing.addOption({ issue: offer.salary, name: "$100K", universalValue: 100000 });
+    await briefing.updateOption({ option: mid, name: "$130K", universalValue: 130000 });
+    expect((await briefing._options({ issue: offer.salary })).map(({ name, universalValue }) => [name, universalValue])).toEqual([
+      ["$80K", 80000],
+      ["$120K", 120000],
+      ["$130K", 130000],
+    ]);
+    await briefing.updateIssue({ issue: offer.salary, name: "Salary", kind: "CONTINUOUS", unit: "  " });
+    expect(await briefing._issue({ issue: offer.salary })).toEqual([{ scenario: offer.scenario, name: "Salary", kind: "CONTINUOUS" }]);
+  });
+
+  test("editing a draft refuses what adding it would, and a name another issue, option, role, or scenario already has", async () => {
+    const { briefing } = await setup();
+    const offer = await jobOffer(briefing);
+    await briefing.create({ author: "omar", name: "The Lease" });
+
+    await expectRefusal(briefing.rename({ scenario: offer.scenario, name: " " }), InvalidScenarioName, "1 to 100 characters");
+    await expectRefusal(briefing.rename({ scenario: offer.scenario, name: "The Lease" }), NameTaken, "already exists");
+    await briefing.rename({ scenario: offer.scenario, name: "The Job Offer" });
+
+    await expectRefusal(briefing.updateIssue({ issue: offer.salary, name: "", kind: "CONTINUOUS" }), InvalidIssueName, "1 to 100");
+    await expectRefusal(
+      briefing.updateIssue({ issue: offer.salary, name: "Health insurance", kind: "CONTINUOUS" }),
+      IssueExists,
+      "already has an issue with that name",
+    );
+    await expectRefusal(
+      briefing.updateIssue({ issue: offer.insurance, name: "Health insurance", kind: "DISCRETE", unit: "plans" }),
+      UnitNotAllowed,
+      "Only a continuous issue has a unit.",
+    );
+
+    await expectRefusal(briefing.updateOption({ option: offer.low, name: "$120K", universalValue: 1 }), OptionExists, "already has an option");
+    await expectRefusal(briefing.updateOption({ option: offer.low, name: "$80K" }), ValueRequired, "needs a universal value");
+    await expectRefusal(briefing.updateOption({ option: offer.none, name: "None", universalValue: 0 }), ValueNotAllowed, "no universal value");
+    await expectRefusal(briefing.updateOption({ option: offer.low, name: "$80K", universalValue: 120000 }), ValueTaken, "at that universal value");
+    await expectRefusal(briefing.updateOption({ option: offer.low, name: " ", universalValue: 1 }), InvalidOptionName, "1 to 100");
+
+    await expectRefusal(briefing.updateRole({ role: offer.hiro, name: "Manon", batna: 0 }), RoleExists, "already has a role");
+    await expectRefusal(briefing.updateRole({ role: offer.hiro, name: "", batna: 0 }), InvalidRoleName, "1 to 100");
+
+    await expectRefusal(briefing.updateIssue({ issue: "nowhere" as Issue, name: "x", kind: "DISCRETE" }), UnknownIssue, "no such issue");
+    await expectRefusal(briefing.removeIssue({ issue: "nowhere" as Issue }), UnknownIssue, "no such issue");
+    await expectRefusal(briefing.updateOption({ option: "nowhere" as Option, name: "x" }), UnknownOption, "There is no such option.");
+    await expectRefusal(briefing.removeOption({ option: "nowhere" as Option }), UnknownOption, "There is no such option.");
+    await expectRefusal(briefing.updateRole({ role: "nowhere" as Role, name: "x", batna: 0 }), UnknownRole, "no such role");
+    await expectRefusal(briefing.removeRole({ role: "nowhere" as Role }), UnknownRole, "no such role");
+    await expectRefusal(briefing.rename({ scenario: "nowhere" as Scenario, name: "x" }), UnknownScenario, "no such scenario");
+    await expectRefusal(briefing.discard({ scenario: "nowhere" as Scenario }), UnknownScenario, "no such scenario");
+  });
+
+  test("removing a role or an issue takes its payoffs with it, so publishing waits only for what is left", async () => {
+    const { briefing } = await setup();
+    const offer = await jobOffer(briefing);
+    const { role: recruiter } = await briefing.addRole({ scenario: offer.scenario, name: "Recruiter", batna: 0 });
+    const { issue: perks } = await briefing.addIssue({ scenario: offer.scenario, name: "Perks", kind: "DISCRETE" });
+    await briefing.addOption({ issue: perks, name: "Gym" });
+    await briefing.setPayoff({ role: recruiter, option: offer.low, points: 10 });
+    await expect(briefing.publish({ scenario: offer.scenario })).rejects.toThrow(Incomplete);
+
+    await briefing.removeRole({ role: recruiter });
+    await briefing.removeIssue({ issue: perks });
+    expect(await briefing._roles({ scenario: offer.scenario })).toEqual([
+      { role: offer.hiro, name: "Hiro" },
+      { role: offer.manon, name: "Manon" },
+    ]);
+    expect((await briefing._issues({ scenario: offer.scenario })).map(({ name }) => name)).toEqual(["Salary", "Health insurance"]);
+    expect(await briefing._payoffs({ role: recruiter })).toEqual([]);
+    await briefing.publish({ scenario: offer.scenario });
+  });
+
+  test("discarding a draft removes it with everything in it and frees its name, and nothing about a published scenario changes", async () => {
+    const { briefing } = await setup();
+    const draft = await jobOffer(briefing);
+    await briefing.discard({ scenario: draft.scenario });
+    expect(await briefing._scenario({ scenario: draft.scenario })).toEqual([]);
+    expect(await briefing._issues({ scenario: draft.scenario })).toEqual([]);
+    expect(await briefing._roles({ scenario: draft.scenario })).toEqual([]);
+    expect(await briefing._role({ role: draft.hiro })).toEqual([]);
+    expect(await briefing._option({ option: draft.full })).toEqual([]);
+    expect(await briefing._authoredBy({ author: "sophie" })).toEqual([]);
+
+    const offer = await jobOffer(briefing);
+    await briefing.publish({ scenario: offer.scenario });
+    for (const change of [
+      () => briefing.rename({ scenario: offer.scenario, name: "Another" }),
+      () => briefing.discard({ scenario: offer.scenario }),
+      () => briefing.updateIssue({ issue: offer.salary, name: "Pay", kind: "CONTINUOUS" }),
+      () => briefing.removeIssue({ issue: offer.insurance }),
+      () => briefing.updateOption({ option: offer.full, name: "All of it" }),
+      () => briefing.removeOption({ option: offer.half }),
+      () => briefing.updateRole({ role: offer.hiro, name: "Hiro", batna: 0 }),
+      () => briefing.removeRole({ role: offer.manon }),
+    ]) {
+      await expectRefusal(change(), Published, "A published scenario can't be changed.");
+    }
+  });
+
+  test("_authoredBy lists the scenarios an author created, drafts and published ones alike, newest first", async () => {
+    const { briefing } = await setup();
+    const offer = await jobOffer(briefing);
+    await briefing.publish({ scenario: offer.scenario });
+    const { scenario: draft } = await briefing.create({ author: "sophie", name: "The Lease" });
+    await briefing.create({ author: "omar", name: "The Car" });
+    expect(await briefing._authoredBy({ author: "sophie" })).toEqual([
+      { scenario: draft, name: "The Lease", published: false },
+      { scenario: offer.scenario, name: "The Job Offer", published: true },
+    ]);
+    expect(await briefing._authoredBy({ author: "nadia" })).toEqual([]);
   });
 });

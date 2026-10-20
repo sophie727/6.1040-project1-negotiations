@@ -53,6 +53,8 @@ describe("how spicy a scenario is", () => {
       "The Job Offer, with BATNAs of 900": 2,
       // No deal is worth 1,200 points to both of them.
       "The Job Offer, with BATNAs of 1200": 3,
+      // Its whole pie of 3,150 points adds 31% to the 2,400 its three roles get by walking away.
+      "The Launch Room": 2,
     });
   });
 

@@ -3,6 +3,7 @@ import { applicationComputations } from "./computations.ts";
 import { authenticating } from "./concepts/Authenticating/registry.ts";
 import { briefing } from "./concepts/Briefing/registry.ts";
 import { conversing } from "./concepts/Conversing/registry.ts";
+import { commonsFederating } from "./concepts/Federating/registry.ts";
 import { inviting } from "./concepts/Inviting/registry.ts";
 import { matchmaking } from "./concepts/Matchmaking/registry.ts";
 import { rating } from "./concepts/Rating/registry.ts";
@@ -18,6 +19,7 @@ import { tabling } from "./concepts/Tabling/registry.ts";
 export const applicationConceptSet = conceptSet({
   Registering: registering,
   Authenticating: authenticating,
+  CommonsFederating: commonsFederating,
   Sessioning: sessioning,
   AgentSessioning: agentSessioning,
   Briefing: briefing,

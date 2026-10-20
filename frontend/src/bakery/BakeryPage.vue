@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { api, type Bakery, type Scenario } from "../api/client.ts";
+import { api, type Bakery, type Scenario, type WrittenScenario } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import YourRatings from "../ratings/YourRatings.vue";
 import { useSession } from "../reusable/session.ts";
@@ -32,7 +32,7 @@ const choices: { value: Opponents; icon: string; label: string; hint: string }[]
   { value: "strangers", icon: "🎲", label: "Someone new", hint: "Get matched with someone who's looking too" },
 ];
 const leads: Record<Opponents, string> = {
-  ai: "Pick a scenario to practice. You'll play one side, and an AI counterpart will play the other.",
+  ai: "Pick a scenario to practice. You'll play one side, and AI counterparts will play the rest.",
   friends: "Pick a scenario and a side, and you'll get a link to send your friends. Whoever follows it plays another side.",
   strangers: "Pick a scenario, and we'll find someone else who wants to practice it. Or pick Surprise me! to join whoever's looking.",
 };
@@ -42,7 +42,13 @@ const surpriseHints: Record<Opponents, string> = {
   strangers: "Join whoever's looking, for any scenario",
 };
 
+/** The scenarios the person wrote, drafts and published ones, so they can go back to writing them. */
+const written = ref<WrittenScenario[]>([]);
+
 onMounted(async () => {
+  void api.scenarios.mine().then((mine) => {
+    if (!("error" in mine)) written.value = mine.scenarios;
+  });
   const result = await api.bakery();
   if ("error" in result) {
     if (result.error === "UNAUTHORIZED") sessionEnded();
@@ -112,6 +118,11 @@ async function surprise() {
         <span class="name display">Surprise me!</span>
         <span class="muted">{{ surpriseHints[opponents] }}</span>
       </button>
+      <a class="pastry-card write" href="/write" @click.prevent="go('/write')">
+        <span class="pastry" aria-hidden="true">🧑‍🍳</span>
+        <span class="name display">Write your own</span>
+        <span class="muted">A scenario of yours, for everyone to negotiate</span>
+      </a>
     </div>
 
     <YourRatings v-if="bakery?.ratings" :ratings="bakery.ratings" />
@@ -130,6 +141,19 @@ async function surprise() {
           <span class="badge" :class="{ good: table.status === 'SETTLED', warm: table.status === 'OPEN' || table.status === 'PREPARING' }">
             {{ statusLabels[table.status] ?? table.status }}
           </span>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="written.length > 0" class="panel">
+      <h2>Your scenarios</h2>
+      <ul class="tables">
+        <li v-for="scenario in written" :key="scenario.scenario">
+          <a :href="`/write/${scenario.scenario}`" @click.prevent="go(`/write/${scenario.scenario}`)">
+            <span aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
+            <strong>{{ scenario.name }}</strong>
+          </a>
+          <span class="badge" :class="scenario.published ? 'good' : 'warm'">{{ scenario.published ? "Published" : "Draft" }}</span>
         </li>
       </ul>
     </section>
@@ -213,6 +237,12 @@ async function surprise() {
 .surprise {
   border-style: dashed;
   background: var(--color-gold-soft);
+}
+.write {
+  border-style: dashed;
+  border-color: var(--color-good);
+  background: var(--color-good-soft);
+  text-decoration: none;
 }
 .tables {
   display: flex;

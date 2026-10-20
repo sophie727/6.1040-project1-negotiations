@@ -22,4 +22,21 @@ export function spiceLevel({ jointPoints, jointBatna }: { jointPoints?: number |
   return share >= MILD ? 1 : share >= MEDIUM ? 2 : 3;
 }
 
-export const applicationComputations = { spiceLevel };
+/** The prefix of every AI counterpart's name, which no person's Registering user has. */
+const BOT = "bot:";
+
+/** Whether `negotiator`, a player at a table, is an AI counterpart rather than a person. */
+export function isCounterpart({ negotiator }: { negotiator: string }): boolean {
+  return negotiator.startsWith(BOT);
+}
+
+/**
+ * The AI counterpart that plays `role` alongside the first one, at a practice table with more than one seat for it.
+ * Tabling seats each player only once at a table, so each of those seats gets a counterpart of its own, named for its
+ * role.
+ */
+export function counterpartFor({ role }: { role: string }): string {
+  return `${BOT}counterpart:${role}`;
+}
+
+export const applicationComputations = { spiceLevel, isCounterpart, counterpartFor };

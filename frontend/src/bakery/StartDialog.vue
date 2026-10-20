@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type { Scenario } from "../api/client.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
 import { pastryFor } from "./pastries.ts";
@@ -8,13 +8,20 @@ import SpiceLevel from "./SpiceLevel.vue";
 import { startPractice, startWithFriends } from "./start.ts";
 
 /**
- * Asks which side of `scenario` to play, then opens the table: with the AI counterpart in the other seat, or with the
+ * Asks which side of `scenario` to play, then opens the table: with an AI counterpart in each other seat, or with the
  * other seats waiting for friends. How long to negotiate is chosen on the prep page.
  */
 const props = defineProps<{ scenario: Scenario; opponents: "ai" | "friends" }>();
 const emit = defineEmits<{ close: [] }>();
 
 const role = ref(props.scenario.roles[0]?.role);
+
+/** Who plays the other sides: one or more AI counterparts, or friends, in as many seats as the scenario has left. */
+const subtitle = computed(() => {
+  const group = props.scenario.roles.length > 2;
+  if (props.opponents === "ai") return group ? "An AI counterpart plays each of the other sides." : "An AI counterpart plays the other side.";
+  return group ? "Friends you invite with a link play the other sides." : "Friends you invite with a link play the other side.";
+});
 const working = ref(false);
 const error = ref<string | null>(null);
 
@@ -30,7 +37,7 @@ async function start() {
 <template>
   <Dialog
     :title="`${pastryFor(scenario.name)} ${scenario.name}`"
-    :subtitle="opponents === 'ai' ? 'An AI counterpart plays the other side.' : 'Friends you invite with a link play the other side.'"
+    :subtitle="subtitle"
     @close="emit('close')"
   >
     <form class="start" @submit.prevent="start">

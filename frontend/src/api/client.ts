@@ -33,6 +33,15 @@ export type StartSuggestion = TableView["start"][number];
 export type InvitationView = Output<"/friends/invitation">;
 export type Invitation = Extract<InvitationView, { invitation: unknown }>["invitation"];
 
+/** A scenario the person wrote, as `/scenarios/mine` lists it: a draft, or published. */
+export type WrittenScenario = Output<"/scenarios/mine">["scenarios"][number];
+/** What `/scenarios/show` responds with: a scenario as its author writes it, with every role's brief and points. */
+export type Draft = Output<"/scenarios/show">["draft"];
+export type ScenarioId = Draft["scenario"];
+export type DraftIssue = Draft["issues"][number];
+export type DraftOption = DraftIssue["options"][number];
+export type DraftRole = Draft["roles"][number];
+
 /** What `/tables/debrief` responds with: the person's role and the whole pie. */
 export type DebriefView = Output<"/tables/debrief">;
 export type Debrief = DebriefView["debrief"];

@@ -1,18 +1,34 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
-import type { TableId } from "./api/client.ts";
+import type { ScenarioId, TableId } from "./api/client.ts";
 import BakeryPage from "./bakery/BakeryPage.vue";
 import JoinPage from "./join/JoinPage.vue";
+import CommonsButton from "./reusable/CommonsButton.vue";
+import CommonsCallback from "./reusable/CommonsCallback.vue";
 import PasswordForm from "./reusable/PasswordForm.vue";
 import SettingsDialog from "./reusable/SettingsDialog.vue";
 import SignIn from "./reusable/SignIn.vue";
 import { useSession } from "./reusable/session.ts";
 import Menu from "./reusable/ui/Menu.vue";
-import { go, page } from "./router.ts";
+import { go, page, rememberedPage, rememberPage, replace } from "./router.ts";
 import TablePage from "./table/TablePage.vue";
+import NewScenario from "./write/NewScenario.vue";
+import ScenarioEditor from "./write/ScenarioEditor.vue";
 
 const { me, checked, load, signOut } = useSession();
-onMounted(load);
+
+/** Whether Commons just sent the browser back here with a code, which the callback finishes signing in with. */
+const returningFromCommons = ref(window.location.pathname === "/auth/commons/callback");
+onMounted(() => {
+  if (!returningFromCommons.value) load();
+});
+
+/** Once signing in with Commons ends, the person goes back to the page they started from, such as an invitation. */
+function finishedCommons() {
+  returningFromCommons.value = false;
+  replace(rememberedPage());
+  if (!checked.value) load();
+}
 
 /** Whether the settings dialog is open. */
 const settingsOpen = ref(false);
@@ -45,11 +61,16 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
     </Menu>
   </header>
   <SettingsDialog v-if="me && settingsOpen" @close="settingsOpen = false" />
-  <main v-if="checked" class="content">
+  <main v-if="returningFromCommons" class="content">
+    <CommonsCallback @done="finishedCommons" />
+  </main>
+  <main v-else-if="checked" class="content">
     <template v-if="me">
       <BakeryPage v-if="page.name === 'bakery'" />
       <TablePage v-else-if="page.name === 'table'" :key="page.table" :table="page.table as TableId" />
       <JoinPage v-else-if="page.name === 'join'" :key="page.code" :code="page.code" />
+      <NewScenario v-else-if="page.name === 'write'" />
+      <ScenarioEditor v-else-if="page.name === 'edit'" :key="page.scenario" :scenario="page.scenario as ScenarioId" />
       <section v-else class="notice">
         <h1>There's nothing here</h1>
         <a class="button primary" href="/" @click.prevent="go('/')">Back to the bakery</a>
@@ -63,6 +84,8 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
           : 'Practice negotiating against an AI counterpart or other people, then see the whole pie: what you got, and what was possible.'
       "
     >
+      <CommonsButton @click="rememberPage" />
+      <p class="divider">or with a password</p>
       <PasswordForm />
     </SignIn>
   </main>

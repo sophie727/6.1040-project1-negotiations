@@ -8,6 +8,7 @@ export class InvalidIssueName extends Error {}
 export class IssueExists extends Error {}
 export class UnitNotAllowed extends Error {}
 export class UnknownIssue extends Error {}
+export class UnknownOption extends Error {}
 export class InvalidOptionName extends Error {}
 export class OptionExists extends Error {}
 export class ValueRequired extends Error {}
@@ -244,6 +245,124 @@ export class BriefingConcept<Author extends string> {
     return {};
   }
 
+  async rename({ scenario, name }: { scenario: Scenario; name: string }) {
+    const found = await this.#draft(scenario);
+    const stored = name.trim();
+    if (!acceptableName(stored)) throw new InvalidScenarioName("A scenario name must have 1 to 100 characters.");
+    if (stored === found.name) return {};
+    await this.#ready();
+    try {
+      const { matchedCount } = await this.scenarios.updateOne({ _id: scenario, published: false }, { $set: { name: stored } });
+      if (matchedCount === 0) throw new Published("A published scenario can't be changed.");
+    } catch (error) {
+      if (isDuplicate(error)) throw new NameTaken("A scenario with that name already exists.");
+      throw error;
+    }
+    return {};
+  }
+
+  async discard({ scenario }: { scenario: Scenario }) {
+    await this.#draft(scenario);
+    const roles = await this.roles.find({ scenario }).toArray();
+    await this.payoffs.deleteMany({ role: { $in: roles.map(({ _id }) => _id) } });
+    await Promise.all([this.roles.deleteMany({ scenario }), this.options.deleteMany({ scenario }), this.issues.deleteMany({ scenario })]);
+    await this.scenarios.deleteOne({ _id: scenario, published: false });
+    return {};
+  }
+
+  async updateIssue({ issue, name, kind, unit }: { issue: Issue; name: string; kind: IssueKind; unit?: string }) {
+    const found = await this.issues.findOne({ _id: issue });
+    if (found === null) throw new UnknownIssue("There is no such issue.");
+    if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
+    const stored = name.trim();
+    if (!acceptableName(stored)) throw new InvalidIssueName("An issue name must have 1 to 100 characters.");
+    const issueExists = new IssueExists("This scenario already has an issue with that name.");
+    if ((await this.issues.findOne({ scenario: found.scenario, name: stored, _id: { $ne: issue } })) !== null) throw issueExists;
+    const storedUnit = unit?.trim() || undefined;
+    if (kind === "DISCRETE" && storedUnit !== undefined) throw new UnitNotAllowed("Only a continuous issue has a unit.");
+    // An option of a range has a universal value that an option of a list can't have, and the other way around.
+    if (kind !== found.kind) await this.#removeOptions({ issue });
+    try {
+      await this.issues.updateOne(
+        { _id: issue },
+        storedUnit === undefined ? { $set: { name: stored, kind }, $unset: { unit: "" } } : { $set: { name: stored, kind, unit: storedUnit } },
+      );
+    } catch (error) {
+      if (isDuplicate(error)) throw issueExists;
+      throw error;
+    }
+    return {};
+  }
+
+  async removeIssue({ issue }: { issue: Issue }) {
+    const found = await this.issues.findOne({ _id: issue });
+    if (found === null) throw new UnknownIssue("There is no such issue.");
+    if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
+    await this.#removeOptions({ issue });
+    await this.issues.deleteOne({ _id: issue });
+    return {};
+  }
+
+  async updateOption({ option, name, universalValue }: { option: Option; name: string; universalValue?: number }) {
+    const found = await this.options.findOne({ _id: option });
+    if (found === null) throw new UnknownOption("There is no such option.");
+    if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
+    const stored = name.trim();
+    if (!acceptableName(stored)) throw new InvalidOptionName("An option name must have 1 to 100 characters.");
+    const optionExists = new OptionExists("This issue already has an option with that name.");
+    const others = { issue: found.issue, _id: { $ne: option } };
+    if ((await this.options.findOne({ ...others, name: stored })) !== null) throw optionExists;
+    const kind = (await this.issues.findOne({ _id: found.issue }))?.kind;
+    // A request that leaves out the universal value may still carry it as null.
+    const value = universalValue ?? undefined;
+    if (kind === "CONTINUOUS" && value === undefined) throw new ValueRequired("An option of a continuous issue needs a universal value.");
+    if (kind === "DISCRETE" && value !== undefined) throw new ValueNotAllowed("An option of a discrete issue has no universal value.");
+    const valueTaken = new ValueTaken("This issue already has an option at that universal value.");
+    if (value !== undefined && (await this.options.findOne({ ...others, universalValue: value })) !== null) throw valueTaken;
+    try {
+      await this.options.updateOne({ _id: option }, { $set: { name: stored, ...(value === undefined ? {} : { universalValue: value }) } });
+    } catch (error) {
+      if (!isDuplicate(error)) throw error;
+      throw (await this.options.findOne({ ...others, name: stored })) === null ? valueTaken : optionExists;
+    }
+    return {};
+  }
+
+  async removeOption({ option }: { option: Option }) {
+    const found = await this.options.findOne({ _id: option });
+    if (found === null) throw new UnknownOption("There is no such option.");
+    if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
+    await this.payoffs.deleteMany({ option });
+    await this.options.deleteOne({ _id: option });
+    return {};
+  }
+
+  async updateRole({ role, name, batna }: { role: Role; name: string; batna: number }) {
+    const found = await this.roles.findOne({ _id: role });
+    if (found === null) throw new UnknownRole("There is no such role.");
+    if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
+    const stored = name.trim();
+    if (!acceptableName(stored)) throw new InvalidRoleName("A role name must have 1 to 100 characters.");
+    const roleExists = new RoleExists("This scenario already has a role with that name.");
+    if ((await this.roles.findOne({ scenario: found.scenario, name: stored, _id: { $ne: role } })) !== null) throw roleExists;
+    try {
+      await this.roles.updateOne({ _id: role }, { $set: { name: stored, batna } });
+    } catch (error) {
+      if (isDuplicate(error)) throw roleExists;
+      throw error;
+    }
+    return {};
+  }
+
+  async removeRole({ role }: { role: Role }) {
+    const found = await this.roles.findOne({ _id: role });
+    if (found === null) throw new UnknownRole("There is no such role.");
+    if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
+    await this.payoffs.deleteMany({ role });
+    await this.roles.deleteOne({ _id: role });
+    return {};
+  }
+
   async publish({ scenario }: { scenario: Scenario }) {
     const found = await this.scenarios.findOne({ _id: scenario });
     if (found === null) throw new UnknownScenario("There is no such scenario.");
@@ -269,6 +388,26 @@ export class BriefingConcept<Author extends string> {
     return found === null ? [] : [{ name: found.name, author: found.author, published: found.published }];
   }
 
+  async _authoredBy({ author }: { author: Author }) {
+    // Each _id comes from an ObjectId, which starts with the time it was made, so sorting by _id backwards puts the newest first.
+    const authored = await this.scenarios.find({ author }).sort({ _id: -1 }).toArray();
+    return authored.map(({ _id, name, published }) => ({ scenario: _id, name, published }));
+  }
+
+  async _issue({ issue }: { issue: Issue }) {
+    const found = await this.issues.findOne({ _id: issue });
+    if (found === null) return [];
+    const { scenario, name, kind, unit } = found;
+    return [{ scenario, name, kind, ...(unit === undefined ? {} : { unit }) }];
+  }
+
+  async _option({ option }: { option: Option }) {
+    const found = await this.options.findOne({ _id: option });
+    if (found === null) return [];
+    const { scenario, issue, name, universalValue } = found;
+    return [{ scenario, issue, name, ...(universalValue === undefined ? {} : { universalValue }) }];
+  }
+
   async _issues({ scenario }: { scenario: Scenario }) {
     // Each _id comes from an ObjectId, which starts with the time it was made, so sorting by _id keeps the order of adding.
     const issues = await this.issues.find({ scenario }).sort({ _id: 1 }).toArray();
@@ -289,9 +428,10 @@ export class BriefingConcept<Author extends string> {
 
   async _role({ role }: { role: Role }) {
     const found = await this.roles.findOne({ _id: role });
-    return found === null
-      ? []
-      : [{ scenario: found.scenario, name: found.name, batna: found.batna, brief: found.brief }];
+    if (found === null) return [];
+    const { scenario, name, batna, brief } = found;
+    // A role without a brief yet has no brief field, rather than an undefined one, which a read would bind as a value.
+    return [{ scenario, name, batna, ...(brief === undefined ? {} : { brief }) }];
   }
 
   async _payoffs({ role }: { role: Role }) {
@@ -338,6 +478,21 @@ export class BriefingConcept<Author extends string> {
     if (!(await this.#isPublished(scenario))) return [];
     const best = wholePie(await this.#model(scenario));
     return best === undefined ? [] : [best];
+  }
+
+  /** The unpublished scenario `scenario`, or the refusal for an unknown or published one. */
+  async #draft(scenario: Scenario) {
+    const found = await this.scenarios.findOne({ _id: scenario });
+    if (found === null) throw new UnknownScenario("There is no such scenario.");
+    if (found.published) throw new Published("A published scenario can't be changed.");
+    return found;
+  }
+
+  /** Removes the options of `issue`, and every role's payoffs for them. */
+  async #removeOptions({ issue }: { issue: Issue }) {
+    const options = await this.options.find({ issue }).toArray();
+    await this.payoffs.deleteMany({ option: { $in: options.map(({ _id }) => _id) } });
+    await this.options.deleteMany({ issue });
   }
 
   async #isPublished(scenario: Scenario): Promise<boolean> {

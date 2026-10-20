@@ -81,6 +81,12 @@ export function results({ table, debrief }: DebriefMaterial) {
 const percent = (share: number) => `${Math.round(share * 100)}%`;
 const points = (value: number) => Math.round(value).toLocaleString("en-US");
 
+/** Every side at `table` at once, in words: "both" with two, and "all" with more. */
+const all = (table: TableMaterial) => (table.seats.length > 2 ? "all" : "both");
+
+/** The sides at `table` together, in words: "the two of you", "the three of you", and so on. */
+const together = (table: TableMaterial) => `the ${["two", "three", "four", "five"][table.seats.length - 2] ?? table.seats.length} of you`;
+
 /**
  * How much value the deal created and how much of it the person claimed, in a sentence about `person`. A deal can do
  * worse than walking away, for both sides together or for the person alone, and then the sentence says so in words.
@@ -89,7 +95,8 @@ function valueInWords(material: DebriefMaterial, person: "you" | "the student"):
   const { created, claimed } = results(material);
   if (created === null || material.debrief.agreed === null) return "";
   const { them, their } = person === "you" ? { them: "you", their: "your" } : { them: "them", their: "their" };
-  if (created < 0) return `Together, ${person} and the other side did worse than walking away: the deal was worth less to both of ${them} than ${their} BATNAs.`;
+  if (created < 0)
+    return `Together, ${person} and ${otherNames(material.table)} did worse than walking away: the deal was worth less to ${all(material.table)} of ${them} than ${their} BATNAs.`;
   const createdWords = `The deal created ${percent(created)} of the value a deal could add over walking away`;
   if (claimed === null) return `${createdWords}.`;
   if (claimed < 0) return `${createdWords}, but ${person} got less than ${their} own BATNA, so walking away would have been better for ${them}.`;
@@ -112,11 +119,11 @@ export function scriptedDebrief(_ask: string, material: CoachMaterial): string {
   const others = otherNames(material.table);
   const lines = [`**How it ended.** ${ending(material, "You")} You got ${points(yours)} points, and ${others} got ${points(theirs)}.`];
   if (debrief.bestJointPoints === null) {
-    lines.push("**The whole pie.** No deal could have beaten both of your BATNAs, so walking away was the right call.");
+    lines.push(`**The whole pie.** No deal could have beaten ${all(material.table)} of your BATNAs, so walking away was the right call.`);
   } else {
     const left = Math.max(0, Math.round(debrief.bestJointPoints) - Math.round(joint));
     lines.push(
-      `**The whole pie.** The best deal possible was worth ${points(debrief.bestJointPoints)} points to the two of you together. ` +
+      `**The whole pie.** The best deal possible was worth ${points(debrief.bestJointPoints)} points to ${together(material.table)} together. ` +
         (left === 0 ? "Yours was just as big: nothing was left on the table." : `Yours was worth ${points(joint)}, so ${points(left)} points were left on the table.`),
     );
   }
@@ -149,8 +156,8 @@ export function debriefPrompt(material: DebriefMaterial): string {
       ? "With no agreement, each side got its BATNA."
       : `The agreement: ${describeTerms(table.issues, debrief.agreed)}. It gave the student ${points(yours)} points and ${others} ${points(theirs)}.`,
     debrief.best === null || debrief.bestJointPoints === null
-      ? "No deal could have given both sides at least their BATNAs."
-      : `The best deal possible (the whole pie): ${describeTerms(table.issues, debrief.best)}, worth ${points(debrief.bestJointPoints)} points to both together. The student's outcome added up to ${points(joint)}.`,
+      ? `No deal could have given ${all(table)} sides at least their BATNAs.`
+      : `The best deal possible (the whole pie): ${describeTerms(table.issues, debrief.best)}, worth ${points(debrief.bestJointPoints)} points to ${table.seats.length > 2 ? "all of them" : "both"} together. The student's outcome added up to ${points(joint)}.`,
     valueInWords(material, "the student"),
   ]
     .filter(Boolean)
