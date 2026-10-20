@@ -11,16 +11,20 @@ import { issuePoints } from "../table/points.ts";
 import PieChart from "./PieChart.vue";
 import Reviews from "./Reviews.vue";
 import TotalValue from "./TotalValue.vue";
+import Transcript from "./Transcript.vue";
 
 /**
  * The Whole Pie: how the negotiation ended, each side's slice of the most the two could have shared, the coach's
- * debrief, how the deal compares with every possible deal, and, issue by issue, how it differs from the best deal.
- * While the coach is writing, the page asks again every POLL_MS, so the debrief appears as it's written.
+ * debrief, how the deal compares with every possible deal, and, issue by issue, how it differs from the best deal. A
+ * second tab holds the transcript, to read back what was said and proposed. While the coach is writing, the page asks
+ * again every POLL_MS, so the debrief appears as it's written.
  */
 const props = defineProps<{ view: TableView }>();
 const POLL_MS = 1500;
 const debriefView = ref<DebriefView | null>(null);
 const error = ref<string | null>(null);
+/** Whether the page shows the whole pie, or the transcript of the negotiation. */
+const showing = ref<"pie" | "transcript">("pie");
 let timer: ReturnType<typeof setTimeout> | undefined;
 let gone = false;
 
@@ -161,7 +165,13 @@ const lesson = computed(() => {
     <template v-if="debrief && me">
       <p class="headline display">{{ headline }}</p>
 
-      <div class="columns">
+      <div class="tabs" role="tablist" aria-label="The whole pie or the transcript">
+        <button type="button" role="tab" :aria-selected="showing === 'pie'" @click="showing = 'pie'">The whole pie</button>
+        <button type="button" role="tab" :aria-selected="showing === 'transcript'" @click="showing = 'transcript'">Transcript</button>
+      </div>
+
+      <Transcript v-if="showing === 'transcript'" :table="view.table" :debrief="debrief" :ending="headline" />
+      <div v-else class="columns">
         <div class="left">
           <section class="panel">
             <h2>Your slice</h2>

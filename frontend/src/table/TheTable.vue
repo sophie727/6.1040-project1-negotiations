@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from "vue";
-import { api, type Message, type Proposal, type TableView } from "../api/client.ts";
+import { api, type TableView } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
@@ -8,13 +8,12 @@ import Icon from "../reusable/ui/Icon.vue";
 import Splitter from "../reusable/ui/Splitter.vue";
 import { storedShare } from "../reusable/ui/splitter.ts";
 import Markdown from "./Markdown.vue";
+import Conversation from "./Conversation.vue";
 import Countdown from "./Countdown.vue";
-import { formatTime } from "./format.ts";
 import Notes from "./Notes.vue";
 import PictureADeal from "./PictureADeal.vue";
 import PrepSheet from "./PrepSheet.vue";
 import { hasCounterpart, othersAt } from "./players.ts";
-import ProposalCard from "./ProposalCard.vue";
 
 /**
  * The Table: the countdown and the conversation, with its proposals, on the left; on the right, the person's brief and
@@ -26,19 +25,12 @@ const emit = defineEmits<{ changed: [] }>();
 const { sessionEnded } = useSession();
 
 const table = computed(() => props.view.table);
-const names = computed(() => new Map(table.value.seats.map(({ role, name }) => [role, name])));
 /** The other seats, as a sentence: the AI by its role's name, and each person by their username and role. */
 const others = computed(() => othersAt(table.value));
 const withCounterpart = computed(() => hasCounterpart(table.value));
 
-/** Messages and proposals together, oldest first. */
-type Entry = { kind: "message"; at: string; message: Message } | { kind: "proposal"; at: string; proposal: Proposal };
-const timeline = computed<Entry[]>(() =>
-  [
-    ...table.value.messages.map((message): Entry => ({ kind: "message", at: message.sentAt, message })),
-    ...table.value.proposals.map((proposal): Entry => ({ kind: "proposal", at: proposal.proposedAt, proposal })),
-  ].sort((a, b) => a.at.localeCompare(b.at)),
-);
+/** How many messages and proposals there are so far. */
+const said = computed(() => table.value.messages.length + table.value.proposals.length);
 
 /** Why the counterpart couldn't answer the newest question, if it couldn't: the reason the agent gave when it abandoned it. */
 const trouble = computed(() => {
@@ -49,7 +41,7 @@ const trouble = computed(() => {
 // The chat follows new entries, unless the person has scrolled up to read.
 const scroller = ref<HTMLElement | null>(null);
 watch(
-  () => [timeline.value.length, props.view.openQuestions, table.value.proposals.map(({ status }) => status).join(), trouble.value],
+  () => [said.value, props.view.openQuestions, table.value.proposals.map(({ status }) => status).join(), trouble.value],
   async () => {
     const box = scroller.value;
     const following = box === null || box.scrollHeight - box.scrollTop - box.clientHeight < 120;
@@ -153,21 +145,13 @@ const materialsId = useId();
         <section class="panel chat" aria-label="Chat">
           <h2>Chat</h2>
           <div ref="scroller" class="timeline" aria-live="polite">
-            <p v-if="timeline.length === 0" class="empty muted">
+            <p v-if="said === 0" class="empty muted">
               <template v-if="withCounterpart">
                 The clock is running. Say hello, ask a question, or make an offer: {{ others }} is waiting for you to open.
               </template>
               <template v-else>The clock is running. Say hello, ask a question, or make an offer.</template>
             </p>
-            <template v-for="entry in timeline" :key="entry.kind === 'message' ? entry.message.message : entry.proposal.proposal">
-              <div v-if="entry.kind === 'message'" class="message" :class="{ mine: entry.message.sender === table.role }">
-                <span class="who muted">
-                  {{ entry.message.sender === table.role ? "You" : names.get(entry.message.sender) }} · {{ formatTime(entry.message.sentAt) }}
-                </span>
-                <p class="bubble">{{ entry.message.body }}</p>
-              </div>
-              <ProposalCard v-else :proposal="entry.proposal" :table="table" @changed="emit('changed')" />
-            </template>
+            <Conversation :table="table" @changed="emit('changed')" />
             <p v-if="view.openQuestions > 0" class="thinking muted">
               {{ others }} is thinking<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
             </p>
@@ -287,28 +271,6 @@ const materialsId = useId();
   margin: auto;
   max-width: 320px;
   text-align: center;
-}
-.message {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-width: 78%;
-}
-.message.mine {
-  align-self: flex-end;
-  align-items: flex-end;
-}
-.bubble {
-  padding: 10px 14px;
-  border-radius: 16px 16px 16px 4px;
-  background: var(--color-line);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.mine .bubble {
-  border-radius: 16px 16px 4px 16px;
-  color: #ffffff;
-  background: var(--color-accent);
 }
 .trouble {
   align-self: center;

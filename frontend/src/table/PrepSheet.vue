@@ -46,7 +46,7 @@ const parts: { part: keyof PlanParts; label: string; hint: string }[] = [
         <textarea
           class="box"
           rows="2"
-          maxlength="2000"
+          maxlength="20000"
           :value="draft[part]"
           @input="edit(part, ($event.target as HTMLTextAreaElement).value)"
           @blur="save"

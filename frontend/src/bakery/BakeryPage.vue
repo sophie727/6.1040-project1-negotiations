@@ -7,6 +7,7 @@ import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 import { pastryFor, statusLabels } from "./pastries.ts";
 import MatchmakingDialog from "./MatchmakingDialog.vue";
+import SpiceLevel from "./SpiceLevel.vue";
 import StartDialog from "./StartDialog.vue";
 import { DEFAULT_TIME_LIMIT, type Opponents, rememberOpponents, rememberedOpponents, startPractice, startWithFriends } from "./start.ts";
 
@@ -16,6 +17,8 @@ const error = ref<string | null>(null);
 /** The scenario whose start dialog is open. */
 const choosing = ref<Scenario | null>(null);
 const surprising = ref(false);
+/** Whether "Surprise me!" is open for someone new, where the person picks how many people to negotiate with. */
+const surprisingStrangers = ref(false);
 
 /** Who the person wants to negotiate against, which decides what picking a scenario does. */
 const opponents = ref<Opponents>(rememberedOpponents());
@@ -31,7 +34,12 @@ const choices: { value: Opponents; icon: string; label: string; hint: string }[]
 const leads: Record<Opponents, string> = {
   ai: "Pick a scenario to practice. You'll play one side, and an AI counterpart will play the other.",
   friends: "Pick a scenario and a side, and you'll get a link to send your friends. Whoever follows it plays another side.",
-  strangers: "Pick a scenario, and we'll find someone else who wants to practice it.",
+  strangers: "Pick a scenario, and we'll find someone else who wants to practice it. Or pick Surprise me! to join whoever's looking.",
+};
+const surpriseHints: Record<Opponents, string> = {
+  ai: "A random scenario and side",
+  friends: "A random scenario and side",
+  strangers: "Join whoever's looking, for any scenario",
 };
 
 onMounted(async () => {
@@ -47,15 +55,18 @@ onMounted(async () => {
 const scenarios = computed(() => bakery.value?.scenarios ?? []);
 const tables = computed(() => bakery.value?.tables ?? []);
 
-/** "Surprise me!": a random scenario and side, or, with someone new, a random scenario to look for others to negotiate. */
+/**
+ * "Surprise me!": a random scenario and side, or, with someone new, joining the first people looking for a negotiation
+ * as large as the person picks, whichever scenario they want.
+ */
 async function surprise() {
+  if (opponents.value === "strangers") {
+    surprisingStrangers.value = true;
+    return;
+  }
   const scenario = scenarios.value[Math.floor(Math.random() * scenarios.value.length)];
   const role = scenario?.roles[Math.floor(Math.random() * scenario.roles.length)];
   if (scenario === undefined || role === undefined) return;
-  if (opponents.value === "strangers") {
-    choosing.value = scenario;
-    return;
-  }
   surprising.value = true;
   error.value = opponents.value === "friends" ? await startWithFriends(scenario, role.role) : await startPractice(scenario, role.role);
   surprising.value = false;
@@ -94,11 +105,12 @@ async function surprise() {
         <span class="muted">
           {{ scenario.roles.map(({ name }) => name).join(" or ") }} · {{ scenario.timeLimit ?? DEFAULT_TIME_LIMIT }} minutes
         </span>
+        <SpiceLevel :spice="scenario.spice" />
       </button>
       <button type="button" class="pastry-card surprise" :disabled="surprising || scenarios.length === 0" @click="surprise">
         <span class="pastry" aria-hidden="true">✨</span>
         <span class="name display">Surprise me!</span>
-        <span class="muted">A random scenario and side</span>
+        <span class="muted">{{ surpriseHints[opponents] }}</span>
       </button>
     </div>
 
@@ -122,7 +134,8 @@ async function surprise() {
       </ul>
     </section>
 
-    <MatchmakingDialog v-if="choosing && opponents === 'strangers'" :scenario="choosing" @close="choosing = null" />
+    <MatchmakingDialog v-if="choosing && opponents === 'strangers'" :scenario="choosing" :scenarios="scenarios" @close="choosing = null" />
+    <MatchmakingDialog v-else-if="surprisingStrangers" :scenario="null" :scenarios="scenarios" @close="surprisingStrangers = false" />
     <StartDialog
       v-else-if="choosing"
       :scenario="choosing"

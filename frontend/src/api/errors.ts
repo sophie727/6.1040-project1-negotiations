@@ -23,7 +23,7 @@ const messages: Record<string, Record<string, string>> = {
     NOT_FOUND: "That suggestion isn't from this negotiation.",
     CONFLICT: "You can't agree now: fill in your plan first, or that suggestion was replaced, or the negotiation started.",
   },
-  "/tables/plan": { INVALID_REQUEST: "Each part of your plan can have at most 2,000 characters." },
+  "/tables/plan": { INVALID_REQUEST: "Each part of your plan can have at most 20,000 characters." },
   "/tables/send": {
     INVALID_REQUEST: "A message must have 1 to 2,000 characters.",
     CONFLICT: "This negotiation is over.",

@@ -46,9 +46,13 @@ describe("the prep sheet", () => {
     const nadia = await practice("nadia");
     const { session: leo } = await register("leo");
     expect(await api.tables.plan({ session: leo, table: nadia.table, ...PLAN })).toEqual({ error: "NOT_FOUND" });
-    expect(await api.tables.plan({ session: nadia.session, table: nadia.table, ...PLAN, target: "x".repeat(2001) })).toEqual({
+
+    // Each part is a note, with at most 20,000 characters, and a part that is too long keeps what it had.
+    ok(await api.tables.plan({ session: nadia.session, table: nadia.table, ...PLAN }));
+    expect(await api.tables.plan({ session: nadia.session, table: nadia.table, ...PLAN, walkaway: "x".repeat(20001) })).toEqual({
       error: "TOO_LONG",
     });
+    expect((await nadia.show()).plan).toEqual({ on: false, ...PLAN });
     expect(await api.settings["prep-sheet"]({ session: nadia.session, on: "yes" as never })).toMatchObject({ error: "INVALID_INPUT" });
   });
 });

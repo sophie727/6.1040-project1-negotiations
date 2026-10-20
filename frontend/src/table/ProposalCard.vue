@@ -3,10 +3,14 @@ import { computed, ref } from "vue";
 import { api, type Proposal, type Table } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
+import type { Worth } from "./conversation.ts";
 import { formatAgreed, formatPoints, formatTime } from "./format.ts";
 
-/** A proposal in the chat: its terms, what it's worth to the person, its status, and the answers they can give. */
-const props = defineProps<{ proposal: Proposal; table: Table }>();
+/**
+ * A proposal in the chat: its terms, what it's worth to the person, its status, and the answers they can give. In the
+ * transcript of a negotiation that has ended, there's nothing to answer, and it also shows what it was worth to `others`.
+ */
+const props = defineProps<{ proposal: Proposal; table: Table; transcript?: boolean; others?: Worth[] }>();
 const emit = defineEmits<{ changed: [] }>();
 
 const mine = computed(() => props.proposal.proposer === props.table.role);
@@ -19,7 +23,12 @@ const statuses: Record<string, { label: string; tone: string }> = {
   RETRACTED: { label: "Taken back", tone: "" },
   SUPERSEDED: { label: "Replaced by a newer proposal", tone: "" },
 };
-const status = computed(() => statuses[props.proposal.status] ?? { label: props.proposal.status, tone: "" });
+const status = computed(() =>
+  // A proposal still waiting when the negotiation ended was never answered.
+  props.transcript && pending.value
+    ? { label: "Never answered", tone: "" }
+    : (statuses[props.proposal.status] ?? { label: props.proposal.status, tone: "" }),
+);
 const belowBatna = computed(() => props.proposal.points !== null && props.proposal.points < props.table.batna);
 
 const working = ref(false);
@@ -55,12 +64,17 @@ async function answer(path: "/tables/accept" | "/tables/reject" | "/tables/retra
     </dl>
     <p class="worth">
       Worth <strong>{{ proposal.points === null ? "—" : formatPoints(proposal.points) }} points</strong> to you
-      <span class="muted">(your BATNA is {{ formatPoints(table.batna) }})</span>
+      <span class="muted">(your BATNA {{ transcript ? "was" : "is" }} {{ formatPoints(table.batna) }})</span>
       <span v-if="belowBatna" class="badge bad">Below your BATNA</span>
+    </p>
+    <p v-for="other in others ?? []" :key="other.name" class="worth">
+      Worth <strong>{{ other.points === null ? "—" : formatPoints(other.points) }} points</strong> to {{ other.name }}
+      <span class="muted">(their BATNA was {{ formatPoints(other.batna) }})</span>
+      <span v-if="other.points !== null && other.points < other.batna" class="badge bad">Below their BATNA</span>
     </p>
     <footer>
       <span class="badge" :class="status.tone">{{ status.label }}</span>
-      <div v-if="pending" class="actions">
+      <div v-if="pending && !transcript" class="actions">
         <template v-if="!mine">
           <button type="button" class="button outline" :disabled="working" @click="answer('/tables/reject')">Reject</button>
           <button type="button" class="button good" :disabled="working" @click="answer('/tables/accept')">Accept</button>

@@ -3,6 +3,8 @@ import { ref } from "vue";
 import type { Scenario } from "../api/client.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
 import { pastryFor } from "./pastries.ts";
+import { spiceLevelOf } from "./spice.ts";
+import SpiceLevel from "./SpiceLevel.vue";
 import { startPractice, startWithFriends } from "./start.ts";
 
 /**
@@ -32,6 +34,10 @@ async function start() {
     @close="emit('close')"
   >
     <form class="start" @submit.prevent="start">
+      <p class="spice-line">
+        <SpiceLevel :spice="scenario.spice" />
+        <span class="muted">{{ spiceLevelOf(scenario.spice).meaning }}</span>
+      </p>
       <fieldset>
         <legend>Which side do you want to play?</legend>
         <div class="roles">
@@ -54,6 +60,15 @@ async function start() {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+}
+.spice-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.spice-line .muted {
+  font-size: var(--text-sm);
 }
 fieldset {
   padding: 0;

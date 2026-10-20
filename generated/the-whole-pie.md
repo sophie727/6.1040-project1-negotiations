@@ -134,7 +134,7 @@ Defined in [Matchmaking](../design/concepts/Matchmaking.md), line 1.
 
 #### Actions
 
-- `seek(seeker: Seeker, pool: Pool, size: Number, now: DateTime) : returns (request: Request, grouped: Flag)`
+- `seek(seeker: Seeker, pool: Pool, size: Number, open: Flag, now: DateTime) : returns (request: Request, grouped: Flag)`
   - Refuses `INVALID_SIZE`: A group needs a whole number of people, at least two.
 - `checkIn(request: Request, seeker: Seeker, now: DateTime) : returns ()`
   - Refuses `NOT_WAITING`: You aren't waiting for a match.
@@ -147,9 +147,10 @@ Defined in [Matchmaking](../design/concepts/Matchmaking.md), line 1.
 
 #### Queries
 
-- `_request(request: Request) : optional (seeker: Seeker, pool: Pool, size: Number, status: LookingStatus)`
+- `_request(request: Request) : optional (seeker: Seeker, pool: Pool, size: Number, open: Flag, status: LookingStatus)`
 - `_lapsed(request: Request, now: DateTime) : one (lapsed: Flag)`
 - `_members(request: Request) : many (seeker: Seeker)`
+- `_agreed(request: Request) : optional (pool: Pool)`
 - `_place(request: Request) : optional (place: Place)`
 
 #### Instances
@@ -177,29 +178,33 @@ Defined in [Noting](../design/concepts/Noting.md), line 1.
 - `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 67.
   - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 68.
   - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 69.
+- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 100.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 101.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 102.
+- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 92.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 93.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 94.
+- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 96.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 97.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 98.
 
-### Preparing
+### Preferring
 
-Defined in [Preparing](../design/concepts/Preparing.md), line 1.
+Defined in [Preferring](../design/concepts/Preferring.md), line 1.
 
 #### Actions
 
-- `turnOn(author: Author) : returns ()`
-- `turnOff(author: Author) : returns ()`
-- `plan(author: Author, subject: Subject, target: String, walkaway: String, priorities: String) : returns (plan: Plan)`
-  - Refuses `TOO_LONG`: Each part of a plan can have at most 2,000 characters.
+- `turnOn(person: Person, feature: String) : returns ()`
+- `turnOff(person: Person, feature: String) : returns ()`
 
 #### Queries
 
-- `_planner(author: Author) : one (on: Flag)`
-- `_plan(author: Author, subject: Subject) : optional (target: String, walkaway: String, priorities: String)`
-- `_complete(author: Author, subject: Subject) : one (complete: Flag)`
+- `_on(person: Person, feature: String) : one (on: Flag)`
 
 #### Instances
 
-- `Preparing` — instance of `Preparing` — [The Whole Pie types](../design/types.md), line 92.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 93.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 94.
+- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 104.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 105.
 
 ### Proposing
 
@@ -430,6 +435,10 @@ Concrete types:
 - `TermSheet` — [The Whole Pie types](../design/types.md), line 23.
 - `TimeLimit` — [The Whole Pie types](../design/types.md), line 26.
 
+## Computations
+
+- `spiceLevel(jointPoints?: Number, jointBatna: Number) : Number` — [Practice](../design/compositions/practice.md), line 24.
+
 ## Views
 
 _Views name reusable conditions. Multiple `where` blocks are alternatives._
@@ -438,7 +447,7 @@ _Views name reusable conditions. Multiple `where` blocks are alternatives._
 
 Authored path: `practice.starting.playable`.
 - Covered by [Friends](../design/compositions/friends.md), line 7.
-- Covered by [Practice](../design/compositions/practice.md), line 17.
+- Covered by [Practice](../design/compositions/practice.md), line 32.
 
 ```view
 (role) of (scenario) can be practiced — inputs (scenario, role); outputs (); bindings ()
@@ -544,12 +553,15 @@ Authored path: `table.access.notOpen`.
 ### (user) is prepared to start (table)
 
 Authored path: `table.access.preparedFor`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 21.
 
 ```view
 (user) is prepared to start (table) — inputs (user, table); outputs (); bindings ()
-  where Preparing._planner (author: user) has (on: false)
-  where Preparing._complete (author: user, subject: table) has (complete: true)
+  where Preferring._on (feature: "prep-sheet", person: user) has (on: false)
+  where
+    TargetNoting._note (author: user, subject: table) and not (body: "")
+    WalkawayNoting._note (author: user, subject: table) and not (body: "")
+    PrioritiesNoting._note (author: user, subject: table) and not (body: "")
 ```
 
 ### a question that asks (ask) about (table) is waiting
@@ -570,6 +582,19 @@ Authored path: `matchmaking.looking.groupSize`.
 ```view
 how many people a negotiation of (scenario) needs — inputs (scenario); outputs (size); bindings () — answers exactly one (size)
   where size is the count of Briefing._roles (scenario)
+```
+
+### how spicy (scenario) is
+
+Authored path: `practice.choosing.spiceOf`.
+- Covered by [Practice](../design/compositions/practice.md), line 15.
+
+```view
+how spicy (scenario) is — inputs (scenario); outputs (spice); bindings (jointPoints, jointBatna) — answers at most one (spice)
+  where
+    whether Briefing._wholePie (scenario) has (jointPoints)
+    Briefing._jointBatna (scenario) has (jointBatna)
+    spice is spiceLevel (jointBatna, jointPoints)
 ```
 
 ### people can look for others to negotiate (scenario) with
@@ -945,8 +970,10 @@ Authored path: `table.showing.planOf`.
 ```former
 Former "the plan (user) wrote for (table)" — inputs (user, table); bindings (on, target, walkaway, priorities); promises exactly one record — forms:
   a record of
-    where Preparing._planner (author: user) has (on)
-    where whether Preparing._plan (author: user, subject: table) has (priorities, target, walkaway)
+    where Preferring._on (feature: "prep-sheet", person: user) has (on)
+    where whether TargetNoting._note (author: user, subject: table) has (body: target)
+    where whether WalkawayNoting._note (author: user, subject: table) has (body: walkaway)
+    where whether PrioritiesNoting._note (author: user, subject: table) has (body: priorities)
     on
     priorities
     target
@@ -971,9 +998,10 @@ Authored path: `practice.choosing.scenarios`.
 - Covered by [Practice](../design/compositions/practice.md), line 7.
 
 ```former
-Former "the published scenarios" — inputs (); bindings (scenario, name, timeLimit, role, roleName); promises exactly one record — forms:
+Former "the published scenarios" — inputs (); bindings (scenario, name, timeLimit, role, roleName, spice); promises exactly one record — forms:
   each Briefing._published () has (name, scenario)
     where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
+    where view "how spicy (scenario) is" with (scenario) has (spice)
     form a record of
       name
       roles: each Briefing._roles (scenario) has (name: roleName, role)
@@ -981,6 +1009,7 @@ Former "the published scenarios" — inputs (); bindings (scenario, name, timeLi
           name: roleName
           role
       scenario
+      spice
       timeLimit
 ```
 
@@ -1696,7 +1725,7 @@ Authored path: `matchmaking.looking.Find`.
 - Covered by [Matchmaking](../design/compositions/matchmaking.md), line 10.
 
 ```reaction
-when RequestBoundary.request (path: "/matchmaking/find", requestId, scenario, session)
+when RequestBoundary.request (open, path: "/matchmaking/find", requestId, scenario, session)
 where
   view "people can look for others to negotiate (scenario) with" with (scenario)
 then
@@ -1713,10 +1742,10 @@ Authored path: `matchmaking.looking.Find`.
 when Sessioning.use (session, subject: user), asked by matchmaking.looking.Find
 where
   instant is the current flow's instant
-  earlier, RequestBoundary.request (path: "/matchmaking/find", requestId, scenario, session)
+  earlier, RequestBoundary.request (open, path: "/matchmaking/find", requestId, scenario, session)
   view "how many people a negotiation of (scenario) needs" with (scenario) has (size)
 then
-  Matchmaking.seek (now: instant, pool: scenario, seeker: user, size)
+  Matchmaking.seek (now: instant, open, pool: scenario, seeker: user, size)
 ```
 
 ### matchmaking.looking.Find:matched#3
@@ -1726,11 +1755,11 @@ Authored path: `matchmaking.looking.Find`.
 - Covered by [Matchmaking](../design/compositions/matchmaking.md), line 10.
 
 ```reaction
-when Matchmaking.seek (now: instant, pool: scenario, seeker: user, size, request), asked by matchmaking.looking.Find#2
+when Matchmaking.seek (now: instant, open, pool: scenario, seeker: user, size, request), asked by matchmaking.looking.Find#2
 at the flow's settlement frontier
 where
   view "the table where (user) sits with the group (request) found" with (request, user) has (table)
-  earlier, RequestBoundary.request (path: "/matchmaking/find", requestId, scenario, session)
+  earlier, RequestBoundary.request (open, path: "/matchmaking/find", requestId, scenario, session)
 then
   RequestBoundary.respond (request, requestId, status: "MATCHED", table)
 ```
@@ -1742,11 +1771,11 @@ Authored path: `matchmaking.looking.Find`.
 - Covered by [Matchmaking](../design/compositions/matchmaking.md), line 10.
 
 ```reaction
-when Matchmaking.seek (now: instant, pool: scenario, seeker: user, size, request), asked by matchmaking.looking.Find#2
+when Matchmaking.seek (now: instant, open, pool: scenario, seeker: user, size, request), asked by matchmaking.looking.Find#2
 at the flow's settlement frontier
 where
   Matchmaking._request (request) has (status: "WAITING")
-  earlier, RequestBoundary.request (path: "/matchmaking/find", requestId, scenario, session)
+  earlier, RequestBoundary.request (open, path: "/matchmaking/find", requestId, scenario, session)
 then
   RequestBoundary.respond (request, requestId, status: "WAITING", table: null)
 ```
@@ -1758,7 +1787,7 @@ Authored path: `matchmaking.looking.RefuseUnfindable`.
 - Covered by [Matchmaking](../design/compositions/matchmaking.md), line 11.
 
 ```reaction
-when RequestBoundary.request (path: "/matchmaking/find", requestId, scenario, session)
+when RequestBoundary.request (open, path: "/matchmaking/find", requestId, scenario, session)
 where
   no view "people can look for others to negotiate (scenario) with" with (scenario)
 then
@@ -1949,7 +1978,9 @@ Authored path: `matchmaking.meeting.OpenTableForMatch`.
 - Covered by [Matchmaking](../design/compositions/matchmaking.md), line 32.
 
 ```reaction
-when Matchmaking.seek (pool: scenario, grouped: true, request)
+when Matchmaking.seek (grouped: true, request)
+where
+  Matchmaking._agreed (request) has (pool: scenario)
 then
   Tabling.open (scenario)
 ```
@@ -1962,7 +1993,7 @@ Authored path: `matchmaking.meeting.OpenTableForMatch`.
 ```reaction
 when Tabling.open (scenario, table), asked by matchmaking.meeting.OpenTableForMatch
 where
-  earlier, Matchmaking.seek (pool: scenario, grouped: true, request)
+  earlier, Matchmaking.seek (grouped: true, request)
 then
   Matchmaking.meet (place: table, request)
 ```
@@ -2010,8 +2041,8 @@ then
 ### practice.starting.RefuseUnplayable
 
 Authored path: `practice.starting.RefuseUnplayable`.
-- Covered by [Practice](../design/compositions/practice.md), line 17.
-- Covered by [Practice](../design/compositions/practice.md), line 21.
+- Covered by [Practice](../design/compositions/practice.md), line 32.
+- Covered by [Practice](../design/compositions/practice.md), line 36.
 
 ```reaction
 when RequestBoundary.request (path: "/practice/start", requestId, role, scenario, session)
@@ -2024,8 +2055,8 @@ then
 ### practice.starting.StartPractice
 
 Authored path: `practice.starting.StartPractice`.
-- Covered by [Practice](../design/compositions/practice.md), line 15.
-- Covered by [Practice](../design/compositions/practice.md), line 20.
+- Covered by [Practice](../design/compositions/practice.md), line 30.
+- Covered by [Practice](../design/compositions/practice.md), line 35.
 
 ```reaction
 when RequestBoundary.request (path: "/practice/start", requestId, role, scenario, session)
@@ -2038,8 +2069,8 @@ then
 ### practice.starting.StartPractice#2
 
 Authored path: `practice.starting.StartPractice`.
-- Covered by [Practice](../design/compositions/practice.md), line 15.
-- Covered by [Practice](../design/compositions/practice.md), line 20.
+- Covered by [Practice](../design/compositions/practice.md), line 30.
+- Covered by [Practice](../design/compositions/practice.md), line 35.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by practice.starting.StartPractice
@@ -2052,8 +2083,8 @@ then
 ### practice.starting.StartPractice#3
 
 Authored path: `practice.starting.StartPractice`.
-- Covered by [Practice](../design/compositions/practice.md), line 15.
-- Covered by [Practice](../design/compositions/practice.md), line 20.
+- Covered by [Practice](../design/compositions/practice.md), line 30.
+- Covered by [Practice](../design/compositions/practice.md), line 35.
 
 ```reaction
 when Tabling.open (scenario, table), asked by practice.starting.StartPractice#2
@@ -2068,8 +2099,8 @@ then
 ### practice.starting.StartPractice#4
 
 Authored path: `practice.starting.StartPractice`.
-- Covered by [Practice](../design/compositions/practice.md), line 15.
-- Covered by [Practice](../design/compositions/practice.md), line 20.
+- Covered by [Practice](../design/compositions/practice.md), line 30.
+- Covered by [Practice](../design/compositions/practice.md), line 35.
 
 ```reaction
 when Tabling.seat (negotiator: user, role, table), asked by practice.starting.StartPractice#3
@@ -2083,8 +2114,8 @@ then
 ### practice.starting.StartPractice#5
 
 Authored path: `practice.starting.StartPractice`.
-- Covered by [Practice](../design/compositions/practice.md), line 15.
-- Covered by [Practice](../design/compositions/practice.md), line 20.
+- Covered by [Practice](../design/compositions/practice.md), line 30.
+- Covered by [Practice](../design/compositions/practice.md), line 35.
 
 ```reaction
 when Tabling.seat (negotiator: "bot:counterpart", role: other, table), asked by practice.starting.StartPractice#4
@@ -2098,8 +2129,8 @@ then
 ### preparing.planning.WritePlan
 
 Authored path: `preparing.planning.WritePlan`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 17.
-- Covered by [Preparing](../design/compositions/preparing.md), line 22.
+- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 24.
 
 ```reaction
 when RequestBoundary.request (path: "/tables/plan", priorities, requestId, session, table, target, walkaway)
@@ -2110,8 +2141,8 @@ then
 ### preparing.planning.WritePlan:not-seated#2
 
 Authored path: `preparing.planning.WritePlan`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 17.
-- Covered by [Preparing](../design/compositions/preparing.md), line 22.
+- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 24.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by preparing.planning.WritePlan
@@ -2125,8 +2156,8 @@ then
 ### preparing.planning.WritePlan:seated#2
 
 Authored path: `preparing.planning.WritePlan`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 17.
-- Covered by [Preparing](../design/compositions/preparing.md), line 22.
+- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 24.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by preparing.planning.WritePlan
@@ -2134,17 +2165,45 @@ where
   earlier, RequestBoundary.request (path: "/tables/plan", priorities, requestId, session, table, target, walkaway)
   view "the role (user) plays at (table)" with (table, user)
 then
-  Preparing.plan (author: user, priorities, subject: table, target, walkaway)
+  TargetNoting.write (author: user, body: target, subject: table)
 ```
 
 ### preparing.planning.WritePlan:seated#3
 
 Authored path: `preparing.planning.WritePlan`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 17.
-- Covered by [Preparing](../design/compositions/preparing.md), line 22.
+- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 24.
 
 ```reaction
-when Preparing.plan (author: user, priorities, subject: table, target, walkaway), asked by preparing.planning.WritePlan:seated#2
+when TargetNoting.write (author: user, body: target, subject: table), asked by preparing.planning.WritePlan:seated#2
+where
+  earlier, RequestBoundary.request (path: "/tables/plan", priorities, requestId, session, table, target, walkaway)
+then
+  WalkawayNoting.write (author: user, body: walkaway, subject: table)
+```
+
+### preparing.planning.WritePlan:seated#4
+
+Authored path: `preparing.planning.WritePlan`.
+- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 24.
+
+```reaction
+when WalkawayNoting.write (author: user, body: walkaway, subject: table), asked by preparing.planning.WritePlan:seated#3
+where
+  earlier, RequestBoundary.request (path: "/tables/plan", priorities, requestId, session, table, target, walkaway)
+then
+  PrioritiesNoting.write (author: user, body: priorities, subject: table)
+```
+
+### preparing.planning.WritePlan:seated#5
+
+Authored path: `preparing.planning.WritePlan`.
+- Covered by [Preparing](../design/compositions/preparing.md), line 19.
+- Covered by [Preparing](../design/compositions/preparing.md), line 24.
+
+```reaction
+when PrioritiesNoting.write (author: user, body: priorities, subject: table), asked by preparing.planning.WritePlan:seated#4
 where
   earlier, RequestBoundary.request (path: "/tables/plan", priorities, requestId, session, table, target, walkaway)
 then
@@ -2154,8 +2213,8 @@ then
 ### preparing.settings.ShowSettings
 
 Authored path: `preparing.settings.ShowSettings`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 10.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 12.
 
 ```reaction
 when RequestBoundary.request (path: "/settings/show", requestId, session)
@@ -2166,13 +2225,13 @@ then
 ### preparing.settings.ShowSettings#2
 
 Authored path: `preparing.settings.ShowSettings`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 10.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 12.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by preparing.settings.ShowSettings
 where
-  Preparing._planner (author: user) has (on)
+  Preferring._on (feature: "prep-sheet", person: user) has (on)
   earlier, RequestBoundary.request (path: "/settings/show", requestId, session)
 then
   RequestBoundary.respond (prepSheet: on, requestId)
@@ -2181,8 +2240,8 @@ then
 ### preparing.settings.TurnPrepSheetsOff
 
 Authored path: `preparing.settings.TurnPrepSheetsOff`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 12.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 14.
 
 ```reaction
 when RequestBoundary.request (on: false, path: "/settings/prep-sheet", requestId, session)
@@ -2193,23 +2252,23 @@ then
 ### preparing.settings.TurnPrepSheetsOff#2
 
 Authored path: `preparing.settings.TurnPrepSheetsOff`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 12.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 14.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by preparing.settings.TurnPrepSheetsOff
 then
-  Preparing.turnOff (author: user)
+  Preferring.turnOff (feature: "prep-sheet", person: user)
 ```
 
 ### preparing.settings.TurnPrepSheetsOff#3
 
 Authored path: `preparing.settings.TurnPrepSheetsOff`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 12.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 14.
 
 ```reaction
-when Preparing.turnOff (author: user), asked by preparing.settings.TurnPrepSheetsOff#2
+when Preferring.turnOff (feature: "prep-sheet", person: user), asked by preparing.settings.TurnPrepSheetsOff#2
 where
   earlier, RequestBoundary.request (on: false, path: "/settings/prep-sheet", requestId, session)
 then
@@ -2219,8 +2278,8 @@ then
 ### preparing.settings.TurnPrepSheetsOn
 
 Authored path: `preparing.settings.TurnPrepSheetsOn`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 11.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 13.
 
 ```reaction
 when RequestBoundary.request (on: true, path: "/settings/prep-sheet", requestId, session)
@@ -2231,23 +2290,23 @@ then
 ### preparing.settings.TurnPrepSheetsOn#2
 
 Authored path: `preparing.settings.TurnPrepSheetsOn`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 11.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 13.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by preparing.settings.TurnPrepSheetsOn
 then
-  Preparing.turnOn (author: user)
+  Preferring.turnOn (feature: "prep-sheet", person: user)
 ```
 
 ### preparing.settings.TurnPrepSheetsOn#3
 
 Authored path: `preparing.settings.TurnPrepSheetsOn`.
-- Covered by [Preparing](../design/compositions/preparing.md), line 7.
-- Covered by [Preparing](../design/compositions/preparing.md), line 11.
+- Covered by [Preparing](../design/compositions/preparing.md), line 9.
+- Covered by [Preparing](../design/compositions/preparing.md), line 13.
 
 ```reaction
-when Preparing.turnOn (author: user), asked by preparing.settings.TurnPrepSheetsOn#2
+when Preferring.turnOn (feature: "prep-sheet", person: user), asked by preparing.settings.TurnPrepSheetsOn#2
 where
   earlier, RequestBoundary.request (on: true, path: "/settings/prep-sheet", requestId, session)
 then
@@ -4141,7 +4200,7 @@ not listed here have no explicit input contract.
 - `/friends/invitation` — requires `code`, `session`
 - `/friends/join` — requires `code`, `role`, `session`
 - `/friends/start` — requires `role`, `scenario`, `session`
-- `/matchmaking/find` — requires `scenario`, `session`
+- `/matchmaking/find` — requires `open`, `scenario`, `session`
 - `/matchmaking/stop` — requires `request`, `session`
 - `/matchmaking/wait` — requires `request`, `session`
 - `/practice/start` — requires `role`, `scenario`, `session`

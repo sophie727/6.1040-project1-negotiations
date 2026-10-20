@@ -1,207 +1,220 @@
 bun test v1.4.2 (744846f84)
 
 tests/seed.test.ts:
-(pass) seeding > an empty database gets The Job Offer, published with a 30-minute time limit and a 2,200-point whole pie [718.56ms]
-(pass) seeding > each brief's alternative is worth exactly its role's BATNA, and its examples match the points [219.96ms]
-(pass) seeding > seeding a database that already has a published scenario changes nothing [218.92ms]
+(pass) seeding > an empty database gets The Job Offer, published with a 30-minute time limit and a 2,200-point whole pie [597.28ms]
+(pass) seeding > each brief's alternative is worth exactly its role's BATNA, and its examples match the points [220.73ms]
+(pass) seeding > seeding a database that already has a published scenario changes nothing [207.53ms]
 
 tests/compositions/friends.test.ts:
-(pass) negotiating with friends > Nadia shares a link, Omar joins, they agree on 45 minutes, reach a deal, and both see the whole pie [973.56ms]
-(pass) negotiating with friends > a link lets in only as many people as the table has empty seats, and only before it begins [810.52ms]
-(pass) negotiating with friends > only someone seated can suggest or agree to a start, and only before it begins [856.56ms]
-(pass) negotiating with friends > a friends table needs a role of a published scenario [581.55ms]
+(pass) negotiating with friends > Nadia shares a link, Omar joins, they agree on 45 minutes, reach a deal, and both see the whole pie [1649.47ms]
+(pass) negotiating with friends > a link lets in only as many people as the table has empty seats, and only before it begins [1001.10ms]
+(pass) negotiating with friends > only someone seated can suggest or agree to a start, and only before it begins [937.21ms]
+(pass) negotiating with friends > a friends table needs a role of a published scenario [326.31ms]
 
 tests/compositions/counterpart.test.ts:
-(pass) the counterpart > it never accepts a proposal worth less than its BATNA, even when its answer says to [1225.60ms]
-(pass) the counterpart > a decision applies only to the proposal it decided on, not to a newer one [1745.07ms]
-(pass) the counterpart > when the counterpart can't answer, the table says why, and the next message asks again [1403.81ms]
-(pass) the counterpart > each line of the counterpart's reply, or of what it says about a proposal, arrives as its own message, in order [1070.01ms]
-(pass) the counterpart > the stand-in replies with a canned message and answers each proposal by its worth to its role [0.88ms]
+(pass) the counterpart > it never accepts a proposal worth less than its BATNA, even when its answer says to [1228.01ms]
+(pass) the counterpart > a decision applies only to the proposal it decided on, not to a newer one [984.48ms]
+(pass) the counterpart > when the counterpart can't answer, the table says why, and the next message asks again [730.19ms]
+(pass) the counterpart > each line of the counterpart's reply, or of what it says about a proposal, arrives as its own message, in order [1099.64ms]
+(pass) the counterpart > the stand-in replies with a canned message and answers each proposal by its worth to its role [0.77ms]
 
 tests/compositions/access.test.ts:
-(pass) access > Sam can't see, act at, or read the debrief of Nadia's table, as if it didn't exist [1136.16ms]
-(pass) access > Nadia reads only her own brief, sees what each proposal is worth only to her, and can't answer a proposal from another table [738.00ms]
-(pass) access > every person's endpoint needs a session, and the counterpart's session is refused at each of them [877.62ms]
-(pass) the counterpart's endpoints > only the agent's session reads a table, and only the table of a prompt the agent took [757.66ms]
+(pass) access > Sam can't see, act at, or read the debrief of Nadia's table, as if it didn't exist [1746.58ms]
+(pass) access > Nadia reads only her own brief, sees what each proposal is worth only to her, and can't answer a proposal from another table [1104.66ms]
+(pass) access > every person's endpoint needs a session, and the counterpart's session is refused at each of them [748.51ms]
+(pass) the counterpart's endpoints > only the agent's session reads a table, and only the table of a prompt the agent took [2432.87ms]
 
 tests/compositions/http.test.ts:
-(pass) over HTTP > signing up sets the session cookie, which every later request carries, and a refusal arrives as its HTTP category [710.89ms]
+(pass) over HTTP > signing up sets the session cookie, which every later request carries, and a refusal arrives as its HTTP category [1046.32ms]
 
 tests/compositions/coaching.test.ts:
-(pass) coaching > when Nadia walks away, the coach writes her a debrief, and the debrief endpoint returns it [810.02ms]
-(pass) coaching > each way a negotiation ends asks the coach for exactly one debrief [1133.92ms]
-(pass) coaching > the coach reads a table only through a debrief it took, after the negotiation ends [742.23ms]
-(pass) coaching > when Nadia and Omar's negotiation ends, the coach writes one debrief of both sides, which both of them read [5481.98ms]
+(pass) coaching > when Nadia walks away, the coach writes her a debrief, and the debrief endpoint returns it [696.48ms]
+(pass) coaching > each way a negotiation ends asks the coach for exactly one debrief [853.13ms]
+(pass) coaching > the coach reads a table only through a debrief it took, after the negotiation ends [705.28ms]
+(pass) coaching > when Nadia and Omar's negotiation ends, the coach writes one debrief of both sides, which both of them read [829.75ms]
 
 tests/compositions/ratings.test.ts:
-(pass) ratings > a deal between people counts for both: it created all the value a deal could, and each claimed half [1407.20ms]
-(pass) ratings > walking away, or running out of time, creates nothing and leaves nothing to claim [1626.85ms]
-(pass) ratings > practicing with the AI counterpart never changes anyone's ratings [685.78ms]
-(pass) ratings > after their negotiation, Nadia and Omar review each other once, and see each other's ratings at their next table [1093.82ms]
-(pass) ratings > a table someone left before it began isn't rated, and its empty seat has nobody to review [659.30ms]
+(pass) ratings > a deal between people counts for both: it created all the value a deal could, and each claimed half [927.04ms]
+(pass) ratings > walking away, or running out of time, creates nothing and leaves nothing to claim [2030.45ms]
+(pass) ratings > practicing with the AI counterpart never changes anyone's ratings [677.71ms]
+(pass) ratings > after their negotiation, Nadia and Omar review each other once, and see each other's ratings at their next table [1331.15ms]
+(pass) ratings > a table someone left before it began isn't rated, and its empty seat has nobody to review [2255.94ms]
+
+tests/compositions/spiciness.test.ts:
+(pass) how spicy a scenario is > The Job Offer is hot, since a deal can add only 10% to what Hiro and Manon get by walking away [392.33ms]
+(pass) how spicy a scenario is > the more a deal can add to walking away, the milder a scenario is, and with no deal possible, it's hot [433.09ms]
+(pass) how spicy a scenario is > start dates later than any deal both sides would take leave a scenario as spicy as it was [368.84ms]
+(pass) spiceLevel > a scenario is mild from a 40% surplus, medium from 15%, and hot below that or without a whole pie [0.05ms]
+(pass) spiceLevel > when walking away is worth nothing in all, any deal that adds something is mild [0.01ms]
 
 tests/compositions/preparing.test.ts:
-(pass) the prep sheet > with prep sheets on, Nadia can't start until her plan is complete, and sees it at the table [709.70ms]
-(pass) the prep sheet > agreeing to start waits for a plan too, and turning prep sheets off lifts it [761.09ms]
-(pass) the prep sheet > only someone at the table can write a plan for it, and a setting must be true or false [673.02ms]
+(pass) the prep sheet > with prep sheets on, Nadia can't start until her plan is complete, and sees it at the table [722.90ms]
+(pass) the prep sheet > agreeing to start waits for a plan too, and turning prep sheets off lifts it [1317.79ms]
+(pass) the prep sheet > only someone at the table can write a plan for it, and a setting must be true or false [1220.43ms]
 
 tests/compositions/timekeeper.test.ts:
-(pass) the timekeeper > expires the tables whose time is up, even with nobody watching, and the coach still writes a debrief [789.24ms]
-(pass) the timekeeper > only the timekeeper's agent session can ask, never a person's [642.64ms]
+(pass) the timekeeper > expires the tables whose time is up, even with nobody watching, and the coach still writes a debrief [855.25ms]
+(pass) the timekeeper > only the timekeeper's agent session can ask, never a person's [625.62ms]
 
 tests/compositions/matchmaking.test.ts:
-(pass) negotiating with someone new > Nadia waits for someone; when Omar looks too, a table opens with each of them in one of its seats [807.52ms]
-(pass) negotiating with someone new > someone whose page stopped checking in for a minute isn't matched, and is told to look again [743.82ms]
-(pass) negotiating with someone new > Leo can stop looking, and nobody but Leo can see or stop his search [474.41ms]
-(pass) negotiating with someone new > only a published scenario can be looked for [398.79ms]
+(pass) negotiating with someone new > Nadia waits for someone; when Omar looks too, a table opens with each of them in one of its seats [1024.14ms]
+(pass) negotiating with someone new > Omar picks Surprise me! for two people, so Omar joins Nadia, who is waiting for The Job Offer, at a table for it [1095.60ms]
+(pass) negotiating with someone new > when both people are open, they negotiate the scenario suggested to the one who looked first [1261.63ms]
+(pass) negotiating with someone new > someone whose page stopped checking in for a minute isn't matched, and is told to look again [793.42ms]
+(pass) negotiating with someone new > Leo can stop looking, and nobody but Leo can see or stop his search [417.94ms]
+(pass) negotiating with someone new > only a published scenario can be looked for, and being open is true or false [319.75ms]
 
 tests/compositions/journey.test.ts:
-(pass) the journey > Nadia signs up, practices The Job Offer as Hiro against the counterpart, and sees the whole pie [866.11ms]
-(pass) how a negotiation ends > Nadia accepts Manon's proposal, and the table settles on it [667.13ms]
-(pass) how a negotiation ends > when time runs out, her next message is refused, the table expires, and each side gets its BATNA [704.56ms]
-(pass) how a negotiation ends > the countdown expires the table only once time is up, and only once [692.61ms]
-(pass) how a negotiation ends > Nadia walks away, and the debrief says she did [723.46ms]
-(pass) how a negotiation ends > Nadia can leave a table before it begins, and nobody coaches a negotiation that never happened [747.17ms]
-(pass) rules at the table > nothing is said or proposed before the negotiation begins, and there's no debrief until it ends [646.60ms]
-(pass) rules at the table > a proposal must agree on every issue, within its range or on one of its options [649.21ms]
-(pass) rules at the table > Nadia can retract her own proposal, but not accept it [731.98ms]
-(pass) rules at the table > Nadia's notes are her own, and she can change them at any time [636.49ms]
-(pass) rules at the table > a practice table needs a role of a published scenario, and starts with a time limit from 1 to 180 minutes [626.74ms]
+(pass) the journey > Nadia signs up, practices The Job Offer as Hiro against the counterpart, and sees the whole pie [881.56ms]
+(pass) how a negotiation ends > Nadia accepts Manon's proposal, and the table settles on it [831.60ms]
+(pass) how a negotiation ends > when time runs out, her next message is refused, the table expires, and each side gets its BATNA [1374.20ms]
+(pass) how a negotiation ends > the countdown expires the table only once time is up, and only once [1065.89ms]
+(pass) how a negotiation ends > Nadia walks away, and the debrief says she did [729.33ms]
+(pass) how a negotiation ends > Nadia can leave a table before it begins, and nobody coaches a negotiation that never happened [1459.38ms]
+(pass) rules at the table > nothing is said or proposed before the negotiation begins, and there's no debrief until it ends [1063.24ms]
+(pass) rules at the table > a proposal must agree on every issue, within its range or on one of its options [978.64ms]
+(pass) rules at the table > Nadia can retract her own proposal, but not accept it [839.22ms]
+(pass) rules at the table > Nadia's notes are her own, and she can change them at any time [663.96ms]
+(pass) rules at the table > a practice table needs a role of a published scenario, and starts with a time limit from 1 to 180 minutes [1044.13ms]
 
 tests/agents/counterpart.test.ts:
-(pass) the counterpart, played by a model > it replies in character, from its own brief and the conversation, without the other side's brief [881.13ms]
-(pass) the counterpart, played by a model > its decision accepts a proposal only when both the model and its BATNA allow it [819.16ms]
-(pass) the counterpart, played by a model > it gives the model room to think, and splits a reply too long for one message into parts [887.24ms]
-(pass) the counterpart, played by a model > its messages keep a reply's words as written: a message per paragraph, and a long paragraph cut between sentences, or between words [0.13ms]
-(pass) the counterpart, played by a model > it reads a decision however the model formats it, and rejects anything unclear [0.04ms]
+(pass) the counterpart, played by a model > it replies in character, from its own brief and the conversation, without the other side's brief [781.19ms]
+(pass) the counterpart, played by a model > its decision accepts a proposal only when both the model and its BATNA allow it [696.86ms]
+(pass) the counterpart, played by a model > it gives the model room to think, and splits a reply too long for one message into parts [707.63ms]
+(pass) the counterpart, played by a model > its messages keep a reply's words as written: a message per paragraph, and a long paragraph cut between sentences, or between words [0.24ms]
+(pass) the counterpart, played by a model > it reads a decision however the model formats it, and rejects anything unclear [0.15ms]
 
 tests/agents/models.test.ts:
-(pass) models > Claude's reply streams in piece by piece, from a request with the instructions, prompt, and key [11.59ms]
-(pass) models > Gemini's reply streams in without its thoughts, from a request with the instructions and prompt [2.10ms]
-The model's API at http://localhost:59926 answered 401: {}
-The model's API at http://localhost:59929 answered 429: {}
-The model's API at http://localhost:59935 couldn't be reached: Unable to connect. Is the computer able to access the url?
-(pass) models > a refused key, a busy model, and an unreachable one each fail with a reason a person can read [5.89ms]
-(pass) models > a proxy such as Parley works at a base URL with a trailing slash, even when it answers all at once [1.22ms]
-(pass) models > a model that runs out of room while thinking, and writes no reply, fails with that reason [1.70ms]
-(pass) models > the models a key can use are listed from the API, and none without a key or with a refused one [1.70ms]
-(pass) models > the environment picks Claude, then Gemini, and no model without a key [0.05ms]
+(pass) models > Claude's reply streams in piece by piece, from a request with the instructions, prompt, and key [10.23ms]
+(pass) models > Gemini's reply streams in without its thoughts, from a request with the instructions and prompt [2.29ms]
+The model's API at http://localhost:49556 answered 401: {}
+The model's API at http://localhost:49559 answered 429: {}
+The model's API at http://localhost:49565 couldn't be reached: Unable to connect. Is the computer able to access the url?
+(pass) models > a refused key, a busy model, and an unreachable one each fail with a reason a person can read [8.09ms]
+(pass) models > a proxy such as Parley works at a base URL with a trailing slash, even when it answers all at once [1.95ms]
+(pass) models > a model that runs out of room while thinking, and writes no reply, fails with that reason [3.15ms]
+(pass) models > the models a key can use are listed from the API, and none without a key or with a refused one [2.86ms]
+(pass) models > the environment picks Claude, then Gemini, and no model without a key [0.08ms]
 
 tests/agents/coach.test.ts:
-(pass) the coach > its model hears both sides' points, how it ended, the best deal, and the conversation [684.85ms]
-(pass) the coach > the stand-in sums up a deal just short of the whole pie, with the value created and claimed [724.06ms]
-(pass) the coach > between people, it debriefs every side: each one's points, what each proposal was worth to each, and the value [849.98ms]
+(pass) the coach > its model hears both sides' points, how it ended, the best deal, and the conversation [757.40ms]
+(pass) the coach > the stand-in sums up a deal just short of the whole pie, with the value created and claimed [1827.40ms]
+(pass) the coach > between people, it debriefs every side: each one's points, what each proposal was worth to each, and the value [1013.82ms]
 
 tests/concepts/Inviting.test.ts:
-(pass) Inviting > its principle: Nadia's link leads her friends to her table, and the table's own address leads nowhere [23.81ms]
-(pass) Inviting > each invitation has its own code, and a table can have several invitations, oldest first [17.60ms]
-(pass) Inviting > codes are random, so none repeats and none gives away the table it leads to [25.40ms]
+(pass) Inviting > its principle: Nadia's link leads her friends to her table, and the table's own address leads nowhere [23.55ms]
+(pass) Inviting > each invitation has its own code, and a table can have several invitations, oldest first [20.43ms]
+(pass) Inviting > codes are random, so none repeats and none gives away the table it leads to [35.53ms]
 
 tests/concepts/Sessioning.test.ts:
-(pass) Sessioning > its principle: Maya stays signed in until she signs out, leaves a session unused for a week, or reaches 90 days [33.62ms]
-(pass) Sessioning > a session's identity is 32 random bytes in base64url [21.52ms]
-(pass) Sessioning > every use sets lastUsed to now, so the week of idleness counts from the latest use [21.88ms]
-(pass) Sessioning > a refused use or end changes no session [22.33ms]
-(pass) Sessioning > Sessioning refuses to use or end an unknown or ended session [25.90ms]
-(pass) Sessioning > of two ends of one session at once, Sessioning accepts one and refuses the other with NOT_SIGNED_IN [24.29ms]
+(pass) Sessioning > its principle: Maya stays signed in until she signs out, leaves a session unused for a week, or reaches 90 days [35.75ms]
+(pass) Sessioning > a session's identity is 32 random bytes in base64url [22.33ms]
+(pass) Sessioning > every use sets lastUsed to now, so the week of idleness counts from the latest use [25.50ms]
+(pass) Sessioning > a refused use or end changes no session [23.30ms]
+(pass) Sessioning > Sessioning refuses to use or end an unknown or ended session [22.55ms]
+(pass) Sessioning > of two ends of one session at once, Sessioning accepts one and refuses the other with NOT_SIGNED_IN [22.37ms]
 
 tests/concepts/Registering.test.ts:
-(pass) Registering > its principle: Sam finds Maya by her username, and Ben registers another when hers is taken [22.19ms]
-(pass) Registering > a username must have 3 to 32 ASCII letters, digits, underscores, or hyphens [19.56ms]
-(pass) Registering > usernames are case-sensitive, so `Maya` is a different username from `maya` [27.70ms]
-(pass) Registering > of two registrations of one username at once, one succeeds and the other is refused with USERNAME_TAKEN [22.42ms]
-(pass) Registering > _username and _byUsername return no row for an unknown user or username [0.64ms]
+(pass) Registering > its principle: Sam finds Maya by her username, and Ben registers another when hers is taken [24.64ms]
+(pass) Registering > a username must have 3 to 32 ASCII letters, digits, underscores, or hyphens [21.87ms]
+(pass) Registering > usernames are case-sensitive, so `Maya` is a different username from `maya` [22.12ms]
+(pass) Registering > of two registrations of one username at once, one succeeds and the other is refused with USERNAME_TAKEN [24.20ms]
+(pass) Registering > _username and _byUsername return no row for an unknown user or username [0.49ms]
+
+tests/concepts/Preferring.test.ts:
+(pass) Preferring > its principle: Nadia turns prep sheets on and then off, and Omar never has them [30.57ms]
+(pass) Preferring > turning a feature on twice, even at once, keeps one preference, so turning it off once turns it off [85.80ms]
+(pass) Preferring > each person's choice for each feature is separate [60.97ms]
 
 tests/concepts/Tabling.test.ts:
-(pass) Tabling > its principle: Nadia's table starts once every seat is taken, runs as long as chosen, and ends once [106.43ms]
-(pass) Tabling > a time limit is a whole number of minutes from 1 to 180, chosen when the negotiation begins [90.07ms]
-(pass) Tabling > a seat exists for each role before anyone takes it, and nobody takes two seats at one table [89.00ms]
-(pass) Tabling > someone who sits down without choosing a role gets one of the empty seats [80.22ms]
-(pass) Tabling > two people sitting down at once without choosing a role get different seats [138.86ms]
-(pass) Tabling > a negotiation begins once it has at least two seats, all taken, and nobody can sit down after that [84.94ms]
-(pass) Tabling > a negotiation ends only once, and only by walking away before it begins [81.88ms]
-(pass) Tabling > _overdue lists the open tables whose time is up, the earliest deadline first [95.68ms]
-(pass) Tabling > _tablesOf lists a negotiator's tables, the most recently opened first [85.08ms]
-(pass) Tabling > of two negotiators taking one seat at once, Tabling seats one and refuses the other with ROLE_TAKEN [82.24ms]
-(pass) Tabling > of a settlement and a walkout at once, Tabling accepts one and refuses the other with NOT_OPEN [74.62ms]
+(pass) Tabling > its principle: Nadia's table starts once every seat is taken, runs as long as chosen, and ends once [109.15ms]
+(pass) Tabling > a time limit is a whole number of minutes from 1 to 180, chosen when the negotiation begins [91.69ms]
+(pass) Tabling > a seat exists for each role before anyone takes it, and nobody takes two seats at one table [72.24ms]
+(pass) Tabling > someone who sits down without choosing a role gets one of the empty seats [80.38ms]
+(pass) Tabling > two people sitting down at once without choosing a role get different seats [69.93ms]
+(pass) Tabling > a negotiation begins once it has at least two seats, all taken, and nobody can sit down after that [84.05ms]
+(pass) Tabling > a negotiation ends only once, and only by walking away before it begins [93.30ms]
+(pass) Tabling > _overdue lists the open tables whose time is up, the earliest deadline first [92.89ms]
+(pass) Tabling > _tablesOf lists a negotiator's tables, the most recently opened first [733.22ms]
+(pass) Tabling > of two negotiators taking one seat at once, Tabling seats one and refuses the other with ROLE_TAKEN [451.92ms]
+(pass) Tabling > of a settlement and a walkout at once, Tabling accepts one and refuses the other with NOT_OPEN [89.40ms]
 
 tests/concepts/Reviewing.test.ts:
-(pass) Reviewing > its principle: Nadia and Omar review each other once per negotiation, and Omar's standing averages his stars [84.44ms]
-(pass) Reviewing > a review gives a whole number of stars from 1 to 5, and a refused one changes nothing [68.41ms]
-(pass) Reviewing > of two reviews of one person about one negotiation at once, Reviewing keeps one [65.01ms]
+(pass) Reviewing > its principle: Nadia and Omar review each other once per negotiation, and Omar's standing averages his stars [70.82ms]
+(pass) Reviewing > a review gives a whole number of stars from 1 to 5, and a refused one changes nothing [60.99ms]
+(pass) Reviewing > of two reviews of one person about one negotiation at once, Reviewing keeps one [63.46ms]
 
 tests/concepts/Proposing.test.ts:
-(pass) Proposing > its principle: Ana, Ben, and Cal agree only once everyone but the proposer accepts, and then no new proposal is allowed [131.93ms]
-(pass) Proposing > with two parties, one acceptance is an agreement [138.60ms]
-(pass) Proposing > only a participant can propose, and only to someone else [110.57ms]
-(pass) Proposing > a proposal is answered only by a participant other than its proposer, and accepted by each at most once [123.96ms]
-(pass) Proposing > only its proposer can retract a pending proposal [123.22ms]
-(pass) Proposing > of two last acceptances at once, both count, and the proposal is accepted [110.79ms]
-(pass) Proposing > of two proposals at once, both are made, and only the later one is still pending [124.33ms]
-(pass) Proposing > of an acceptance and a rejection at once, Proposing takes one and refuses the other [139.41ms]
+(pass) Proposing > its principle: Ana, Ben, and Cal agree only once everyone but the proposer accepts, and then no new proposal is allowed [133.14ms]
+(pass) Proposing > with two parties, one acceptance is an agreement [101.28ms]
+(pass) Proposing > only a participant can propose, and only to someone else [112.74ms]
+(pass) Proposing > a proposal is answered only by a participant other than its proposer, and accepted by each at most once [116.60ms]
+(pass) Proposing > only its proposer can retract a pending proposal [124.34ms]
+(pass) Proposing > of two last acceptances at once, both count, and the proposal is accepted [105.82ms]
+(pass) Proposing > of two proposals at once, both are made, and only the later one is still pending [113.15ms]
+(pass) Proposing > of an acceptance and a rejection at once, Proposing takes one and refuses the other [124.36ms]
 
 tests/concepts/Briefing.test.ts:
-(pass) Briefing > its principle: Sophie publishes The Job Offer once every role has a brief, and Briefing scores term sheets and finds the whole pie [217.65ms]
-(pass) Briefing > Briefing stores names trimmed and refuses a blank or overlong one [162.94ms]
-(pass) Briefing > only a continuous issue has a unit, and an issue's name is unique in its scenario [179.86ms]
-(pass) Briefing > an option has a universal value exactly when its issue is continuous, and no two options of one issue share a name or value [203.81ms]
-(pass) Briefing > a payoff belongs to a role and an option of the same scenario, and setting it again replaces it [204.75ms]
-(pass) Briefing > a brief must have 1 to 20,000 characters [174.25ms]
-(pass) Briefing > publishing needs every payoff, and nothing about a published scenario can change [192.65ms]
-(pass) Briefing > _dealValidity reports every problem with a term sheet, issue by issue [161.94ms]
-(pass) Briefing > the whole pie may need a continuous issue to move points from one role to the other [163.13ms]
-(pass) Briefing > the whole pie is empty when no term sheet is worth at least its BATNA to everyone, or the scenario isn't published [195.68ms]
-(pass) Briefing > of two scenarios with one name at once, Briefing creates one and refuses the other with NAME_TAKEN [152.37ms]
-(pass) Briefing > of two options at one universal value at once, Briefing adds one and refuses the other [176.98ms]
+(pass) Briefing > its principle: Sophie publishes The Job Offer once every role has a brief, and Briefing scores term sheets and finds the whole pie [187.03ms]
+(pass) Briefing > Briefing stores names trimmed and refuses a blank or overlong one [146.58ms]
+(pass) Briefing > only a continuous issue has a unit, and an issue's name is unique in its scenario [142.78ms]
+(pass) Briefing > an option has a universal value exactly when its issue is continuous, and no two options of one issue share a name or value [169.99ms]
+(pass) Briefing > a payoff belongs to a role and an option of the same scenario, and setting it again replaces it [179.21ms]
+(pass) Briefing > a brief must have 1 to 20,000 characters [164.62ms]
+(pass) Briefing > publishing needs every payoff, and nothing about a published scenario can change [187.53ms]
+(pass) Briefing > _dealValidity reports every problem with a term sheet, issue by issue [198.19ms]
+(pass) Briefing > the whole pie may need a continuous issue to move points from one role to the other [155.93ms]
+(pass) Briefing > the whole pie is empty when no term sheet is worth at least its BATNA to everyone, or the scenario isn't published [184.75ms]
+(pass) Briefing > of two scenarios with one name at once, Briefing creates one and refuses the other with NAME_TAKEN [154.00ms]
+(pass) Briefing > of two options at one universal value at once, Briefing adds one and refuses the other [829.66ms]
 
 tests/concepts/Reasoning.test.ts:
-(pass) Reasoning > its principle: gemini takes the prompt, extends the answer piece by piece, and concludes it; another reasoner can't answer it; whoever abandons a prompt gives a reason, and Reasoning returns it; forgetting the photo removes its questions [25.73ms]
-(pass) Reasoning > _lines splits a concluded answer into trimmed, nonblank lines, numbered from 0 [17.84ms]
-(pass) Reasoning > _taken returns a reasoner's unfinished prompts with their subjects, oldest first [17.72ms]
-(pass) Reasoning > of four reasoners taking one prompt at once, Reasoning accepts one and refuses the others with ALREADY_TAKEN [15.92ms]
-(pass) Reasoning > Reasoning refuses an empty ask, an unknown prompt, answering before taking or by another reasoner, an empty answer or reason, and any change to a closed prompt [21.35ms]
-(pass) Reasoning > a person can abandon a prompt no reasoner has taken, for example after a crash [15.67ms]
-
-tests/concepts/Preparing.test.ts:
-(pass) Preparing > its principle: Nadia turns on prep sheets, and her plan is complete only once every part is written [45.45ms]
-(pass) Preparing > each part of a plan has at most 2,000 characters, and a refused plan changes nothing [20.56ms]
-(pass) Preparing > two saves of one plan at once leave one plan [21.01ms]
+(pass) Reasoning > its principle: gemini takes the prompt, extends the answer piece by piece, and concludes it; another reasoner can't answer it; whoever abandons a prompt gives a reason, and Reasoning returns it; forgetting the photo removes its questions [401.98ms]
+(pass) Reasoning > _lines splits a concluded answer into trimmed, nonblank lines, numbered from 0 [27.94ms]
+(pass) Reasoning > _taken returns a reasoner's unfinished prompts with their subjects, oldest first [23.55ms]
+(pass) Reasoning > of four reasoners taking one prompt at once, Reasoning accepts one and refuses the others with ALREADY_TAKEN [24.55ms]
+(pass) Reasoning > Reasoning refuses an empty ask, an unknown prompt, answering before taking or by another reasoner, an empty answer or reason, and any change to a closed prompt [28.86ms]
+(pass) Reasoning > a person can abandon a prompt no reasoner has taken, for example after a crash [19.27ms]
 
 tests/concepts/Conversing.test.ts:
-(pass) Conversing > its principle: everyone reads Hiro's message, then Manon's reply, and a message of only spaces is refused [21.50ms]
-(pass) Conversing > a message is stored trimmed and must have 1 to 2,000 characters once trimmed [23.21ms]
-(pass) Conversing > each subject has its own conversation [25.22ms]
+(pass) Conversing > its principle: everyone reads Hiro's message, then Manon's reply, and a message of only spaces is refused [45.97ms]
+(pass) Conversing > a message is stored trimmed and must have 1 to 2,000 characters once trimmed [22.16ms]
+(pass) Conversing > each subject has its own conversation [28.23ms]
 
 tests/concepts/Noting.test.ts:
-(pass) Noting > its principle: Nadia's later notes replace her earlier ones, and other notes stay separate [23.68ms]
-(pass) Noting > notes can be empty, and can have at most 20,000 characters [27.02ms]
-(pass) Noting > two saves of one note at once leave a single note [31.13ms]
+(pass) Noting > its principle: Nadia's later notes replace her earlier ones, and other notes stay separate [25.06ms]
+(pass) Noting > notes can be empty, and can have at most 20,000 characters [26.15ms]
+(pass) Noting > two saves of one note at once leave a single note [31.26ms]
 
 tests/concepts/Matchmaking.test.ts:
-(pass) Matchmaking > its principle: Nadia waits until Omar looks too, and then both are matched and find their table [57.32ms]
-(pass) Matchmaking > a three-way negotiation waits until three people are looking [49.61ms]
-(pass) Matchmaking > the people who waited longest are matched first, and nobody is matched twice [47.54ms]
-(pass) Matchmaking > of people looking at the same moment, exactly one search forms their group [39.83ms]
-(pass) Matchmaking > someone who stops checking in stops counting, and has to look again [60.78ms]
-(pass) Matchmaking > looking again replaces the earlier search, so nobody waits twice or is matched with themselves [24.00ms]
-(pass) Matchmaking > Leo stops looking, so he is never matched, and stopping again is refused [22.99ms]
-(pass) Matchmaking > a matched request can't check in or stop, and only a matched one can meet [42.72ms]
-(pass) Matchmaking > a group needs a whole number of people, at least two, and a refused search changes nothing [26.82ms]
+(pass) Matchmaking > its principle: Nadia waits until Omar looks too, and then both are matched and find their table [53.44ms]
+(pass) Matchmaking > its principle, with open minds: Tess joins Uma's pool, and Ravi and Sam agree on what Ravi suggested [65.56ms]
+(pass) Matchmaking > someone open joins whoever has waited longest for a group their size, in the pool that person picked [69.14ms]
+(pass) Matchmaking > someone open finds a group whenever there is one, and of several, the one whose members waited longest [64.06ms]
+(pass) Matchmaking > a three-way negotiation waits until three people are looking [51.39ms]
+(pass) Matchmaking > the people who waited longest are matched first, and nobody is matched twice [72.45ms]
+(pass) Matchmaking > of people looking at the same moment, exactly one search forms their group [111.38ms]
+(pass) Matchmaking > of someone open and someone who picked a pool looking at the same moment, exactly one search forms their group [118.47ms]
+(pass) Matchmaking > someone who stops checking in stops counting, and has to look again [73.90ms]
+(pass) Matchmaking > looking again replaces the earlier search, so nobody waits twice or is matched with themselves [49.49ms]
+(pass) Matchmaking > Leo stops looking, so he is never matched, and stopping again is refused [46.01ms]
+(pass) Matchmaking > a matched request can't check in or stop, and only a matched one can meet [80.62ms]
+(pass) Matchmaking > a group needs a whole number of people, at least two, and a refused search changes nothing [38.82ms]
 
 tests/concepts/Authenticating.test.ts:
-(pass) Authenticating > its principle: Ben authenticates with his password, and Leo can neither guess it nor set a new one [397.64ms]
-(pass) Authenticating > a user with no password, such as one who signed in with Commons, is refused like a wrong password [0.63ms]
-(pass) Authenticating > Authenticating stores an argon2id hash, never the password [78.18ms]
-(pass) Authenticating > a password must have 8 to 128 characters, and _acceptable returns the same answer as set [0.34ms]
-(pass) Authenticating > of two passwords set for one user at once, one is set and the other is refused with PASSWORD_SET [84.53ms]
+(pass) Authenticating > its principle: Ben authenticates with his password, and Leo can neither guess it nor set a new one [402.16ms]
+(pass) Authenticating > a user with no password, such as one who signed in with Commons, is refused like a wrong password [0.58ms]
+(pass) Authenticating > Authenticating stores an argon2id hash, never the password [90.55ms]
+(pass) Authenticating > a password must have 8 to 128 characters, and _acceptable returns the same answer as set [0.48ms]
+(pass) Authenticating > of two passwords set for one user at once, one is set and the other is refused with PASSWORD_SET [138.73ms]
 
 tests/concepts/Rating.test.ts:
-(pass) Rating > its principle: Nadia's ratings average how much value her deals created and how much she claimed [24.44ms]
-(pass) Rating > a negotiation counts once for each person, and recording it again changes nothing [19.41ms]
-(pass) Rating > when no deal could beat everyone's BATNAs, there was nothing to create, and walking away doesn't count against anyone [22.87ms]
-(pass) Rating > a deal can create less than walking away would have, and someone can claim more than all of it [23.17ms]
+(pass) Rating > its principle: Nadia's ratings average how much value her deals created and how much she claimed [42.64ms]
+(pass) Rating > a negotiation counts once for each person, and recording it again changes nothing [43.46ms]
+(pass) Rating > when no deal could beat everyone's BATNAs, there was nothing to create, and walking away doesn't count against anyone [39.46ms]
+(pass) Rating > a deal can create less than walking away would have, and someone can claim more than all of it [44.02ms]
 
- 142 pass
+ 153 pass
  0 fail
- 1110 expect() calls
-Ran 142 tests across 28 files. [52.58s]
+ 1153 expect() calls
+Ran 153 tests across 29 files. [63.04s]

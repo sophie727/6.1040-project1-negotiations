@@ -1,7 +1,7 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { count, no, now, reaction, view, when, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
-import { textInput } from "./reusable/inputs.ts";
+import { inputOf, textInput } from "./reusable/inputs.ts";
 import { seatedAs } from "./table.ts";
 
 const { Briefing, Matchmaking, Sessioning, Tabling } = concepts;
@@ -24,18 +24,20 @@ const seatedFor = view("the table where (user) sits with the group (request) fou
 ).optional();
 
 /**
- * Looks for others to negotiate (scenario) with. It answers once the flow has settled: right away while the person
- * waits, and, when this request completed a group, once they are seated at the group's table.
+ * Looks for others to negotiate (scenario) with, or, when the person is (open) to any scenario for as many people, for
+ * others to negotiate anything that size with, suggesting (scenario) in case they're all open. It answers once the flow
+ * has settled: right away while the person waits, and, when this request completed a group, once they are seated at
+ * the group's table.
  */
 const Find = endpoint(
   "/matchmaking/find",
-  ({ session, scenario, user, size, instant, request, table }) =>
-    receive({ session, scenario })
+  ({ session, scenario, open, user, size, instant, request, table }) =>
+    receive({ session, scenario, open })
       .where(findable({ scenario }))
       .then(Sessioning.use({ session }).responds({ subject: user }))
       .then(
         where(now(instant), groupSize({ scenario }).is({ size })).then(
-          Matchmaking.seek({ seeker: user, pool: scenario, size, now: instant }).responds({ request }),
+          Matchmaking.seek({ seeker: user, pool: scenario, size, open, now: instant }).responds({ request }),
         ),
       )
       .afterFlowSettles()
@@ -47,11 +49,11 @@ const Find = endpoint(
           .then(respond({ request, status: "MATCHED", table }))
           .named("matched"),
       ),
-  { validators: { input: textInput } },
+  { validators: { input: inputOf({ open: "flag" }) } },
 );
 
-const RefuseUnfindable = endpoint("/matchmaking/find", ({ session, scenario }) =>
-  receive({ session, scenario })
+const RefuseUnfindable = endpoint("/matchmaking/find", ({ session, scenario, open }) =>
+  receive({ session, scenario, open })
     .where(no(findable({ scenario })))
     .then(respond({ error: "NOT_FOUND" })),
 );
@@ -119,11 +121,12 @@ const Stop = endpoint(
 // Meeting
 
 /**
- * When someone's search completes a group, a table opens for the scenario, and the group meets there. Only the search
- * that formed the group says so, so each group gets one table.
+ * When someone's search completes a group, a table opens for the scenario the group agreed on, and the group meets
+ * there. Only the search that formed the group says so, so each group gets one table.
  */
 const OpenTableForMatch = reaction(({ request, scenario, table }) =>
-  when(Matchmaking.seek({ pool: scenario }).responds({ request, grouped: true }))
+  when(Matchmaking.seek({}).responds({ request, grouped: true }))
+    .where(Matchmaking._agreed({ request }).is({ pool: scenario }))
     .then(Tabling.open({ scenario }).responds({ table }))
     .then(Matchmaking.meet({ request, place: table })),
 );

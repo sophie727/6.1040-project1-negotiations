@@ -17,6 +17,8 @@ interface Plan {
   status: Ref<"saved" | "saving" | "unsaved">;
   error: Ref<string | null>;
   timer?: ReturnType<typeof setTimeout>;
+  /** The newest save on its way to the server. Each save waits for the one before it, so saves arrive in order. */
+  saving?: Promise<void>;
 }
 
 /** Like the notes, the plan is kept per table while the tab is open, so the prep page and the table share one draft. */
@@ -36,22 +38,36 @@ export function usePlan(table: TableId, saved: { target: string | null; walkaway
   const { draft, status, error } = plan;
   const current = plan;
 
-  async function save() {
+  /**
+   * Saves the draft after any save already on its way, and resolves once the server has it, so starting can wait for
+   * the plan the person sees. With nothing new to save, it waits for the save on its way, if there is one.
+   */
+  function save(): Promise<void> {
     clearTimeout(current.timer);
     current.timer = undefined;
-    if (status.value === "saved") return;
+    if (status.value !== "unsaved") return current.saving ?? Promise.resolve();
     status.value = "saving";
-    const parts = { ...draft.value };
-    const result = await api.tables.plan({ table, ...parts });
-    if ("error" in result) {
-      if (result.error === "UNAUTHORIZED") useSession().sessionEnded();
-      error.value = messageFor("/tables/plan", result.error);
-      status.value = "unsaved";
-      return;
-    }
-    error.value = null;
-    // More typing while saving leaves the newer draft unsaved, and its own timer saves it.
-    if (JSON.stringify(draft.value) === JSON.stringify(parts)) status.value = "saved";
+    const typed = { ...draft.value };
+    // Each part is saved without surrounding spaces, so a part with only spaces counts as empty when starting.
+    const parts = { target: typed.target.trim(), walkaway: typed.walkaway.trim(), priorities: typed.priorities.trim() };
+    const saving = (current.saving ?? Promise.resolve())
+      .then(() => api.tables.plan({ table, ...parts }))
+      .then((result) => {
+        if ("error" in result) {
+          if (result.error === "UNAUTHORIZED") useSession().sessionEnded();
+          error.value = messageFor("/tables/plan", result.error);
+          status.value = "unsaved";
+          return;
+        }
+        error.value = null;
+        // More typing while saving leaves the newer draft unsaved, and its own timer saves it.
+        if (JSON.stringify(draft.value) === JSON.stringify(typed)) status.value = "saved";
+      })
+      .finally(() => {
+        if (current.saving === saving) current.saving = undefined;
+      });
+    current.saving = saving;
+    return saving;
   }
 
   /** Records a change to one part and saves the plan once typing pauses. */

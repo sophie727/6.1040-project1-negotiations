@@ -1,22 +1,39 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
-import { each, former, no, view, whether, where } from "@mit-sdg/sync-engine/language";
-import { concepts } from "../concepts.ts";
+import { compute, each, former, no, view, whether, where } from "@mit-sdg/sync-engine/language";
+import { computations, concepts } from "../concepts.ts";
 import { COUNTERPART } from "./counterpart.ts";
 import { textInput } from "./reusable/inputs.ts";
 import { ratingsOf, seatedAs } from "./table.ts";
 
 const { Briefing, Registering, Sessioning, Tabling } = concepts;
+const { spiceLevel } = computations;
 
 // Choosing
 
-/** The published scenarios, by name, each with its recommended time limit and its roles. */
-const scenarios = former("the published scenarios", (_input, { scenario, name, timeLimit, role, roleName }) =>
+/**
+ * How spicy (scenario) is, from 1 (mild) to 3 (hot): how much its whole pie adds to what its roles get together by
+ * walking away. A scenario where no deal is possible has no whole pie, and is hot.
+ */
+export const spiceOf = view("how spicy (scenario) is", ({ scenario }, { spice }, { jointPoints, jointBatna }) =>
+  where(
+    whether(Briefing._wholePie({ scenario }).is({ jointPoints })),
+    Briefing._jointBatna({ scenario }).is({ jointBatna }),
+    compute(spiceLevel, { jointPoints, jointBatna }, spice),
+  ),
+).optional();
+
+/**
+ * The published scenarios, by name, each with its recommended time limit, its roles, and how spicy it is. Only the
+ * spice level leaves the server: the whole pie's points would tell the roles what the others get by walking away.
+ */
+const scenarios = former("the published scenarios", (_input, { scenario, name, timeLimit, role, roleName, spice }) =>
   each(Briefing._published({}).is({ scenario, name }))
-    .where(whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit })))
+    .where(whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit })), spiceOf({ scenario }).is({ spice }))
     .form({
       scenario,
       name,
       timeLimit,
+      spice,
       roles: each(Briefing._roles({ scenario }).is({ role, name: roleName })).form({ role, name: roleName }),
     }),
 );
@@ -88,6 +105,6 @@ const RefuseUnplayable = endpoint("/practice/start", ({ session, scenario, role 
 );
 
 export const composition = {
-  choosing: { scenarios, tablesOf, ShowBakery },
+  choosing: { spiceOf, scenarios, tablesOf, ShowBakery },
   starting: { playable, StartPractice, RefuseUnplayable },
 };

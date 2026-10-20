@@ -55,6 +55,8 @@ function refused(path: string, code: string) {
 
 async function suggest() {
   working.value = true;
+  // The start reads the saved plan, so a part typed a moment ago is saved first.
+  await plan.save();
   const result = await api.tables.start({ table: table.value.table, minutes: Number(minutes.value) });
   working.value = false;
   if ("error" in result) return refused("/tables/start", result.error);
@@ -66,6 +68,7 @@ async function agree() {
   const proposal = pending.value?.proposal;
   if (proposal === undefined) return;
   working.value = true;
+  await plan.save();
   const result = await api.tables.agree({ table: table.value.table, proposal });
   working.value = false;
   if ("error" in result) return refused("/tables/agree", result.error);

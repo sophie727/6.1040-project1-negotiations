@@ -21,8 +21,12 @@ const CASE_BANK = "wholepie";
  */
 export async function seed({ concepts }: { concepts: Concepts }): Promise<void> {
   if ((await concepts.Briefing._published()).length > 0) return;
-  const author = await caseBankAuthor(concepts);
-  for (const definition of builtInScenarios) await create(concepts, author, definition);
+  for (const definition of builtInScenarios) await publishScenario({ concepts }, definition);
+}
+
+/** Creates and publishes `definition`, authored by the case bank, as the built-in scenarios are. */
+export async function publishScenario({ concepts }: { concepts: Concepts }, definition: ScenarioDefinition): Promise<void> {
+  await create(concepts, await caseBankAuthor(concepts), definition);
 }
 
 async function caseBankAuthor(concepts: Concepts): Promise<User> {

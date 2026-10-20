@@ -2,9 +2,9 @@ import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { no, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
 import { inputOf, textInput } from "./reusable/inputs.ts";
-import { seatedAs } from "./table.ts";
+import { PREP_SHEET, seatedAs } from "./table.ts";
 
-const { Preparing, Sessioning } = concepts;
+const { Preferring, PrioritiesNoting, Sessioning, TargetNoting, WalkawayNoting } = concepts;
 
 // Settings
 
@@ -14,7 +14,7 @@ const ShowSettings = endpoint(
   ({ session, user, on }) =>
     receive({ session })
       .then(Sessioning.use({ session }).responds({ subject: user }))
-      .then(where(Preparing._planner({ author: user }).is({ on })).then(respond({ prepSheet: on }))),
+      .then(where(Preferring._on({ person: user, feature: PREP_SHEET }).is({ on })).then(respond({ prepSheet: on }))),
   { validators: { input: textInput } },
 );
 
@@ -24,7 +24,7 @@ const TurnPrepSheetsOn = endpoint(
   ({ session, user }) =>
     receive({ session, on: true })
       .then(Sessioning.use({ session }).responds({ subject: user }))
-      .then(Preparing.turnOn({ author: user }).responds({}))
+      .then(Preferring.turnOn({ person: user, feature: PREP_SHEET }).responds({}))
       .then(respond({ prepSheet: true })),
   { validators: { input: inputOf({ on: "flag" }) } },
 );
@@ -33,13 +33,16 @@ const TurnPrepSheetsOn = endpoint(
 const TurnPrepSheetsOff = endpoint("/settings/prep-sheet", ({ session, user }) =>
   receive({ session, on: false })
     .then(Sessioning.use({ session }).responds({ subject: user }))
-    .then(Preparing.turnOff({ author: user }).responds({}))
+    .then(Preferring.turnOff({ person: user, feature: PREP_SHEET }).responds({}))
     .then(respond({ prepSheet: false })),
 );
 
 // Planning
 
-/** Saves the person's plan for a table where they sit: their target, their walkaway, and their priorities. */
+/**
+ * Saves the person's plan for a table where they sit: their target, their walkaway, and their priorities, each as a
+ * note about the table that replaces the one before.
+ */
 const WritePlan = endpoint(
   "/tables/plan",
   ({ session, table, target, walkaway, priorities, user }) =>
@@ -47,7 +50,9 @@ const WritePlan = endpoint(
       .then(Sessioning.use({ session }).responds({ subject: user }))
       .then(
         where(seatedAs({ user, table }))
-          .then(Preparing.plan({ author: user, subject: table, target, walkaway, priorities }).responds({}))
+          .then(TargetNoting.write({ author: user, subject: table, body: target }).responds({}))
+          .then(WalkawayNoting.write({ author: user, subject: table, body: walkaway }).responds({}))
+          .then(PrioritiesNoting.write({ author: user, subject: table, body: priorities }).responds({}))
           .then(respond({}))
           .named("seated"),
         where(no(seatedAs({ user, table })))

@@ -12,7 +12,7 @@ A person can negotiate against the AI counterpart, or against other people. To b
 
 Negotiating with other people is rated, as on chess.com, and negotiating with the AI counterpart never is. P1's three ratings come from two concepts, because they have different sources: Rating keeps how much value each negotiation created and how much of it each person claimed, recorded when the negotiation ends, and Reviewing keeps how the people at a table say it was to deal with each other, written afterwards, if at all.
 
-Someone who wants to prepare deliberately turns on prep sheets in Preparing, and then writes a plan for each negotiation, their target, walkaway, and priorities, before they can start it.
+Someone who wants to prepare deliberately turns on prep sheets, a feature in Preferring, which keeps each person's settings. Then they write a plan for each negotiation before they can start it: their target, their walkaway, and their priorities. Each part is a note they keep about the table, so each is its own instance of Noting: TargetNoting, WalkawayNoting, and PrioritiesNoting.
 
 Two agents answer questions: the counterpart, which plays the other side, and the coach, which writes the debrief. A third agent, the timekeeper, answers none: every half minute, it asks the app to expire the tables whose time is up, which matters once people negotiate each other and may both close the page. Each signs in to its own instance of Sessioning, AgentSessioning, under its name, `counterpart`, `coach`, or `timekeeper`, and the first two are the reasoners that Reasoning records for their answers. For now, every question to an agent is about a table: what the counterpart says next, whether it accepts a proposal, and the debrief. Once people can write scenarios in the app, generating their briefs will need questions about scenarios and roles too.
 
@@ -89,7 +89,18 @@ instantiate Rating with
   Person is Registering.User
   Subject is Tabling.Table
 
-instantiate Preparing with
+instantiate Noting as TargetNoting with
   Author is Registering.User
   Subject is Tabling.Table
+
+instantiate Noting as WalkawayNoting with
+  Author is Registering.User
+  Subject is Tabling.Table
+
+instantiate Noting as PrioritiesNoting with
+  Author is Registering.User
+  Subject is Tabling.Table
+
+instantiate Preferring with
+  Person is Registering.User
 ```

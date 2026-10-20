@@ -10,7 +10,8 @@ const {
   Conversing,
   Inviting,
   Noting,
-  Preparing,
+  Preferring,
+  PrioritiesNoting,
   Proposing,
   Rating,
   Reasoning,
@@ -18,8 +19,13 @@ const {
   Reviewing,
   Sessioning,
   Tabling,
+  TargetNoting,
   TimeLimitProposing,
+  WalkawayNoting,
 } = concepts;
+
+/** The feature in Preferring that someone turns on to write a prep sheet before each negotiation. */
+export const PREP_SHEET = "prep-sheet";
 
 // Seating
 
@@ -88,10 +94,17 @@ export function forEachEnding<Rule>(rule: (ended: Ending) => Rule) {
   return { Settled: rule(endings.Settled), Withdrawn: rule(endings.Withdrawn), Expired: rule(endings.Expired) };
 }
 
-/** (user) is prepared to start (table): they haven't turned prep sheets on, or their plan for the table is complete. */
+/**
+ * (user) is prepared to start (table): they haven't turned prep sheets on, or they have written every part of their
+ * plan for the table: a target, a walkaway, and priorities, each a note that isn't empty.
+ */
 export const preparedFor = view("(user) is prepared to start (table)", ({ user, table }) => [
-  where(Preparing._planner({ author: user }).is({ on: false })),
-  where(Preparing._complete({ author: user, subject: table }).is({ complete: true })),
+  where(Preferring._on({ person: user, feature: PREP_SHEET }).is({ on: false })),
+  where(
+    TargetNoting._note({ author: user, subject: table }).is.not({ body: "" }),
+    WalkawayNoting._note({ author: user, subject: table }).is.not({ body: "" }),
+    PrioritiesNoting._note({ author: user, subject: table }).is.not({ body: "" }),
+  ),
 ]).holds();
 
 /** (table) has ended: in an agreement, with someone walking away, or with time running out. */
@@ -280,8 +293,10 @@ const startTalksAt = former("the suggestion to start (table)", ({ table }, { pro
  */
 const planOf = former("the plan (user) wrote for (table)", ({ user, table }, { on, target, walkaway, priorities }) =>
   where(
-    Preparing._planner({ author: user }).is({ on }),
-    whether(Preparing._plan({ author: user, subject: table }).is({ target, walkaway, priorities })),
+    Preferring._on({ person: user, feature: PREP_SHEET }).is({ on }),
+    whether(TargetNoting._note({ author: user, subject: table }).is({ body: target })),
+    whether(WalkawayNoting._note({ author: user, subject: table }).is({ body: walkaway })),
+    whether(PrioritiesNoting._note({ author: user, subject: table }).is({ body: priorities })),
   ).form({ on, target, walkaway, priorities }),
 );
 
