@@ -55,9 +55,10 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
 
 <style scoped>
 .topbar {
-  display: flex;
+  /* Three columns, so the brand sits in the middle whether or not the account menu is on the right. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-4);
   position: sticky;
   top: 0;
@@ -74,6 +75,7 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
   box-shadow: var(--shadow-card);
 }
 .brand {
+  grid-column: 2;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -81,6 +83,10 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
   font-weight: 700;
   color: inherit;
   text-decoration: none;
+}
+.topbar > .menu {
+  grid-column: 3;
+  justify-self: end;
 }
 .brand img {
   border-radius: 50%;
@@ -124,8 +130,15 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
   padding: var(--space-8) var(--space-6) var(--space-12);
 }
 @media (max-width: 600px) {
+  /* A phone has no room to center the brand beside the account menu, so the brand moves to the left. */
   .topbar {
+    display: flex;
+    justify-content: space-between;
     padding: 0 16px;
+  }
+  .brand {
+    font-size: var(--text-xl);
+    white-space: nowrap;
   }
   .content {
     padding: var(--space-4) var(--space-4) var(--space-8);

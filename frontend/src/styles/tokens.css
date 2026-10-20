@@ -6,8 +6,9 @@
     /* Palette */
     --color-page: #fefbea;
     --color-surface: #fffdf6;
-    --color-text: #2d1f18;
-    --color-text-muted: #7b6a5d;
+    /* Text in a deep green, the palette's deep teal (507C68) darkened, and a softer green for secondary text. */
+    --color-text: #1f3a2e;
+    --color-text-muted: #54695f;
     --color-line: #f3eed6;
     --color-border: #e6dfbf;
     --color-accent: #aa420e;
@@ -21,7 +22,7 @@
     /* Cooler than the rusty accent, so an error never looks like a button. */
     --color-danger: #b8203c;
     --color-danger-soft: #fdeced;
-    --color-tip: #2d1f18;
+    --color-tip: #1f3a2e;
     /* The navbar once the page scrolls: green, like a bakery's menu board, with lemon-chiffon lettering. */
     --color-menu: #507c68;
     --color-on-menu: #fdf8c3;

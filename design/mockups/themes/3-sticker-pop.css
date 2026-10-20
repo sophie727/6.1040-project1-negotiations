@@ -1,0 +1,428 @@
+/*
+ * Sticker Pop: playful and loud. Chunky ink outlines, hard offset shadows, color-blocked cards set at a slight tilt,
+ * sticker labels and badges, highlighter titles, and a dotted mint page. Palette: FDF8C3, 507C68, DBE7C5, F8BA12,
+ * AA420E, with deep green ink.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&display=swap");
+
+html.t-sticker-pop {
+  --ink: #1f3a2e;
+  --lemon: #fdf8c3;
+  --mint: #dbe7c5;
+  --teal: #507c68;
+  --amber: #f8ba12;
+  --rust: #aa420e;
+  --white: #fffef7;
+  --edge: 2.5px solid var(--ink);
+  --pop: 5px 5px 0 var(--ink);
+  --chunky: "Bricolage Grotesque", "Figtree", sans-serif;
+  --star: polygon(50.0% 0.0%, 58.0% 9.8%, 69.1% 3.8%, 72.8% 15.9%, 85.4% 14.6%, 84.1% 27.2%, 96.2% 30.9%, 90.2% 42.0%, 100.0% 50.0%, 90.2% 58.0%, 96.2% 69.1%, 84.1% 72.8%, 85.4% 85.4%, 72.8% 84.1%, 69.1% 96.2%, 58.0% 90.2%, 50.0% 100.0%, 42.0% 90.2%, 30.9% 96.2%, 27.2% 84.1%, 14.6% 85.4%, 15.9% 72.8%, 3.8% 69.1%, 9.8% 58.0%, 0.0% 50.0%, 9.8% 42.0%, 3.8% 30.9%, 15.9% 27.2%, 14.6% 14.6%, 27.2% 15.9%, 30.9% 3.8%, 42.0% 9.8%);
+  --color-page: var(--mint);
+  --color-surface: var(--white);
+  --color-line: #e9e5c9;
+  --color-border: var(--ink);
+  --color-accent-soft: #fde7a1;
+  --radius-lg: 20px;
+  --shadow-card: var(--pop);
+  min-height: 100%;
+  background:
+    radial-gradient(circle, rgba(80, 124, 104, 0.28) 1.4px, transparent 1.8px) 0 0 / 22px 22px,
+    var(--mint);
+}
+html.t-sticker-pop body {
+  background: transparent;
+}
+html.t-sticker-pop h1,
+html.t-sticker-pop h2,
+html.t-sticker-pop .display {
+  font-family: var(--chunky);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* The navbar: a lemon strip with an ink rule, and the name as a bold wordmark. */
+html.t-sticker-pop .topbar,
+html.t-sticker-pop .topbar.scrolled {
+  height: 70px;
+  color: var(--rust);
+  background: var(--lemon);
+  box-shadow: 0 2.5px 0 var(--ink);
+}
+html.t-sticker-pop .brand {
+  font-family: var(--chunky);
+  font-size: 30px;
+  font-weight: 800;
+  font-variation-settings: "wdth" 85;
+  letter-spacing: -0.02em;
+}
+html.t-sticker-pop .brand img {
+  padding: 2px;
+  border: var(--edge);
+  background: var(--white);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+html.t-sticker-pop .topbar .icon-button,
+html.t-sticker-pop .topbar .icon-button:hover {
+  color: var(--ink);
+  border: var(--edge);
+  background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-weight: 800;
+}
+
+/* Titles marked with a highlighter. */
+html.t-sticker-pop .page-head h1,
+html.t-sticker-pop .top h1 {
+  display: inline;
+  padding: 0 6px;
+  font-size: 54px;
+  font-variation-settings: "wdth" 80;
+  background: linear-gradient(transparent 58%, var(--amber) 58% 90%, transparent 90%);
+  -webkit-box-decoration-break: clone;
+}
+html.t-sticker-pop .page-head .lead,
+html.t-sticker-pop .top .muted {
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* Panels are stickers, and their titles are labels stuck on at an angle. */
+html.t-sticker-pop .panel,
+html.t-sticker-pop .card {
+  border: var(--edge);
+  box-shadow: var(--pop);
+}
+html.t-sticker-pop .panel > h2,
+html.t-sticker-pop .deal header h2 {
+  align-self: flex-start;
+  padding: 2px 12px 3px;
+  border: var(--edge);
+  border-radius: 10px;
+  color: var(--ink);
+  background: var(--amber);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 19px;
+  transform: rotate(-2deg);
+}
+html.t-sticker-pop .chat > h2 {
+  background: var(--mint);
+}
+html.t-sticker-pop .deal header h2 {
+  background: var(--lemon);
+}
+
+/* Buttons you can press. */
+html.t-sticker-pop .button {
+  border: var(--edge);
+  box-shadow: 4px 4px 0 var(--ink);
+  font-weight: 800;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+html.t-sticker-pop .button:hover:not(:disabled) {
+  filter: none;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+html.t-sticker-pop .button.primary {
+  color: var(--lemon);
+  background: var(--rust);
+}
+html.t-sticker-pop .button.outline {
+  color: var(--ink);
+  background: var(--white);
+}
+html.t-sticker-pop .button.large {
+  font-family: var(--chunky);
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+html.t-sticker-pop .badge {
+  padding: 3px 11px;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-weight: 800;
+  transform: rotate(-3deg);
+}
+html.t-sticker-pop .badge.good {
+  background: var(--mint);
+}
+html.t-sticker-pop .badge.warm {
+  background: var(--amber);
+}
+html.t-sticker-pop .badge.bad {
+  color: var(--lemon);
+  background: var(--rust);
+}
+
+/* The gallery: chunky sticker cards in color blocks, each at its own tilt. */
+html.t-sticker-pop .gallery {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 270px));
+  gap: 32px;
+  padding: 6px 4px 10px;
+}
+/* A speech-bubble sticker in the empty corner of the counter. */
+html.t-sticker-pop .gallery {
+  position: relative;
+}
+html.t-sticker-pop .gallery::after {
+  content: "Practice makes pie-fect!";
+  position: absolute;
+  top: 40px;
+  right: 90px;
+  max-width: 230px;
+  padding: 16px 22px;
+  border: var(--edge);
+  border-radius: 28px 28px 28px 6px;
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: var(--pop);
+  font: 800 24px/1.15 var(--chunky);
+  transform: rotate(4deg);
+}
+html.t-sticker-pop .pastry-card {
+  min-height: 250px;
+  gap: 12px;
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  background: var(--white);
+  box-shadow: 7px 7px 0 var(--ink);
+  transform: rotate(-1.5deg);
+}
+html.t-sticker-pop .pastry-card:nth-child(2n) {
+  background: var(--lemon);
+  transform: rotate(1.5deg);
+}
+html.t-sticker-pop .pastry-card:hover:not(:disabled) {
+  transform: rotate(0) translate(-2px, -3px);
+  box-shadow: 10px 10px 0 var(--ink);
+}
+html.t-sticker-pop .pastry-card .pastry {
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 108px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 4px 4px 0 var(--ink);
+  font-size: 56px;
+}
+html.t-sticker-pop .pastry-card .name {
+  font-size: 27px;
+  font-variation-settings: "wdth" 85;
+}
+html.t-sticker-pop .pastry-card .muted {
+  padding: 3px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--mint);
+  font-weight: 700;
+}
+html.t-sticker-pop .pastry-card.surprise {
+  border-style: solid;
+  color: var(--lemon);
+  background: var(--rust);
+}
+html.t-sticker-pop .pastry-card.surprise .pastry {
+  border: 0;
+  border-radius: 0;
+  background: var(--amber);
+  box-shadow: none;
+  clip-path: var(--star);
+  font-size: 50px;
+}
+html.t-sticker-pop .pastry-card.surprise .muted {
+  background: var(--lemon);
+}
+html.t-sticker-pop .tables li {
+  border-top: 2px solid var(--ink);
+}
+html.t-sticker-pop .tables strong {
+  font-family: var(--chunky);
+  font-size: 18px;
+}
+
+/* Your Slice. */
+html.t-sticker-pop .banner.panel {
+  background: var(--teal);
+  color: var(--lemon);
+}
+html.t-sticker-pop .banner h2 {
+  color: var(--lemon);
+  font-size: 30px;
+}
+html.t-sticker-pop .banner .muted {
+  color: var(--mint);
+  font-size: 15px;
+  font-weight: 600;
+}
+html.t-sticker-pop .banner .pastry {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  border: var(--edge);
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 38px;
+}
+html.t-sticker-pop .markdown h1 {
+  font-family: var(--chunky);
+  font-size: 30px;
+  font-weight: 800;
+}
+html.t-sticker-pop .markdown h2,
+html.t-sticker-pop .markdown h3 {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0 4px;
+  font-family: var(--chunky);
+  font-weight: 800;
+  background: linear-gradient(transparent 55%, var(--mint) 55% 92%, transparent 92%);
+}
+html.t-sticker-pop textarea.box {
+  border: var(--edge);
+  border-radius: 14px;
+  background: var(--white);
+}
+
+/* The Table. */
+html.t-sticker-pop .countdown {
+  border: var(--edge);
+  color: var(--ink);
+  background: var(--amber);
+  box-shadow: 4px 4px 0 var(--ink);
+  font-family: var(--chunky);
+}
+html.t-sticker-pop .countdown.urgent {
+  color: var(--lemon);
+  background: var(--rust);
+}
+html.t-sticker-pop .bubble {
+  border: 2px solid var(--ink);
+  background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+html.t-sticker-pop .mine .bubble {
+  color: var(--lemon);
+  background: var(--teal);
+}
+html.t-sticker-pop .timeline {
+  padding: 4px 8px 8px 4px;
+}
+html.t-sticker-pop .proposal {
+  border: var(--edge);
+  border-radius: 18px;
+  background: var(--lemon);
+  box-shadow: var(--pop);
+}
+html.t-sticker-pop .proposal header strong {
+  font-family: var(--chunky);
+  font-size: 18px;
+  font-weight: 800;
+}
+html.t-sticker-pop .tabs {
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 0;
+}
+html.t-sticker-pop .tabs button {
+  margin: 0;
+  padding: 4px 16px;
+  border: var(--edge);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: var(--chunky);
+  font-weight: 800;
+}
+html.t-sticker-pop .tabs button[aria-selected="true"] {
+  color: var(--lemon);
+  background: var(--teal);
+  border-bottom: var(--edge);
+}
+html.t-sticker-pop .deal legend {
+  font-family: var(--chunky);
+  font-size: 15px;
+  font-weight: 800;
+}
+html.t-sticker-pop .choices label {
+  border: 2px solid var(--ink);
+  background: var(--white);
+  font-weight: 700;
+}
+html.t-sticker-pop .choices label.chosen {
+  background: var(--amber);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+html.t-sticker-pop .choices input,
+html.t-sticker-pop .range input {
+  accent-color: var(--ink);
+}
+html.t-sticker-pop .summary {
+  border-top: var(--edge);
+}
+html.t-sticker-pop .summary .worth {
+  border: var(--edge);
+  background: var(--mint);
+  font-weight: 600;
+}
+html.t-sticker-pop .splitter::after {
+  background: var(--ink);
+  opacity: 0.5;
+}
+
+/* The Whole Pie. */
+html.t-sticker-pop .headline {
+  align-self: flex-start;
+  padding: 6px 18px 8px;
+  border: var(--edge);
+  border-radius: 16px;
+  color: var(--lemon);
+  background: var(--teal);
+  box-shadow: var(--pop);
+  font-size: 28px;
+  transform: rotate(-1deg);
+}
+html.t-sticker-pop .pie svg {
+  overflow: visible;
+  filter: drop-shadow(6px 6px 0 var(--ink));
+}
+html.t-sticker-pop .pie svg path {
+  stroke: var(--ink);
+  stroke-width: 0.03;
+}
+html.t-sticker-pop .swatch {
+  border: 2px solid var(--ink);
+}
+html.t-sticker-pop .scores > div {
+  padding: 10px 14px 12px;
+  border: var(--edge);
+  border-radius: 16px;
+  background: var(--lemon);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+html.t-sticker-pop .scores > div:nth-child(2) {
+  background: var(--mint);
+}
+html.t-sticker-pop .scores dd {
+  color: var(--rust);
+  font-family: var(--chunky);
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+html.t-sticker-pop .compare th,
+html.t-sticker-pop .compare td {
+  border-bottom: 2px solid var(--ink);
+}
+html.t-sticker-pop .compare tbody tr.differs td {
+  background: var(--lemon);
+}

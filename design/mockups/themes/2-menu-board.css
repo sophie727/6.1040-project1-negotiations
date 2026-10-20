@@ -1,0 +1,393 @@
+/*
+ * Menu Board: a chalkboard café. The page is a deep teal board with chalk dust, titles are hand-lettered in chalk,
+ * the bakery is a menu with dotted leaders, and the things you read closely (the chat, the deal, your orders) are
+ * on cream paper taped to the board. Palette: FDF8C3, 507C68, DBE7C5, F8BA12, AA420E, with deep green ink.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Caveat:wght@500;700&display=swap");
+
+html.t-menu-board {
+  --board: #2a4539;
+  --board-light: #33503f;
+  --chalk: #f2efd7;
+  --chalk-dim: #b9c9b0;
+  --lemon: #fdf8c3;
+  --mint: #dbe7c5;
+  --teal: #507c68;
+  --amber: #f8ba12;
+  --rust: #aa420e;
+  --ink: #1f3a2e;
+  --paper: #fbf8e6;
+  --dust: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/%3E%3CfeColorMatrix values=%220 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.09 0%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E");
+  --hand: "Caveat", cursive;
+  --letters: "Amatic SC", "Caveat", cursive;
+  --color-page: var(--board);
+  --color-surface: var(--board-light);
+  --color-text: var(--chalk);
+  --color-text-muted: var(--chalk-dim);
+  --color-line: rgba(242, 239, 215, 0.14);
+  --color-border: rgba(242, 239, 215, 0.3);
+  --color-gold-soft: rgba(248, 186, 18, 0.16);
+  --color-left: rgba(219, 231, 197, 0.55);
+  --color-good: #bfe0c9;
+  --color-good-soft: rgba(191, 224, 201, 0.16);
+  --shadow-card: none;
+}
+html.t-menu-board body {
+  background: transparent;
+}
+html.t-menu-board {
+  min-height: 100%;
+  background:
+    var(--dust),
+    radial-gradient(ellipse at 15% 0%, rgba(255, 255, 255, 0.07), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(255, 255, 255, 0.05), transparent 50%),
+    var(--board);
+}
+
+/* Chalk sections on the board: a lighter board inside a chalk line. */
+html.t-menu-board .panel {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 0 0 2px rgba(242, 239, 215, 0.18);
+}
+
+/* Paper taped to the board: these hold what you read closely, in ink. */
+html.t-menu-board .chat,
+html.t-menu-board .deal,
+html.t-menu-board .page > section.panel:has(.tables),
+html.t-menu-board .side > .panel:has(.notes),
+html.t-menu-board .right > .panel:has(.compare),
+html.t-menu-board .card {
+  --color-text: var(--ink);
+  --color-text-muted: #54695f;
+  --color-line: #ece6c4;
+  --color-border: #ddd5ad;
+  --color-surface: var(--paper);
+  --color-gold-soft: #fdf3b8;
+  --color-good: #3f6b57;
+  --color-good-soft: #dbe7c5;
+  position: relative;
+  color: var(--ink);
+  background: var(--paper);
+  border-radius: 3px;
+  box-shadow: 0 14px 26px -12px rgba(0, 0, 0, 0.55);
+}
+html.t-menu-board .chat::before,
+html.t-menu-board .deal::before,
+html.t-menu-board .page > section.panel:has(.tables)::before,
+html.t-menu-board .side > .panel:has(.notes)::before,
+html.t-menu-board .right > .panel:has(.compare)::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 110px;
+  height: 26px;
+  transform: translateX(-50%) rotate(-2deg);
+  background: rgba(219, 231, 197, 0.75);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+html.t-menu-board .page > section.panel:has(.tables) {
+  transform: rotate(-0.5deg);
+}
+
+html.t-menu-board .panel > h2,
+html.t-menu-board .deal h2 {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+}
+
+/* The navbar is the top edge of the board, with the name lettered in chalk. */
+html.t-menu-board .topbar,
+html.t-menu-board .topbar.scrolled {
+  height: 72px;
+  color: var(--lemon);
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0 -2px 0 rgba(242, 239, 215, 0.12);
+}
+html.t-menu-board .brand {
+  font-family: var(--letters);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--lemon);
+}
+html.t-menu-board .brand img {
+  background: var(--lemon);
+}
+html.t-menu-board .topbar .icon-button,
+html.t-menu-board .topbar .icon-button:hover {
+  color: var(--chalk);
+  background: transparent;
+  border: 2px solid rgba(242, 239, 215, 0.4);
+  font-family: var(--hand);
+  font-size: 20px;
+}
+
+/* Titles: big chalk lettering, centered like a menu, with flourishes. */
+html.t-menu-board .page-head {
+  text-align: center;
+}
+html.t-menu-board .page-head h1,
+html.t-menu-board .top h1 {
+  color: var(--lemon);
+  font-family: var(--letters);
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+html.t-menu-board .page-head h1::before,
+html.t-menu-board .page-head h1::after {
+  content: "~";
+  margin: 0 18px;
+  color: var(--amber);
+  font-family: var(--hand);
+}
+html.t-menu-board .page-head .lead,
+html.t-menu-board .top .muted {
+  color: var(--mint);
+  font-family: var(--hand);
+  font-size: 24px;
+}
+
+/* The bakery is a written menu: each scenario a line, with a dotted leader to its details. */
+html.t-menu-board .gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 26px 52px 30px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 3px rgba(242, 239, 215, 0.25), inset 0 0 0 9px rgba(0, 0, 0, 0.08), inset 0 0 0 11px rgba(242, 239, 215, 0.12);
+}
+html.t-menu-board .gallery::before {
+  content: "Today's scenarios";
+  align-self: center;
+  margin-bottom: 6px;
+  color: var(--amber);
+  font-family: var(--hand);
+  font-size: 30px;
+  font-weight: 700;
+}
+html.t-menu-board .pastry-card {
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 16px;
+  min-height: 0;
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 2px dashed rgba(242, 239, 215, 0.12);
+  border-radius: 0;
+  color: var(--chalk);
+  background: none;
+  text-align: left;
+}
+html.t-menu-board .pastry-card:last-child {
+  border-bottom: 0;
+}
+html.t-menu-board .pastry-card:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+html.t-menu-board .pastry-card:hover .name {
+  color: var(--amber);
+}
+html.t-menu-board .pastry-card .pastry {
+  font-size: 34px;
+  transform: translateY(5px);
+}
+html.t-menu-board .pastry-card .name {
+  order: 1;
+  color: var(--lemon);
+  font-family: var(--letters);
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+html.t-menu-board .pastry-card::after {
+  content: "";
+  order: 2;
+  flex: 1;
+  min-width: 40px;
+  border-bottom: 4px dotted rgba(242, 239, 215, 0.45);
+  transform: translateY(-9px);
+}
+html.t-menu-board .pastry-card .muted {
+  order: 3;
+  color: var(--amber);
+  font-family: var(--hand);
+  font-size: 26px;
+  font-weight: 700;
+}
+/* The special of the day, circled in chalk. */
+html.t-menu-board .pastry-card.surprise {
+  background: none;
+  border-style: none;
+}
+html.t-menu-board .pastry-card.surprise .name {
+  padding: 2px 16px 4px;
+  border: 3px solid var(--rust);
+  border-radius: 48% 52% 46% 54% / 60% 44% 56% 40%;
+  color: var(--chalk);
+  transform: rotate(-2deg);
+}
+
+/* Paper and buttons. */
+html.t-menu-board .tables li {
+  border-top-style: dashed;
+}
+html.t-menu-board .tables strong {
+  font-family: var(--hand);
+  font-size: 24px;
+}
+html.t-menu-board .badge {
+  padding: 1px 10px;
+  border: 2px solid currentColor;
+  background: transparent;
+  font-family: var(--hand);
+  font-size: 18px;
+  font-weight: 700;
+}
+html.t-menu-board .badge.warm {
+  color: #9a6a00;
+}
+html.t-menu-board .button.primary {
+  color: var(--lemon);
+  background: var(--rust);
+  box-shadow: 0 6px 0 -1px #7a2f0a;
+}
+html.t-menu-board .button.large {
+  font-family: var(--hand);
+  font-size: 26px;
+  font-weight: 700;
+}
+html.t-menu-board .button.outline {
+  color: var(--chalk);
+  background: transparent;
+  border: 2px solid rgba(242, 239, 215, 0.5);
+}
+
+/* Your Slice. */
+html.t-menu-board .banner.panel {
+  box-shadow: inset 0 0 0 2px rgba(248, 186, 18, 0.55);
+}
+html.t-menu-board .banner h2 {
+  color: var(--amber);
+  font-family: var(--letters);
+  font-size: 44px;
+  letter-spacing: 0.03em;
+}
+html.t-menu-board .markdown h1,
+html.t-menu-board .markdown h2,
+html.t-menu-board .markdown h3 {
+  color: var(--lemon);
+  font-family: var(--letters);
+  font-size: 34px;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+html.t-menu-board .markdown h1 {
+  font-size: 40px;
+}
+html.t-menu-board .markdown strong {
+  color: var(--amber);
+}
+
+/* The Table. */
+html.t-menu-board .countdown {
+  color: var(--amber);
+  background: transparent;
+  box-shadow: inset 0 0 0 3px var(--amber);
+  font-family: var(--hand);
+  font-size: 22px;
+}
+html.t-menu-board .countdown .time {
+  font-size: 30px;
+}
+html.t-menu-board .tabs {
+  border-bottom: 2px dashed rgba(242, 239, 215, 0.2);
+}
+html.t-menu-board .tabs button {
+  font-family: var(--letters);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--chalk-dim);
+}
+html.t-menu-board .tabs button[aria-selected="true"] {
+  color: var(--lemon);
+  border-bottom-color: var(--amber);
+}
+html.t-menu-board .chat > h2,
+html.t-menu-board .deal h2 {
+  color: var(--rust);
+}
+html.t-menu-board .bubble {
+  background: #ece8cb;
+}
+html.t-menu-board .mine .bubble {
+  color: var(--lemon);
+  background: var(--teal);
+}
+/* A proposal is a sticky note on the chat's paper. */
+html.t-menu-board .proposal {
+  border: 0;
+  border-radius: 2px;
+  background: #fdf3a6;
+  box-shadow: 0 10px 18px -10px rgba(31, 58, 46, 0.5);
+  transform: rotate(0.8deg);
+}
+html.t-menu-board .proposal header strong {
+  font-family: var(--hand);
+  font-size: 22px;
+}
+html.t-menu-board .deal legend {
+  font-family: var(--hand);
+  font-size: 20px;
+  font-weight: 700;
+}
+html.t-menu-board .choices label.chosen {
+  color: var(--lemon);
+  border-color: var(--teal);
+  background: var(--teal);
+}
+html.t-menu-board .summary .worth {
+  font-family: var(--hand);
+  font-size: 21px;
+}
+html.t-menu-board .splitter::after {
+  background: rgba(242, 239, 215, 0.4);
+}
+
+/* The Whole Pie. */
+html.t-menu-board .headline {
+  color: var(--amber);
+  font-family: var(--hand);
+  font-size: 40px;
+  font-weight: 700;
+  text-align: center;
+}
+html.t-menu-board .pie svg path {
+  stroke: var(--board);
+  stroke-width: 0.035;
+}
+html.t-menu-board .scores dt {
+  font-family: var(--hand);
+  font-size: 22px;
+}
+html.t-menu-board .scores dd {
+  color: var(--lemon);
+  font-family: var(--letters);
+  font-size: 64px;
+  line-height: 1;
+}
+html.t-menu-board .again {
+  font-size: 26px;
+}

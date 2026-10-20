@@ -1,0 +1,435 @@
+/*
+ * Patisserie: refined and editorial. Arched cards like a pâtisserie's windows, hairline double frames with a gold inner
+ * rule, light italic serif titles, small-caps labels, centered headers with an ornament, and dotted leaders in the
+ * proposals. Palette: FDF8C3, 507C68, DBE7C5, F8BA12, AA420E, with deep green ink.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap");
+
+html.t-patisserie {
+  --teal: #507c68;
+  --lemon: #fdf8c3;
+  --mint: #dbe7c5;
+  --amber: #f8ba12;
+  --rust: #aa420e;
+  --ink: #1f3a2e;
+  --hairline: rgba(80, 124, 104, 0.38);
+  --gold-line: rgba(248, 186, 18, 0.75);
+  --serif: "Fraunces", Georgia, serif;
+  --color-page: #fbf8e7;
+  --color-surface: #fffef8;
+  --color-line: #ebe7cf;
+  --color-border: var(--hairline);
+  --color-accent-soft: #f5e6da;
+  --radius-lg: 3px;
+  --radius-md: 3px;
+  --shadow-card: none;
+  background: var(--color-page);
+}
+html.t-patisserie h1,
+html.t-patisserie h2,
+html.t-patisserie .display {
+  font-family: var(--serif);
+  letter-spacing: -0.01em;
+}
+
+/* A quiet navbar: the name in italic between two stars, over a double rule. */
+html.t-patisserie .topbar {
+  height: 76px;
+  color: var(--ink);
+  background: var(--color-page);
+  box-shadow: 0 1px 0 var(--hairline), 0 4px 0 var(--color-page), 0 5px 0 var(--hairline);
+}
+html.t-patisserie .topbar.scrolled {
+  color: var(--lemon);
+  background: var(--teal);
+}
+html.t-patisserie .brand {
+  gap: 14px;
+  color: inherit;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144;
+  letter-spacing: 0;
+}
+html.t-patisserie .brand img {
+  display: none;
+}
+html.t-patisserie .brand::before,
+html.t-patisserie .brand::after {
+  content: "✦";
+  color: var(--amber);
+  font-size: 13px;
+  font-style: normal;
+}
+html.t-patisserie .topbar .icon-button,
+html.t-patisserie .topbar .icon-button:hover {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+html.t-patisserie .content {
+  padding-top: 48px;
+}
+
+/* Centered headers, with an ornament underneath. */
+html.t-patisserie .page-head {
+  text-align: center;
+}
+html.t-patisserie .page-head h1,
+html.t-patisserie .top h1 {
+  font-size: 58px;
+  font-style: italic;
+  font-weight: 300;
+  font-variation-settings: "opsz" 144;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+html.t-patisserie .page-head .lead,
+html.t-patisserie .top .muted {
+  margin-top: 8px;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html.t-patisserie .page-head::after {
+  content: "✦";
+  display: block;
+  margin: 18px auto 0;
+  width: 220px;
+  color: var(--amber);
+  font-size: 14px;
+  background: linear-gradient(var(--hairline), var(--hairline)) left center / 92px 1px no-repeat,
+    linear-gradient(var(--hairline), var(--hairline)) right center / 92px 1px no-repeat;
+}
+
+/* Panels in a double frame: a teal hairline outside and a gold one inside. */
+html.t-patisserie .panel,
+html.t-patisserie .card {
+  border: 1px solid var(--hairline);
+  outline: 1px solid var(--gold-line);
+  outline-offset: -7px;
+  padding: 26px;
+}
+html.t-patisserie .panel > h2,
+html.t-patisserie .deal header h2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--teal);
+  font-family: "Figtree", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+html.t-patisserie .panel > h2::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+html.t-patisserie .button {
+  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+html.t-patisserie .button.large {
+  min-height: 52px;
+}
+html.t-patisserie .button.outline {
+  border: 1px solid var(--hairline);
+  background: transparent;
+}
+html.t-patisserie .badge {
+  gap: 7px;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+html.t-patisserie .badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hairline);
+}
+html.t-patisserie .badge.good::before {
+  background: var(--teal);
+}
+html.t-patisserie .badge.warm::before {
+  background: var(--amber);
+}
+html.t-patisserie .badge.bad::before {
+  background: var(--rust);
+}
+
+/* The gallery: arched windows, each pastry on a mint plate with a gold rim. */
+html.t-patisserie .gallery {
+  grid-template-columns: repeat(auto-fit, 250px);
+  justify-content: center;
+  gap: 36px;
+  padding: 8px 0 12px;
+}
+html.t-patisserie .pastry-card {
+  min-height: 330px;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 34px 22px 34px;
+  border: 1px solid var(--hairline);
+  border-radius: 125px 125px 3px 3px;
+  outline: 1px solid var(--gold-line);
+  outline-offset: -9px;
+  background: var(--color-surface);
+}
+html.t-patisserie .pastry-card:hover:not(:disabled) {
+  box-shadow: 0 18px 30px -22px rgba(31, 58, 46, 0.6);
+}
+html.t-patisserie .pastry-card .pastry {
+  display: grid;
+  place-items: center;
+  width: 118px;
+  height: 118px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 6px var(--color-surface), 0 0 0 7px var(--gold-line);
+  font-size: 58px;
+}
+html.t-patisserie .pastry-card .name {
+  font-size: 27px;
+  font-style: italic;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144;
+}
+html.t-patisserie .pastry-card .muted {
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-patisserie .pastry-card.surprise {
+  border-style: solid;
+  color: var(--lemon);
+  background: var(--teal);
+  outline-color: rgba(253, 248, 195, 0.55);
+}
+html.t-patisserie .pastry-card.surprise .pastry {
+  background: rgba(253, 248, 195, 0.18);
+  box-shadow: 0 0 0 6px var(--teal), 0 0 0 7px rgba(253, 248, 195, 0.55);
+}
+html.t-patisserie .pastry-card.surprise .muted {
+  color: var(--mint);
+}
+html.t-patisserie .page > section.panel:has(.tables) {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+html.t-patisserie .tables strong {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Your Slice. */
+html.t-patisserie .banner.panel {
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  color: var(--lemon);
+  background: var(--teal);
+  outline-color: rgba(253, 248, 195, 0.5);
+}
+html.t-patisserie .banner h2 {
+  color: var(--lemon);
+  font-size: 34px;
+  font-style: italic;
+  font-weight: 400;
+}
+html.t-patisserie .banner .muted {
+  color: var(--mint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-patisserie .markdown h1 {
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144;
+}
+html.t-patisserie .markdown h2,
+html.t-patisserie .markdown h3 {
+  color: var(--rust);
+  font-family: "Figtree", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html.t-patisserie .markdown p {
+  line-height: 1.7;
+}
+html.t-patisserie textarea.box {
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  background: transparent;
+}
+
+/* The Table. */
+html.t-patisserie .top h1 {
+  font-size: 46px;
+}
+html.t-patisserie .countdown {
+  border: 1px solid var(--hairline);
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--serif);
+  font-weight: 400;
+}
+html.t-patisserie .countdown .time {
+  font-size: 24px;
+}
+html.t-patisserie .bubble {
+  border-radius: 18px 18px 18px 2px;
+  background: var(--mint);
+}
+html.t-patisserie .mine .bubble {
+  border-radius: 18px 18px 2px 18px;
+}
+html.t-patisserie .who {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+html.t-patisserie .proposal {
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  outline: 1px solid var(--gold-line);
+  outline-offset: -6px;
+  padding: 20px 22px;
+  background: var(--color-surface);
+}
+html.t-patisserie .proposal header strong {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-style: italic;
+  font-weight: 400;
+}
+html.t-patisserie .proposal .terms {
+  grid-template-columns: 1fr auto;
+}
+html.t-patisserie .proposal dt {
+  display: flex;
+  align-items: baseline;
+}
+html.t-patisserie .proposal dt::after {
+  content: "";
+  flex: 1;
+  margin: 0 8px;
+  border-bottom: 1px dotted var(--hairline);
+}
+html.t-patisserie .proposal dd {
+  text-align: right;
+}
+html.t-patisserie .tabs {
+  justify-content: center;
+}
+html.t-patisserie .tabs button {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html.t-patisserie .deal legend {
+  color: var(--teal);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-patisserie .choices label {
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+}
+html.t-patisserie .choices label.chosen {
+  color: var(--lemon);
+  background: var(--teal);
+  border-color: var(--teal);
+}
+html.t-patisserie .choices input {
+  accent-color: var(--amber);
+}
+html.t-patisserie .summary {
+  margin: var(--space-1) -18px -18px;
+  padding: 14px 18px 18px;
+  border-top: 1px solid var(--hairline);
+}
+html.t-patisserie .summary .worth {
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--gold-line);
+  font-family: var(--serif);
+  font-size: 17px;
+}
+html.t-patisserie .splitter::after {
+  background: var(--gold-line);
+}
+
+/* The Whole Pie. */
+html.t-patisserie .headline {
+  text-align: center;
+  font-size: 34px;
+  font-style: italic;
+  font-weight: 300;
+  font-variation-settings: "opsz" 144;
+}
+html.t-patisserie .pie svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 12px var(--color-surface), 0 0 0 13px var(--gold-line);
+}
+html.t-patisserie .pie svg path {
+  stroke: var(--color-surface);
+  stroke-width: 0.025;
+}
+html.t-patisserie .scores dt {
+  color: var(--teal);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-patisserie .scores dd {
+  color: var(--rust);
+  font-family: var(--serif);
+  font-size: 60px;
+  font-style: italic;
+  font-weight: 300;
+  font-variation-settings: "opsz" 144;
+}
+html.t-patisserie .compare thead th {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+html.t-patisserie .compare tbody th {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 15px;
+}

@@ -1,0 +1,470 @@
+/*
+ * Storefront: a corner bakery. A striped awning with a scalloped valance, a glass display case with pastries on
+ * doilies and price tags, recipe cards and notepads, receipts for proposals, rubber stamps for statuses, and the
+ * pie served on a plate. Palette: FDF8C3, 507C68, DBE7C5, F8BA12, AA420E, with deep green ink.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=DM+Mono:wght@400;500&display=swap");
+
+html.t-storefront {
+  --teal: #507c68;
+  --teal-deep: #3b5f4f;
+  --lemon: #fdf8c3;
+  --mint: #dbe7c5;
+  --amber: #f8ba12;
+  --rust: #aa420e;
+  --ink: #1f3a2e;
+  --paper: #fffdf3;
+  --color-page: #fbf5cf;
+  --color-surface: var(--paper);
+  --color-line: #efe7c2;
+  --color-border: #e2d7a6;
+  --color-accent-soft: #f6e2d3;
+  --radius-lg: 18px;
+  --shadow-card: 0 1px 0 rgba(31, 58, 46, 0.06), 0 14px 28px -18px rgba(31, 58, 46, 0.5);
+  --mono: "DM Mono", ui-monospace, monospace;
+  --serif: "Fraunces", Georgia, serif;
+  --doily: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -50 100 100'%3E%3Ccircle cx='44.00' cy='0.00' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='43.04' cy='9.15' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='40.20' cy='17.90' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='35.60' cy='25.86' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='29.44' cy='32.70' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='22.00' cy='38.11' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='13.60' cy='41.85' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='4.60' cy='43.76' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-4.60' cy='43.76' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-13.60' cy='41.85' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-22.00' cy='38.11' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-29.44' cy='32.70' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-35.60' cy='25.86' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-40.20' cy='17.90' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-43.04' cy='9.15' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-44.00' cy='0.00' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-43.04' cy='-9.15' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-40.20' cy='-17.90' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-35.60' cy='-25.86' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-29.44' cy='-32.70' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-22.00' cy='-38.11' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-13.60' cy='-41.85' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='-4.60' cy='-43.76' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='4.60' cy='-43.76' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='13.60' cy='-41.85' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='22.00' cy='-38.11' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='29.44' cy='-32.70' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='35.60' cy='-25.86' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='40.20' cy='-17.90' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle cx='43.04' cy='-9.15' r='5.4' fill='%23ffffff' stroke='%23e6dcab' stroke-width='.9'/%3E%3Ccircle r='44.2' fill='%23ffffff'/%3E%3Ccircle cx='40.28' cy='4.23' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='38.52' cy='12.52' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='35.07' cy='20.25' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='30.10' cy='27.10' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='23.81' cy='32.77' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='16.47' cy='37.00' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='8.42' cy='39.61' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='0.00' cy='40.50' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-8.42' cy='39.61' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-16.47' cy='37.00' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-23.81' cy='32.77' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-30.10' cy='27.10' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-35.07' cy='20.25' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-38.52' cy='12.52' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-40.28' cy='4.23' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-40.28' cy='-4.23' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-38.52' cy='-12.52' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-35.07' cy='-20.25' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-30.10' cy='-27.10' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-23.81' cy='-32.77' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-16.47' cy='-37.00' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-8.42' cy='-39.61' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='-0.00' cy='-40.50' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='8.42' cy='-39.61' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='16.47' cy='-37.00' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='23.81' cy='-32.77' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='30.10' cy='-27.10' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='35.07' cy='-20.25' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='38.52' cy='-12.52' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='40.28' cy='-4.23' r='1.5' fill='%23f7efc4'/%3E%3Ccircle cx='35.00' cy='0.00' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='31.97' cy='14.24' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='23.42' cy='26.01' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='10.82' cy='33.29' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-3.66' cy='34.81' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-17.50' cy='30.31' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-28.32' cy='20.57' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-34.24' cy='7.28' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-34.24' cy='-7.28' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-28.32' cy='-20.57' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-17.50' cy='-30.31' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='-3.66' cy='-34.81' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='10.82' cy='-33.29' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='23.42' cy='-26.01' r='2.3' fill='%23f7efc4'/%3E%3Ccircle cx='31.97' cy='-14.24' r='2.3' fill='%23f7efc4'/%3E%3Ccircle r='30.5' fill='none' stroke='%23e6dcab' stroke-width='.8' stroke-dasharray='1.6 1.6'/%3E%3C/svg%3E");
+  background: var(--color-page);
+}
+
+/* The awning: teal and cream stripes, with a scalloped valance hanging below. */
+html.t-storefront .topbar,
+html.t-storefront .topbar.scrolled {
+  height: 66px;
+  color: var(--lemon);
+  background: repeating-linear-gradient(90deg, var(--teal) 0 40px, var(--paper) 40px 80px);
+  box-shadow: none;
+}
+html.t-storefront .topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 20px;
+  background:
+    radial-gradient(circle at 20px 0, var(--teal) 19.5px, transparent 20.5px) 0 0 / 80px 20px repeat-x,
+    radial-gradient(circle at 60px 0, var(--paper) 19.5px, transparent 20.5px) 0 0 / 80px 20px repeat-x;
+  filter: drop-shadow(0 5px 3px rgba(31, 58, 46, 0.16));
+  pointer-events: none;
+}
+/* The shop sign hangs over the awning. */
+html.t-storefront .brand {
+  position: relative;
+  z-index: 1;
+  top: 14px;
+  gap: 12px;
+  padding: 8px 24px 10px 14px;
+  border: 2px solid var(--amber);
+  border-radius: 12px;
+  color: var(--lemon);
+  background: var(--teal-deep);
+  box-shadow: 0 0 0 5px var(--teal-deep), 0 12px 22px -8px rgba(31, 58, 46, 0.6);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 27px;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  letter-spacing: 0.005em;
+}
+html.t-storefront .brand img {
+  background: var(--lemon);
+  box-shadow: 0 0 0 2px var(--amber);
+}
+html.t-storefront .topbar .icon-button,
+html.t-storefront .topbar .icon-button:hover {
+  color: var(--teal-deep);
+  background: var(--paper);
+  border: 2px solid var(--teal);
+  font-weight: 700;
+}
+html.t-storefront .content {
+  padding-top: 64px;
+}
+
+/* Titles like hand-painted shop lettering. */
+html.t-storefront .page-head h1,
+html.t-storefront .top h1 {
+  color: var(--rust);
+  font-family: var(--serif);
+  font-size: 46px;
+  font-weight: 900;
+  font-variation-settings: "SOFT" 100, "opsz" 144;
+  letter-spacing: -0.02em;
+}
+html.t-storefront .page-head .lead,
+html.t-storefront .top .muted {
+  color: var(--teal-deep);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+}
+html.t-storefront .panel {
+  border: 1px solid var(--color-border);
+}
+html.t-storefront .panel > h2,
+html.t-storefront .deal h2 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--teal-deep);
+  font-variation-settings: "SOFT" 100;
+}
+
+/* The display case: a glass case on a teal counter, with each pastry on a doily and a price tag. */
+html.t-storefront .gallery {
+  position: relative;
+  isolation: isolate;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 250px));
+  gap: 28px;
+  padding: 36px 36px 58px;
+  border: 3px solid var(--teal);
+  border-radius: 26px 26px 10px 10px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 220 200%22%3E%3Cellipse cx=%22110%22 cy=%22190%22 rx=%2262%22 ry=%227%22 fill=%22%233b5f4f%22/%3E%3Crect x=%22101%22 y=%22152%22 width=%2218%22 height=%2238%22 rx=%224%22 fill=%22%23507c68%22/%3E%3Ctext x=%22110%22 y=%22146%22 font-size=%2274%22 text-anchor=%22middle%22%3E%F0%9F%A5%A7%3C/text%3E%3Cellipse cx=%22110%22 cy=%22152%22 rx=%2296%22 ry=%2212%22 fill=%22%23ffffff%22 stroke=%22%23e2d7a6%22 stroke-width=%222%22/%3E%3Cpath d=%22M22 150 C 22 38, 198 38, 198 150%22 fill=%22rgba(255,255,255,0.28)%22 stroke=%22rgba(80,124,104,0.6)%22 stroke-width=%223%22/%3E%3Cpath d=%22M48 118 C 52 84, 72 66, 96 60%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.9)%22 stroke-width=%225%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%22110%22 cy=%2258%22 r=%229%22 fill=%22%23507c68%22/%3E%3C/svg%3E") right 56px bottom 26px / 230px auto no-repeat,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(219, 231, 197, 0.55));
+  box-shadow: inset 0 0 0 7px rgba(255, 255, 255, 0.55), 0 22px 34px -22px rgba(31, 58, 46, 0.55);
+}
+html.t-storefront .gallery::before {
+  content: "Fresh today";
+  position: absolute;
+  top: -17px;
+  left: 32px;
+  padding: 3px 14px 4px;
+  border-radius: 999px;
+  color: var(--lemon);
+  background: var(--rust);
+  font: italic 700 15px/1.4 var(--serif);
+  box-shadow: 0 6px 12px -6px rgba(170, 66, 14, 0.7);
+}
+html.t-storefront .gallery::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  height: 26px;
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(180deg, var(--teal), var(--teal-deep));
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28);
+}
+html.t-storefront .pastry-card {
+  position: relative;
+  min-height: 0;
+  gap: 10px;
+  padding: 20px 18px 24px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--paper);
+  box-shadow: 0 1px 0 rgba(31, 58, 46, 0.06), 0 16px 26px -16px rgba(31, 58, 46, 0.55);
+}
+html.t-storefront .pastry-card .pastry {
+  display: grid;
+  place-items: center;
+  width: 124px;
+  height: 124px;
+  font-size: 62px;
+  background: var(--doily) center / contain no-repeat;
+  filter: drop-shadow(0 6px 6px rgba(31, 58, 46, 0.12));
+}
+html.t-storefront .pastry-card .name {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 23px;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+/* The price tag. */
+html.t-storefront .pastry-card .muted {
+  padding: 4px 12px 4px 22px;
+  color: var(--ink);
+  background: radial-gradient(circle at 11px 50%, var(--paper) 3px, transparent 3.5px), var(--amber);
+  clip-path: polygon(9px 0, 100% 0, 100% 100%, 9px 100%, 0 50%);
+  font: 500 11.5px/1.4 var(--mono);
+  white-space: nowrap;
+  transform: rotate(-2.5deg);
+}
+/* The mystery box, tied with a rust ribbon. */
+html.t-storefront .pastry-card.surprise {
+  border: 0;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 7px), var(--rust) calc(50% - 7px) calc(50% + 7px), transparent calc(50% + 7px)) top / 100% 30px no-repeat,
+    linear-gradient(var(--rust), var(--rust)) 0 24px / 100% 6px no-repeat,
+    var(--mint);
+}
+html.t-storefront .pastry-card.surprise::before {
+  content: "🎀";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  font-size: 34px;
+  transform: translateX(-50%);
+}
+html.t-storefront .pastry-card.surprise .pastry {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 58%, transparent 59%);
+}
+
+/* Your negotiations: an order slip, with rubber stamps for their states. */
+html.t-storefront .page > section.panel:has(.tables) {
+  max-width: 760px;
+  padding: 26px 30px 30px;
+  border: 0;
+  border-radius: 4px;
+  background: #ffffff;
+  -webkit-mask:
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 18px 51% repeat-x,
+    linear-gradient(#000, #000) top / 100% 51% no-repeat;
+}
+html.t-storefront .tables li {
+  border-top: 2px dashed var(--color-border);
+  font-family: var(--mono);
+  font-size: 14px;
+}
+html.t-storefront .badge {
+  padding: 2px 9px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  font: 500 11px/1.4 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-5deg);
+  opacity: 0.9;
+}
+html.t-storefront .badge.good {
+  color: #2f6b4f;
+}
+html.t-storefront .badge.warm {
+  color: #9a6a00;
+}
+html.t-storefront .badge.bad {
+  color: #b8203c;
+}
+
+/* Buttons with a little shine. */
+html.t-storefront .button.primary {
+  color: var(--lemon);
+  background: linear-gradient(180deg, #bb4c15, var(--rust));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 14px -8px rgba(170, 66, 14, 0.9);
+}
+html.t-storefront .button.large {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+}
+
+/* Your Slice: a shop banner, a recipe card for the brief, and a notepad. */
+html.t-storefront .banner.panel {
+  border: 0;
+  color: var(--lemon);
+  background: var(--teal);
+  box-shadow: inset 0 0 0 4px var(--teal), inset 0 0 0 6px rgba(253, 248, 195, 0.45);
+}
+html.t-storefront .banner h2 {
+  color: var(--lemon);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+}
+html.t-storefront .banner .muted {
+  color: var(--mint);
+  font-size: 15px;
+}
+html.t-storefront .banner .pastry {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  font-size: 40px;
+  background: var(--doily) center / contain no-repeat;
+}
+html.t-storefront .columns > section.panel:has(.markdown) {
+  padding-left: 72px;
+  background:
+    linear-gradient(90deg, transparent 50px, rgba(170, 66, 14, 0.4) 50px 52px, transparent 52px),
+    var(--paper);
+}
+html.t-storefront .markdown h1 {
+  color: var(--rust);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 26px;
+}
+html.t-storefront .markdown h2 {
+  color: var(--teal-deep);
+  font-family: var(--serif);
+  font-style: italic;
+}
+html.t-storefront .notes textarea.box {
+  border: 0;
+  border-radius: 6px;
+  line-height: 28px;
+  padding: 2px 14px;
+  background: repeating-linear-gradient(var(--paper) 0 27px, #cfdcb7 27px 28px);
+  background-attachment: local;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* The Table. */
+html.t-storefront .countdown {
+  color: var(--ink);
+  background: var(--amber);
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--amber), 0 10px 18px -10px rgba(31, 58, 46, 0.7);
+  font-family: var(--mono);
+}
+html.t-storefront .countdown.urgent {
+  color: var(--lemon);
+  background: var(--rust);
+}
+html.t-storefront .button.outline {
+  border: 2px solid var(--teal);
+  color: var(--teal-deep);
+  background: var(--paper);
+}
+html.t-storefront .chat > h2 {
+  align-self: flex-start;
+  padding: 3px 16px 5px;
+  border-radius: 999px;
+  color: var(--lemon);
+  background: var(--teal);
+  font-size: 17px;
+}
+html.t-storefront .bubble {
+  background: var(--mint);
+}
+html.t-storefront .mine .bubble {
+  color: var(--lemon);
+  background: var(--rust);
+}
+/* A proposal is printed on a receipt. */
+html.t-storefront .proposal {
+  gap: 8px;
+  padding: 24px 22px 28px;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  font-family: var(--mono);
+  font-size: 13px;
+  -webkit-mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / 14px 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 14px 51% repeat-x;
+}
+html.t-storefront .timeline {
+  padding: 4px 10px;
+  margin: 0 -10px;
+  border-radius: 12px;
+  background: #f6efcb;
+}
+html.t-storefront .proposal header {
+  padding-bottom: 8px;
+  border-bottom: 2px dashed var(--color-border);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+}
+html.t-storefront .proposal .worth {
+  padding-top: 8px;
+  border-top: 2px dashed var(--color-border);
+}
+html.t-storefront .tabs {
+  gap: 6px;
+  border-bottom: 2px solid var(--teal);
+}
+html.t-storefront .tabs button {
+  margin-bottom: 0;
+  border: 0;
+  border-radius: 10px 10px 0 0;
+  color: var(--teal-deep);
+  background: var(--mint);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 700;
+}
+html.t-storefront .tabs button[aria-selected="true"] {
+  color: var(--lemon);
+  background: var(--teal);
+}
+/* Picture a deal: an order ticket. */
+html.t-storefront .deal header h2::before {
+  content: "№ 1 · ";
+  color: var(--rust);
+}
+html.t-storefront .deal legend {
+  font: 500 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal-deep);
+}
+html.t-storefront .choices label {
+  border: 2px solid var(--color-border);
+  background: #ffffff;
+}
+html.t-storefront .choices label.chosen {
+  color: var(--lemon);
+  border-color: var(--teal);
+  background: var(--teal);
+}
+html.t-storefront .choices input {
+  accent-color: var(--amber);
+}
+html.t-storefront .range input {
+  accent-color: var(--rust);
+}
+html.t-storefront .summary {
+  border-top: 2px dashed var(--color-border);
+}
+html.t-storefront .summary .worth {
+  font-family: var(--mono);
+  background: var(--lemon);
+  box-shadow: inset 0 0 0 1px #efe39a;
+}
+html.t-storefront .summary .badge {
+  transform: rotate(-3deg);
+}
+html.t-storefront .splitter::after {
+  background: var(--teal);
+  opacity: 0.45;
+}
+
+/* The Whole Pie: served on a plate. */
+html.t-storefront .headline {
+  color: var(--teal-deep);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 32px;
+  font-weight: 700;
+  text-decoration: underline wavy var(--amber) 3px;
+  text-underline-offset: 10px;
+}
+html.t-storefront .pie svg {
+  padding: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0 63%, #f3edd0 63.5% 64.5%, #ffffff 65%);
+  box-shadow: 0 0 0 1px var(--color-border), 0 18px 34px -16px rgba(31, 58, 46, 0.6);
+}
+html.t-storefront .scores dt {
+  font: 500 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+html.t-storefront .scores dd {
+  color: var(--rust);
+  font-family: var(--serif);
+  font-weight: 900;
+  font-variation-settings: "SOFT" 100, "opsz" 144;
+}
+html.t-storefront .compare .points,
+html.t-storefront .compare tfoot {
+  font-family: var(--mono);
+}
+html.t-storefront .compare thead th {
+  font: 500 11px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
