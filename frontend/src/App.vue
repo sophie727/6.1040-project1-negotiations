@@ -179,9 +179,13 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
 .signed-in strong {
   color: var(--color-text);
 }
-/* The page starts clear of the awning's scallops. */
+/*
+ * The page starts clear of the awning's scallops. Anything as wide as the screen, like the bakery's display case, is
+ * clipped at its edge, so a scrollbar's width never makes the page scroll sideways.
+ */
 .content {
   padding: var(--space-12) var(--space-6) var(--space-12);
+  overflow-x: clip;
 }
 @media (max-width: 600px) {
   /* A phone has no room to center the brand beside the account menu, so the brand moves to the left. */

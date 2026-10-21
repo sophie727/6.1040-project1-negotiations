@@ -104,25 +104,27 @@ async function surprise() {
     </div>
     <p v-if="error" class="refusal" role="alert">{{ error }}</p>
 
-    <div v-if="bakery" class="gallery">
-      <button v-for="scenario in scenarios" :key="scenario.scenario" type="button" class="pastry-card" @click="choosing = scenario">
-        <span class="pastry" aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
-        <span class="name display">{{ scenario.name }}</span>
-        <span class="muted">
-          {{ scenario.roles.map(({ name }) => name).join(" or ") }} · {{ scenario.timeLimit ?? DEFAULT_TIME_LIMIT }} minutes
-        </span>
-        <SpiceLevel :spice="scenario.spice" />
-      </button>
-      <button type="button" class="pastry-card surprise" :disabled="surprising || scenarios.length === 0" @click="surprise">
-        <span class="pastry" aria-hidden="true">✨</span>
-        <span class="name display">Surprise me!</span>
-        <span class="muted">{{ surpriseHints[opponents] }}</span>
-      </button>
-      <a class="pastry-card write" href="/write" @click.prevent="go('/write')">
-        <span class="pastry" aria-hidden="true">🧑‍🍳</span>
-        <span class="name display">Write your own</span>
-        <span class="muted">A scenario of yours, for everyone to negotiate</span>
-      </a>
+    <div v-if="bakery" class="case">
+      <div class="gallery">
+        <button v-for="scenario in scenarios" :key="scenario.scenario" type="button" class="pastry-card" @click="choosing = scenario">
+          <span class="pastry" aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
+          <span class="name display">{{ scenario.name }}</span>
+          <span class="muted">
+            {{ scenario.roles.map(({ name }) => name).join(" or ") }} · {{ scenario.timeLimit ?? DEFAULT_TIME_LIMIT }} minutes
+          </span>
+          <SpiceLevel :spice="scenario.spice" />
+        </button>
+        <button type="button" class="pastry-card surprise" :disabled="surprising || scenarios.length === 0" @click="surprise">
+          <span class="pastry" aria-hidden="true">✨</span>
+          <span class="name display">Surprise me!</span>
+          <span class="muted">{{ surpriseHints[opponents] }}</span>
+        </button>
+        <a class="pastry-card write" href="/write" @click.prevent="go('/write')">
+          <span class="pastry" aria-hidden="true">🧑‍🍳</span>
+          <span class="name display">Write your own</span>
+          <span class="muted">A scenario of yours, for everyone to negotiate</span>
+        </a>
+      </div>
     </div>
 
     <YourRatings v-if="bakery?.ratings" :ratings="bakery.ratings" />
@@ -202,19 +204,58 @@ async function surprise() {
 .opponent:hover:not([aria-checked="true"]) {
   border-color: var(--color-accent);
 }
-/* The scenarios in arched windows: a teal hairline, a gold rule inside it, and each pastry on a mint plate. */
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 236px);
-  gap: 30px;
+/*
+ * The bakery's display case, from one edge of the screen to the other, in two drawings that repeat in step: the shelves
+ * of pastries behind the scenarios, and the case's glass outline in front of them. The scenarios stand in the band of
+ * glass between the shelves: from 21.8% to 78.7% of the case's height, above the pastries on the bottom shelf. When
+ * there are more scenarios than fit, they slide sideways behind the glass.
+ */
+.case {
+  --case-height: 612px;
+  position: relative;
+  width: 100vw;
+  height: var(--case-height);
+  margin-inline: calc(50% - 50vw);
+  background: url("/display-case-shelves.webp") center top / auto 100% repeat-x;
 }
+.case::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/display-case-glass.webp") center top / auto 100% repeat-x;
+  pointer-events: none;
+}
+.gallery {
+  position: absolute;
+  top: calc(var(--case-height) * 0.218);
+  left: 0;
+  right: 0;
+  height: calc(var(--case-height) * (0.787 - 0.218));
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 236px;
+  align-items: center;
+  gap: 30px;
+  /* The first window lines up with the page's content. */
+  padding-inline: max(var(--space-6), calc((100vw - 1168px) / 2));
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(80, 124, 104, 0.5) transparent;
+}
+@media (max-width: 600px) {
+  .gallery {
+    padding-inline: var(--space-4);
+  }
+}
+/* Each scenario in an arched window: a teal hairline, a gold rule inside it, and the pastry on a mint plate. */
 .pastry-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   gap: 9px;
-  min-height: 340px;
+  height: 320px;
   padding: 30px 18px 28px;
   border: 1px solid rgba(80, 124, 104, 0.42);
   border-radius: 118px 118px 4px 4px;
@@ -229,6 +270,11 @@ async function surprise() {
   transform: translateY(-3px);
   box-shadow: 0 20px 30px -22px rgba(31, 58, 46, 0.6);
 }
+/* The gold rule is the window's outline, so a focused window trades it for the usual focus ring. */
+.pastry-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
 .pastry {
   display: grid;
   place-items: center;
@@ -240,6 +286,14 @@ async function surprise() {
   box-shadow: 0 0 0 6px var(--color-surface), 0 0 0 7px rgba(248, 186, 18, 0.75);
   font-size: 54px;
   line-height: 1;
+}
+/* A long name or list of roles is cut at two lines, so the window holds whatever a scenario's author wrote. */
+.name,
+.pastry-card > .muted {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .name {
   font-size: 22px;
@@ -269,13 +323,7 @@ async function surprise() {
 .write {
   border-style: dashed;
   border-color: rgba(80, 124, 104, 0.6);
-  background: transparent;
   text-decoration: none;
-}
-@media (max-width: 600px) {
-  .gallery {
-    justify-content: center;
-  }
 }
 .tables {
   display: flex;
