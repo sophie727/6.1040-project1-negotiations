@@ -248,7 +248,7 @@ const materialsId = useId();
 .columns {
   display: grid;
   grid-template-columns: var(--columns);
-  height: calc(100vh - var(--topbar-height) - var(--space-8) - var(--space-12));
+  height: calc(100vh - var(--topbar-height) - var(--space-12) - var(--space-12));
   min-height: 480px;
 }
 .main {

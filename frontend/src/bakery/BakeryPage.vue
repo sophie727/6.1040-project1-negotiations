@@ -202,47 +202,80 @@ async function surprise() {
 .opponent:hover:not([aria-checked="true"]) {
   border-color: var(--color-accent);
 }
+/* The scenarios in arched windows: a teal hairline, a gold rule inside it, and each pastry on a mint plate. */
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, 236px);
+  gap: 30px;
 }
 .pastry-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 200px;
-  justify-content: center;
-  padding: var(--space-6) var(--space-4);
-  border: 2px solid var(--color-accent);
-  border-radius: var(--radius-lg);
+  justify-content: flex-end;
+  gap: 9px;
+  min-height: 340px;
+  padding: 30px 18px 28px;
+  border: 1px solid rgba(80, 124, 104, 0.42);
+  border-radius: 118px 118px 4px 4px;
+  outline: 1px solid rgba(248, 186, 18, 0.75);
+  outline-offset: -9px;
   background: var(--color-surface);
   color: var(--color-text);
   text-align: center;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 .pastry-card:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-popover);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 30px -22px rgba(31, 58, 46, 0.6);
 }
 .pastry {
-  font-size: 56px;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: var(--color-mint);
+  box-shadow: 0 0 0 6px var(--color-surface), 0 0 0 7px rgba(248, 186, 18, 0.75);
+  font-size: 54px;
   line-height: 1;
 }
 .name {
-  font-size: var(--text-xl);
+  font-size: 22px;
   font-weight: 700;
 }
-.surprise {
-  border-style: dashed;
-  background: var(--color-gold-soft);
+.pastry-card > .muted {
+  color: var(--color-teal);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
+/* Surprise me! is the window painted teal. */
+.surprise {
+  color: var(--color-gold-soft);
+  background: var(--color-teal);
+  outline-color: rgba(253, 248, 195, 0.55);
+}
+.surprise .pastry {
+  background: rgba(253, 248, 195, 0.16);
+  box-shadow: 0 0 0 6px var(--color-teal), 0 0 0 7px rgba(253, 248, 195, 0.55);
+}
+.surprise > .muted {
+  color: var(--color-mint);
+}
+/* Writing your own is an empty window, waiting to be filled. */
 .write {
   border-style: dashed;
-  border-color: var(--color-good);
-  background: var(--color-good-soft);
+  border-color: rgba(80, 124, 104, 0.6);
+  background: transparent;
   text-decoration: none;
+}
+@media (max-width: 600px) {
+  .gallery {
+    justify-content: center;
+  }
 }
 .tables {
   display: flex;

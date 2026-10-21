@@ -33,7 +33,7 @@ function finishedCommons() {
 /** Whether the settings dialog is open. */
 const settingsOpen = ref(false);
 
-/** Whether the page has scrolled, when the navbar turns menu-board green; at the top, it blends into the page. */
+/** Whether the page has scrolled, when the shopfront folds down to a slimmer awning and leaves more of the page in view. */
 const scrolled = ref(false);
 const notice = () => {
   scrolled.value = window.scrollY > 0;
@@ -47,10 +47,7 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
 
 <template>
   <header class="topbar" :class="{ scrolled }">
-    <a class="brand display" href="/" @click.prevent="go('/')">
-      <img src="/pie.svg" alt="" width="30" height="30" />
-      The Whole Pie
-    </a>
+    <a class="brand display" href="/" @click.prevent="go('/')">The Whole Pie</a>
     <Menu v-if="me" label="Account">
       <template #button>
         <span class="me">{{ me.username }}</span>
@@ -92,8 +89,12 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
 </template>
 
 <style scoped>
+/*
+ * A painted shopfront: a teal cornice with a cream bead under it, over a frosted-mint awning that is lettered with the
+ * name and shaded where it folds. Three columns keep the name in the middle whether or not the account menu is there.
+ */
 .topbar {
-  /* Three columns, so the brand sits in the middle whether or not the account menu is on the right. */
+  --cornice: 14px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -102,53 +103,67 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
   top: 0;
   z-index: 20;
   height: var(--topbar-height);
-  padding: 0 max(24px, calc((100vw - 1168px) / 2));
+  padding: var(--cornice) max(24px, calc((100vw - 1168px) / 2)) 0;
   color: var(--color-accent);
-  background: var(--color-page);
-  transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  background:
+    linear-gradient(var(--color-page), var(--color-page)) 0 var(--cornice) / 100% 2px no-repeat,
+    linear-gradient(180deg, #628d79, var(--color-teal)) top / 100% var(--cornice) no-repeat,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0) 40%, rgba(80, 124, 104, 0.12)),
+    var(--color-mint);
+  transition: height 0.25s ease, padding 0.25s ease;
 }
+/* The awning's valance, which falls in shallow scallops edged in teal. */
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 12px;
+  background: radial-gradient(circle at 15px 0, var(--color-awning-edge) 14.5px, transparent 15.5px) 0 0 / 30px 12px repeat-x;
+  filter: drop-shadow(0 1.5px 0 rgba(80, 124, 104, 0.75)) drop-shadow(0 4px 3px rgba(31, 58, 46, 0.14));
+  pointer-events: none;
+}
+/* Once the page scrolls, the shopfront folds down to a slimmer awning. */
 .topbar.scrolled {
-  color: var(--color-on-menu);
-  background: var(--color-menu);
-  box-shadow: var(--shadow-card);
+  --cornice: 6px;
+  height: 62px;
 }
 .brand {
   grid-column: 2;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--text-2xl);
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 144;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  white-space: nowrap;
   color: inherit;
   text-decoration: none;
+  transition: font-size 0.25s ease;
+}
+.topbar.scrolled .brand {
+  font-size: 26px;
 }
 .topbar > .menu {
   grid-column: 3;
   justify-self: end;
 }
-.brand img {
-  border-radius: 50%;
-  background: var(--color-gold-soft);
-}
 .topbar :deep(.icon-button) {
   width: auto;
-  height: 36px;
+  height: 32px;
   padding: 0 14px;
+  border: 1px solid rgba(80, 124, 104, 0.45);
   border-radius: var(--radius-full);
-  color: inherit;
-  background: rgba(45, 31, 24, 0.06);
+  color: var(--color-teal);
+  background: transparent;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 .topbar :deep(.icon-button:hover),
 .topbar :deep(.icon-button[aria-expanded="true"]) {
-  color: inherit;
-  background: rgba(45, 31, 24, 0.12);
-}
-.topbar.scrolled :deep(.icon-button) {
-  background: rgba(0, 0, 0, 0.12);
-}
-.topbar.scrolled :deep(.icon-button:hover),
-.topbar.scrolled :deep(.icon-button[aria-expanded="true"]) {
-  background: rgba(0, 0, 0, 0.22);
+  color: var(--color-teal);
+  background: rgba(80, 124, 104, 0.1);
 }
 .topbar :deep(.items) {
   color: var(--color-text);
@@ -164,22 +179,25 @@ onUnmounted(() => window.removeEventListener("scroll", notice));
 .signed-in strong {
   color: var(--color-text);
 }
+/* The page starts clear of the awning's scallops. */
 .content {
-  padding: var(--space-8) var(--space-6) var(--space-12);
+  padding: var(--space-12) var(--space-6) var(--space-12);
 }
 @media (max-width: 600px) {
   /* A phone has no room to center the brand beside the account menu, so the brand moves to the left. */
   .topbar {
     display: flex;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: var(--cornice) 16px 0;
   }
   .brand {
-    font-size: var(--text-xl);
-    white-space: nowrap;
+    font-size: 26px;
+  }
+  .topbar.scrolled .brand {
+    font-size: 22px;
   }
   .content {
-    padding: var(--space-4) var(--space-4) var(--space-8);
+    padding: var(--space-8) var(--space-4) var(--space-8);
   }
 }
 </style>
