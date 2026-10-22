@@ -10,6 +10,16 @@ NEVER push to GitHub. The user will never ask for it and never wants it.
 
 Design deliverables and notes are in `design/notes/`: `P1_design/`, `P2_design/` (the MVP's plan, challenges, and journey), and `P3_design/` (the beta's plan, `claude-plan-p3.md`, and journey).
 
+## P3 Deliverables
+
+- my code and specifications are in this folder.
+- the URL of my deployed app is here: https://whole-pie.mit-sdg.dev/
+- my automated tests and their saved execution output are in tests/
+- my visual design study is in design/notes/P3_design/visual_design_study.pdf. To see my comments and annotations, see this link: https://docs.google.com/presentation/d/1JjVsr007LRz5RLJFWWi-q5-C41KLaWfBwttFwIPfkWY/edit?usp=sharing.
+- An updated user journey is in design/notes/P3_design/beta_user_journey.md.
+- An updated screen recording is here: https://youtu.be/iAhnsTYcQbI.
+- And my updated design notebook is in my private github.
+
 ## Commands
 
 Runtime is Bun (backend), plus Vue 3 + Vite in `frontend/` (that folder has its own `package.json` and `bun.lock`).
@@ -22,6 +32,7 @@ Runtime is Bun (backend), plus Vue 3 + Vite in `frontend/` (that folder has its 
 - `bun run models` lists the models the configured Anthropic key/proxy offers.
 
 Environment (`.env`, which Bun reads automatically; see `.env.example`):
+
 - Without `MONGODB_URL`, the server uses an in-memory MongoDB (`mongodb-memory-server`). Tests always use one.
 - People can sign in with Commons at `COMMONS_ORIGIN` (`https://class.mit-sdg.dev` unless set), which sends them back to `PUBLIC_ORIGIN` (the dev script sets it to the Vite origin). Tests use a `MemoryProvider` in place of Commons.
 - With `ANTHROPIC_API_KEY` set (optionally with `ANTHROPIC_BASE_URL` for MIT's Parley proxy, and `ANTHROPIC_MODEL`), the agents use Claude. Otherwise, with `GEMINI_API_KEY`, they use Gemini. With neither key, they use scripted stand-ins.
