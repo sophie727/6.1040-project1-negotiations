@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { api, type DraftIssue, type DraftOption } from "../api/client.ts";
+import HowTo from "../reusable/ui/HowTo.vue";
 import Icon from "../reusable/ui/Icon.vue";
 import { nextName, type Save } from "./draft.ts";
 import { addStarterOptions, type IssueKind, kinds } from "./issues.ts";
 
 /**
  * One issue of a scenario: its name, whether it is a list of options or a range of values, its unit on a range, and its
- * options, each with its universal value on a range. Each change is saved when the author leaves the box they changed.
+ * options. On a range, each option is a point: its value, which is its universal value, counted in the unit, and how it is
+ * shown to negotiators, which is its name. Each change is saved when the author leaves the box they changed.
  */
 const props = defineProps<{ issue: DraftIssue; save: Save; readonly: boolean; removable: boolean }>();
 const emit = defineEmits<{ remove: [] }>();
@@ -117,25 +119,62 @@ async function removeOption(option: DraftOption) {
     </div>
     <p class="muted">{{ kinds[issue.kind].hint }}</p>
 
-    <label v-if="issue.kind === 'CONTINUOUS'" class="field unit">
-      Unit
-      <input :value="issue.unit ?? ''" placeholder="dollars" maxlength="100" :disabled="readonly" @change="changeUnit" />
-      <span class="hint">"dollars" shows values as money, such as $95,000. Leave it blank for plain numbers.</span>
-    </label>
+    <template v-if="issue.kind === 'CONTINUOUS'">
+      <HowTo question="How does a range work?">
+        <p>
+          A deal can land anywhere along a range, such as any salary from $80,000 to $120,000. Each row below is a point on
+          it, with two parts:
+        </p>
+        <ul>
+          <li><strong>Value</strong> is where the point sits, counted in the unit. It's the number a deal agrees on.</li>
+          <li>
+            <strong>Shown as</strong> is what negotiators read for that point, such as "$80K" for 80000, or "March 1" for 59
+            days after January 1. It can just be the number.
+          </li>
+        </ul>
+        <p>
+          The lowest and highest values are the ends of the range: a deal can land on any value between them, but not past
+          them. On each role's tab, you give each point its points, and a value between two points earns points between
+          theirs, along a straight line.
+        </p>
+        <p>
+          Add a point in the middle when what the issue is worth bends there, such as a start date that's fine until March
+          and costly after.
+        </p>
+      </HowTo>
+      <label class="field unit">
+        Unit
+        <input :value="issue.unit ?? ''" placeholder="dollars" maxlength="100" :disabled="readonly" @change="changeUnit" />
+        <span class="hint">
+          What the values count, such as dollars, percent, or days after January 1. "dollars" shows values as money, such as
+          $95,000. Leave it blank for plain numbers.
+        </span>
+      </label>
+    </template>
 
-    <ol class="options">
+    <div v-if="issue.kind === 'CONTINUOUS' && issue.options.length > 0" class="columns" aria-hidden="true">
+      <span>Value{{ issue.unit ? ` (${issue.unit})` : "" }}</span>
+      <span>Shown as</span>
+    </div>
+    <ol class="options" :class="{ range: issue.kind === 'CONTINUOUS' }">
       <li v-for="option in issue.options" :key="option.option">
-        <input class="name" :value="option.name" aria-label="Option name" maxlength="100" :disabled="readonly" @change="renameOption(option, $event)" />
-        <label v-if="issue.kind === 'CONTINUOUS'" class="value">
-          <span class="muted">at</span>
-          <input
-            type="number"
-            :value="option.universalValue ?? 0"
-            :aria-label="`Value of ${option.name}`"
-            :disabled="readonly"
-            @change="moveOption(option, $event)"
-          />
-        </label>
+        <input
+          v-if="issue.kind === 'CONTINUOUS'"
+          class="value"
+          type="number"
+          :value="option.universalValue ?? 0"
+          :aria-label="`Value of ${option.name}${issue.unit ? `, in ${issue.unit}` : ''}`"
+          :disabled="readonly"
+          @change="moveOption(option, $event)"
+        />
+        <input
+          class="name"
+          :value="option.name"
+          :aria-label="issue.kind === 'CONTINUOUS' ? `How the value ${option.universalValue ?? 0} is shown` : 'Option name'"
+          maxlength="100"
+          :disabled="readonly"
+          @change="renameOption(option, $event)"
+        />
         <button
           v-if="!readonly"
           type="button"
@@ -147,8 +186,13 @@ async function removeOption(option: DraftOption) {
         </button>
       </li>
     </ol>
-    <p v-if="issue.options.length < 2" class="muted">An issue needs at least two options before the scenario can be published.</p>
-    <button v-if="!readonly" type="button" class="text-button add" @click="addOption">+ Add an option</button>
+    <p v-if="issue.options.length < 2" class="muted">
+      {{ issue.kind === "CONTINUOUS" ? "A range needs at least two points, its ends," : "An issue needs at least two options" }}
+      before the scenario can be published.
+    </p>
+    <button v-if="!readonly" type="button" class="text-button add" @click="addOption">
+      {{ issue.kind === "CONTINUOUS" ? "+ Add a point" : "+ Add an option" }}
+    </button>
     <p v-if="problem" class="refusal" role="alert">{{ problem }}</p>
   </article>
 </template>
@@ -241,13 +285,28 @@ header {
   flex: 1;
   min-width: 0;
 }
-.value {
-  display: flex;
+/* On a range, the values and how they're shown line up in two columns under their headings. */
+.columns,
+.range li {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) 36px;
+  gap: var(--space-2);
   align-items: center;
-  gap: var(--space-1);
 }
-.value input {
-  width: 110px;
+.columns {
+  margin-bottom: calc(-1 * var(--space-2));
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.columns span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.range .value {
+  width: 100%;
+  min-width: 0;
 }
 .add {
   align-self: flex-start;

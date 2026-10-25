@@ -9,38 +9,21 @@ import { pastryFor, statusLabels } from "./pastries.ts";
 import MatchmakingDialog from "./MatchmakingDialog.vue";
 import SpiceLevel from "./SpiceLevel.vue";
 import StartDialog from "./StartDialog.vue";
-import { DEFAULT_TIME_LIMIT, type Opponents, rememberOpponents, rememberedOpponents, startPractice, startWithFriends } from "./start.ts";
+import { DEFAULT_TIME_LIMIT } from "./start.ts";
 
 const { sessionEnded } = useSession();
 const bakery = ref<Bakery | null>(null);
 const error = ref<string | null>(null);
-/** The scenario whose start dialog is open. */
-const choosing = ref<Scenario | null>(null);
-const surprising = ref(false);
-/** Whether "Surprise me!" is open for someone new, where the person picks how many people to negotiate with. */
-const surprisingStrangers = ref(false);
+/** The case whose start dialog is open, where the person picks who to negotiate with; a null scenario is "Surprise me!". */
+const choosing = ref<{ scenario: Scenario | null } | null>(null);
+/** The case the person is looking for someone new to negotiate; a null scenario is "Surprise me!", for any scenario. */
+const matching = ref<{ scenario: Scenario | null } | null>(null);
 
-/** Who the person wants to negotiate against, which decides what picking a scenario does. */
-const opponents = ref<Opponents>(rememberedOpponents());
-function choose(choice: Opponents) {
-  opponents.value = choice;
-  rememberOpponents(choice);
+/** Hands a start dialog over to matchmaking, once the person picks someone new. */
+function matchmake() {
+  matching.value = choosing.value;
+  choosing.value = null;
 }
-const choices: { value: Opponents; icon: string; label: string; hint: string }[] = [
-  { value: "ai", icon: "🤖", label: "An AI counterpart", hint: "Practice any time" },
-  { value: "friends", icon: "💌", label: "Friends", hint: "Get a link to send them" },
-  { value: "strangers", icon: "🎲", label: "Someone new", hint: "Get matched with someone who's looking too" },
-];
-const leads: Record<Opponents, string> = {
-  ai: "Pick a scenario to practice. You'll play one side, and AI counterparts will play the rest.",
-  friends: "Pick a scenario and a side, and you'll get a link to send your friends. Whoever follows it plays another side.",
-  strangers: "Pick a scenario, and we'll find someone else who wants to practice it. Or pick Surprise me! to join whoever's looking.",
-};
-const surpriseHints: Record<Opponents, string> = {
-  ai: "A random scenario and side",
-  friends: "A random scenario and side",
-  strangers: "Join whoever's looking, for any scenario",
-};
 
 /** The scenarios the person wrote, drafts and published ones, so they can go back to writing them. */
 const written = ref<WrittenScenario[]>([]);
@@ -60,53 +43,22 @@ onMounted(async () => {
 
 const scenarios = computed(() => bakery.value?.scenarios ?? []);
 const tables = computed(() => bakery.value?.tables ?? []);
-
-/**
- * "Surprise me!": a random scenario and side, or, with someone new, joining the first people looking for a negotiation
- * as large as the person picks, whichever scenario they want.
- */
-async function surprise() {
-  if (opponents.value === "strangers") {
-    surprisingStrangers.value = true;
-    return;
-  }
-  const scenario = scenarios.value[Math.floor(Math.random() * scenarios.value.length)];
-  const role = scenario?.roles[Math.floor(Math.random() * scenario.roles.length)];
-  if (scenario === undefined || role === undefined) return;
-  surprising.value = true;
-  error.value = opponents.value === "friends" ? await startWithFriends(scenario, role.role) : await startPractice(scenario, role.role);
-  surprising.value = false;
-}
 </script>
 
 <template>
   <section class="page">
     <header class="page-head">
       <h1>The Bakery</h1>
-      <p class="lead">{{ leads[opponents] }}</p>
+      <p class="lead">
+        Pick a scenario from the case. Next, you'll choose who to negotiate with: an AI counterpart, friends you invite, or
+        someone new.
+      </p>
     </header>
-    <div class="opponents" role="radiogroup" aria-label="Who do you want to negotiate with?">
-      <button
-        v-for="choice in choices"
-        :key="choice.value"
-        type="button"
-        role="radio"
-        class="opponent"
-        :aria-checked="opponents === choice.value"
-        @click="choose(choice.value)"
-      >
-        <span class="icon" aria-hidden="true">{{ choice.icon }}</span>
-        <span>
-          <strong>{{ choice.label }}</strong>
-          <span class="muted">{{ choice.hint }}</span>
-        </span>
-      </button>
-    </div>
     <p v-if="error" class="refusal" role="alert">{{ error }}</p>
 
     <div v-if="bakery" class="case">
       <div class="gallery">
-        <button v-for="scenario in scenarios" :key="scenario.scenario" type="button" class="pastry-card" @click="choosing = scenario">
+        <button v-for="scenario in scenarios" :key="scenario.scenario" type="button" class="pastry-card" @click="choosing = { scenario }">
           <span class="pastry" aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
           <span class="name display">{{ scenario.name }}</span>
           <span class="muted">
@@ -114,10 +66,10 @@ async function surprise() {
           </span>
           <SpiceLevel :spice="scenario.spice" />
         </button>
-        <button type="button" class="pastry-card surprise" :disabled="surprising || scenarios.length === 0" @click="surprise">
+        <button type="button" class="pastry-card surprise" :disabled="scenarios.length === 0" @click="choosing = { scenario: null }">
           <span class="pastry" aria-hidden="true">✨</span>
           <span class="name display">Surprise me!</span>
-          <span class="muted">{{ surpriseHints[opponents] }}</span>
+          <span class="muted">A random scenario and side</span>
         </button>
         <a class="pastry-card write" href="/write" @click.prevent="go('/write')">
           <span class="pastry" aria-hidden="true">🧑‍🍳</span>
@@ -160,50 +112,18 @@ async function surprise() {
       </ul>
     </section>
 
-    <MatchmakingDialog v-if="choosing && opponents === 'strangers'" :scenario="choosing" :scenarios="scenarios" @close="choosing = null" />
-    <MatchmakingDialog v-else-if="surprisingStrangers" :scenario="null" :scenarios="scenarios" @close="surprisingStrangers = false" />
     <StartDialog
-      v-else-if="choosing"
-      :scenario="choosing"
-      :opponents="opponents === 'friends' ? 'friends' : 'ai'"
+      v-if="choosing"
+      :scenario="choosing.scenario"
+      :scenarios="scenarios"
       @close="choosing = null"
+      @matchmake="matchmake"
     />
+    <MatchmakingDialog v-else-if="matching" :scenario="matching.scenario" :scenarios="scenarios" @close="matching = null" />
   </section>
 </template>
 
 <style scoped>
-.opponents {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-3);
-}
-.opponent {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-  text-align: left;
-}
-.opponent > span:last-child {
-  display: flex;
-  flex-direction: column;
-}
-.opponent .icon {
-  font-size: 28px;
-  line-height: 1;
-}
-.opponent[aria-checked="true"] {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  box-shadow: var(--shadow-card);
-}
-.opponent:hover:not([aria-checked="true"]) {
-  border-color: var(--color-accent);
-}
 /*
  * The bakery's display case, from one edge of the screen to the other, in two drawings that repeat in step: the shelves
  * of pastries behind the scenarios, and the case's glass outline in front of them. The scenarios stand in the band of

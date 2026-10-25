@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from "vue";
 import { api, type Draft, type DraftOption, type DraftRole } from "../api/client.ts";
+import HowTo from "../reusable/ui/HowTo.vue";
 import Markdown from "../table/Markdown.vue";
 import { briefFor, narrativeOf } from "./brief.ts";
 import { bestOn, pointsOf, type Save, scaleOf, stepOf } from "./draft.ts";
@@ -120,6 +121,25 @@ async function setBatna(event: Event) {
         Drag a bar or a point, or type a number, to set an option's points. A deal is worth the points of what it settles on every
         issue, added up, so the issues that matter most to {{ role.name }} should stand tallest.
       </p>
+      <HowTo v-if="!readonly" question="How do points work?">
+        <ul>
+          <li>
+            Points are how {{ role.name }} keeps score. Only the negotiator playing {{ role.name }} sees them, and the coach
+            uses everyone's to show the whole pie afterward.
+          </li>
+          <li>
+            A deal's points are what it settles on each issue, added up. Give the issues that matter most to {{ role.name }} the
+            most points, and give the roles different priorities, so there's room to trade.
+          </li>
+          <li>
+            On a range, you set the points of each point on it, and a value between two points earns points between theirs.
+          </li>
+          <li>
+            The BATNA is what {{ role.name }} gets with no deal. A deal is only worth taking if it beats it, so set it below the
+            best deal and above the worst.
+          </li>
+        </ul>
+      </HowTo>
       <div class="sums">
         <label class="field batna">
           BATNA

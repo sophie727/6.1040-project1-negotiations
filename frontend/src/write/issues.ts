@@ -7,7 +7,7 @@ export const kinds: Record<IssueKind, { label: string; hint: string }> = {
   DISCRETE: { label: "A list of options", hint: "An agreement picks one of them, such as a job title." },
   CONTINUOUS: {
     label: "A range of values",
-    hint: "An agreement can land on any value from the lowest option to the highest, such as a salary. Each option is a point on the range, and a value between two options earns points between theirs.",
+    hint: "An agreement can land on any value from the lowest point to the highest, such as a salary.",
   },
 };
 
