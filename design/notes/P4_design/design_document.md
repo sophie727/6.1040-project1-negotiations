@@ -99,6 +99,7 @@ P2's feedback said that an all-in-one metric like the whole pie needs small flow
     - I checked that negotiations and scenarios persist across a refresh and a redeploy.
     - Also, archiving works for admin.
     - I also checked how wrong passwords and full tables are reported.
+    - I also checked access control
     - I did find and correct some UI issues in the process of testing user journeys in the deployed app (the BATNA informational button, for instance, was bothering me, as well as the display case spacing and some errors with the Propose a Deal input.)
 
 ## Next steps

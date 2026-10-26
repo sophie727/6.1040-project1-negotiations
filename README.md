@@ -9,7 +9,7 @@ A place to practice negotiating, like chess.com for negotiation: pick a scenario
 **Final design (P4)**
 
 - [Design document](design/notes/P4_design/design_document.md): how the final app differs from the P1 concept design and the P3 visual design, and why.
-- Demo video: *[link to add]*
+- Demo video: https://youtu.be/AIqGao6pf2g
 
 **Specifications**
 
@@ -23,10 +23,10 @@ A place to practice negotiating, like chess.com for negotiation: pick a scenario
 - **P1, concept design:** [problem, pitch, concepts and sketches](design/notes/P1_design/og_design.md).
 - **P2, MVP:** [user journey](design/notes/P2_design/mvp_user_journey.md) and [demo video](https://youtu.be/LbMD6UagjHQ).
 - **P3, beta:**
-  - [user journey](design/notes/P3_design/beta_user_journey.md);
-  - [changes since P2](design/notes/P3_design/changes_since_p2.md);
-  - [visual design study](design/notes/P3_design/visual_design_study.pdf) ([annotated slides](https://docs.google.com/presentation/d/1JjVsr007LRz5RLJFWWi-q5-C41KLaWfBwttFwIPfkWY/edit?usp=sharing));
-  - [demo video](https://youtu.be/iAhnsTYcQbI).
+    - [user journey](design/notes/P3_design/beta_user_journey.md);
+    - [changes since P2](design/notes/P3_design/changes_since_p2.md);
+    - [visual design study](design/notes/P3_design/visual_design_study.pdf) ([annotated slides](https://docs.google.com/presentation/d/1JjVsr007LRz5RLJFWWi-q5-C41KLaWfBwttFwIPfkWY/edit?usp=sharing));
+    - [demo video](https://youtu.be/iAhnsTYcQbI).
 
 **Working notes:** plans and in-progress thinking, kept apart from the design above.
 
