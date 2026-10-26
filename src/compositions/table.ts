@@ -21,6 +21,7 @@ const {
   Tabling,
   TargetNoting,
   TimeLimitProposing,
+  Typing,
   WalkawayNoting,
 } = concepts;
 
@@ -309,6 +310,16 @@ const planOf = former("the plan (user) wrote for (table)", ({ user, table }, { o
   ).form({ on, target, walkaway, priorities }),
 );
 
+/**
+ * The other people typing at (table) at (instant), as (user) sees it: each one's role and its name. The person's own
+ * typing isn't among them, and the AI counterpart never types.
+ */
+const typingAt = former("who else is typing at (table) at (instant), as (user) sees it", ({ user, table, instant }, { typist, name }) =>
+  each(Typing._typing({ subject: table, now: instant }).is({ typist }))
+    .where(no(seatedAs({ user, table }).is({ role: typist })), Briefing._role({ role: typist }).is({ name }))
+    .form({ role: typist, name }),
+);
+
 /** The code of the link that invites people to (table), or null when nobody made one, as at a practice table. */
 const linkOf = former("the invitation link to (table)", ({ table }, { code }) =>
   each(Inviting._invitations({ subject: table }).is({ code })).first(code),
@@ -316,14 +327,15 @@ const linkOf = former("the invitation link to (table)", ({ table }, { code }) =>
 
 const ShowTable = endpoint(
   "/tables/show",
-  ({ session, table, user, role }) =>
+  ({ session, table, user, role, instant }) =>
     receive({ session, table })
       .then(Sessioning.use({ session }).responds({ subject: user }))
       .then(
-        where(seatedAs({ user, table }).is({ role }))
+        where(now(instant), seatedAs({ user, table }).is({ role }))
           .then(
             respond({
               table: tableAsSeenBy({ table, role }),
+              typing: typingAt({ user, table, instant }),
               start: startTalksAt({ table }),
               link: linkOf({ table }),
               plan: planOf({ user, table }),
@@ -550,6 +562,30 @@ const Send = endpoint(
   { validators: { input: textInput } },
 );
 
+/**
+ * Says that the person is typing a message, as their role, while the negotiation is under way. The page says so every
+ * few seconds while they type, and each signal lasts a few seconds, so the sign goes away soon after they stop.
+ */
+const SignalTyping = endpoint(
+  "/tables/typing",
+  ({ session, table, user, role, instant }) =>
+    receive({ session, table })
+      .then(Sessioning.use({ session }).responds({ subject: user }))
+      .then(
+        where(now(instant), seatedAs({ user, table }).is({ role }), underWay({ table, instant }))
+          .then(Typing.type({ subject: table, typist: role, now: instant }).responds({}))
+          .then(respond({}))
+          .named("under-way"),
+        ...unlessUnderWay({ user, table, instant }),
+      ),
+  { validators: { input: textInput } },
+);
+
+/** Once someone sends a message, they're no longer typing it, so the others stop seeing that they are. */
+const StopTypingWhenSent = reaction(({ table, sender }) =>
+  when(Conversing.send({ subject: table, sender }).responds({})).then(Typing.stop({ subject: table, typist: sender })),
+);
+
 const WriteNotes = endpoint(
   "/tables/notes",
   ({ session, table, body, user }) =>
@@ -570,7 +606,7 @@ const WriteNotes = endpoint(
 export const composition = {
   seating: { AddSeatForEachRole, JoinProposalsWhenSeated },
   access: { seatedAs, began, occupant, openSeats, underWay, overdue, notOpen, ended, preparedFor },
-  showing: { ratingsOf, issuesOf, tableAsSeenBy, notesOf, questionsOpenAt, questionsAbout, startTalksAt, linkOf, planOf, ShowTable },
+  showing: { ratingsOf, issuesOf, tableAsSeenBy, notesOf, questionsOpenAt, questionsAbout, startTalksAt, typingAt, linkOf, planOf, ShowTable },
   starting: {
     preparing,
     JoinStartTalksForEachSeat,
@@ -581,5 +617,5 @@ export const composition = {
     RefuseAgreement,
   },
   clock: { Expire, ExpireOverdue, Withdraw },
-  talking: { Send, WriteNotes },
+  talking: { Send, SignalTyping, StopTypingWhenSent, WriteNotes },
 };

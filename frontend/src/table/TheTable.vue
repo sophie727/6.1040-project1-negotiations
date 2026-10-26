@@ -44,7 +44,7 @@ const trouble = computed(() => {
 // The chat follows new entries, unless the person has scrolled up to read.
 const scroller = ref<HTMLElement | null>(null);
 watch(
-  () => [said.value, props.view.openQuestions, table.value.proposals.map(({ status }) => status).join(), trouble.value],
+  () => [said.value, props.view.openQuestions, props.view.typing.length, table.value.proposals.map(({ status }) => status).join(), trouble.value],
   async () => {
     const box = scroller.value;
     const following = box === null || box.scrollHeight - box.scrollTop - box.clientHeight < 120;
@@ -74,8 +74,30 @@ async function send() {
   if ("error" in result) return refused("/tables/send", result.error);
   error.value = null;
   draft.value = "";
+  // Sending stopped the typing sign, so the next message starts a new one at once.
+  lastSignal = 0;
   emit("changed");
 }
+
+// Typing
+
+/** Whether another seat has a person in it, who could see the person typing. The AI counterpart never looks. */
+const withPeople = computed(() => table.value.seats.some(({ role, player }) => role !== table.value.role && player !== null));
+/** When the page last said the person is typing. Each signal lasts six seconds, so saying it every few is enough. */
+let lastSignal = 0;
+const SIGNAL_EVERY_MS = 2_500;
+watch(draft, (text) => {
+  if (!withPeople.value || text.trim() === "" || Date.now() - lastSignal < SIGNAL_EVERY_MS) return;
+  lastSignal = Date.now();
+  // A refusal, such as when time has just run out, shows up with the next message the person sends.
+  void api.tables.typing({ table: table.value.table });
+});
+
+/** The others typing, by their role's name, as in "Mandy and Presley". */
+const typists = computed(() => {
+  const names = props.view.typing.map(({ name }) => name);
+  return names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+});
 
 function sendOnEnter(event: KeyboardEvent) {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
@@ -155,6 +177,11 @@ const materialsId = useId();
               <template v-else>The clock is running. Say hello, ask a question, or make an offer.</template>
             </p>
             <Conversation :table="table" @changed="emit('changed')" />
+            <p v-if="view.typing.length > 0" class="thinking muted">
+              {{ typists }} {{ view.typing.length > 1 ? "are" : "is" }} typing<span class="dots" aria-hidden="true"
+                ><span>.</span><span>.</span><span>.</span></span
+              >
+            </p>
             <p v-if="view.openQuestions > 0" class="thinking muted">
               {{ others }} {{ are }} thinking<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
             </p>

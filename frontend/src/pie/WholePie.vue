@@ -4,7 +4,6 @@ import { api, type DebriefView, type TableView } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
-import BatnaTip from "../table/BatnaTip.vue";
 import { formatAgreed, formatPoints } from "../table/format.ts";
 import Markdown from "../table/Markdown.vue";
 import { hasCounterpart } from "../table/players.ts";
@@ -280,7 +279,7 @@ const lesson = computed(() => {
               </tfoot>
             </table>
             <p class="muted">
-              BATNAs <BatnaTip />: {{ rolesYouFirst.map((role) => `${role.role === me?.role ? "yours" : role.name + "'s"} was ${formatPoints(role.batna)}`).join(", ") }}.
+              BATNAs: {{ rolesYouFirst.map((role) => `${role.role === me?.role ? "yours" : role.name + "'s"} was ${formatPoints(role.batna)}`).join(", ") }}.
             </p>
           </section>
         </div>

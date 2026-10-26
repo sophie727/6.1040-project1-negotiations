@@ -175,9 +175,9 @@ Defined in [Inviting](../design/concepts/Inviting.md), line 1.
 
 #### Instances
 
-- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 82.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 84.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 83.
+- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 86.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 88.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 87.
 
 ### Matchmaking
 
@@ -206,10 +206,10 @@ Defined in [Matchmaking](../design/concepts/Matchmaking.md), line 1.
 
 #### Instances
 
-- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 86.
-  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 89.
-  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 88.
-  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 87.
+- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 90.
+  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 93.
+  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 92.
+  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 91.
 
 ### Noting
 
@@ -226,18 +226,18 @@ Defined in [Noting](../design/concepts/Noting.md), line 1.
 
 #### Instances
 
-- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 74.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 75.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 76.
-- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 107.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 108.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 109.
-- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 99.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 100.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 101.
-- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 103.
+- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 78.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 79.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 80.
+- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 111.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 112.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 113.
+- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 103.
   - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 104.
   - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 105.
+- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 107.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 108.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 109.
 
 ### Posting
 
@@ -280,8 +280,8 @@ Defined in [Preferring](../design/concepts/Preferring.md), line 1.
 
 #### Instances
 
-- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 111.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 112.
+- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 115.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 116.
 
 ### Proposing
 
@@ -314,14 +314,14 @@ Defined in [Proposing](../design/concepts/Proposing.md), line 1.
 
 #### Instances
 
-- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 64.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 66.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 65.
-  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 67.
-- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 69.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 71.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 70.
-  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 72.
+- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 68.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 70.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 69.
+  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 71.
+- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 73.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 75.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 74.
+  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 76.
 
 ### Rating
 
@@ -339,9 +339,9 @@ Defined in [Rating](../design/concepts/Rating.md), line 1.
 
 #### Instances
 
-- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 95.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 96.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 97.
+- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 99.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 100.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 101.
 
 ### Reasoning
 
@@ -383,9 +383,9 @@ Defined in [Reasoning](../design/concepts/Reasoning.md), line 1.
 
 #### Instances
 
-- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 78.
-  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 80.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 79.
+- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 82.
+  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 84.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 83.
 
 ### Registering
 
@@ -424,9 +424,9 @@ Defined in [Reviewing](../design/concepts/Reviewing.md), line 1.
 
 #### Instances
 
-- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 91.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 93.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 92.
+- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 95.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 97.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 96.
 
 ### Sessioning
 
@@ -502,6 +502,25 @@ Defined in [Tabling](../design/concepts/Tabling.md), line 1.
   - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 58.
   - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 57.
   - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 56.
+
+### Typing
+
+Defined in [Typing](../design/concepts/Typing.md), line 1.
+
+#### Actions
+
+- `type(subject: Subject, typist: Typist, now: DateTime) : returns ()`
+- `stop(subject: Subject, typist: Typist) : returns ()`
+
+#### Queries
+
+- `_typing(subject: Subject, now: DateTime) : many (typist: Typist)`
+
+#### Instances
+
+- `Typing` — instance of `Typing` — [The Whole Pie types](../design/types.md), line 64.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 65.
+  - `Typist` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 66.
 
 ## Application types
 
@@ -1411,6 +1430,21 @@ Former "the waiting prompts" — inputs (); bindings (prompt, ask); promises exa
     form a record of
       ask
       prompt
+```
+
+### who else is typing at (table) at (instant), as (user) sees it
+
+Authored path: `table.showing.typingAt`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+
+```former
+Former "who else is typing at (table) at (instant), as (user) sees it" — inputs (user, table, instant); bindings (typist, name); promises exactly one record — forms:
+  each Typing._typing (now: instant, subject: table) has (typist)
+    where no view "the role (user) plays at (table)" with (table, user) has (role: typist)
+    where Briefing._role (role: typist) has (name)
+    form a record of
+      name
+      role: typist
 ```
 
 ## Reactions
@@ -5920,10 +5954,11 @@ Authored path: `table.showing.ShowTable`.
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.showing.ShowTable
 where
+  instant is the current flow's instant
   earlier, RequestBoundary.request (path: "/tables/show", requestId, session, table)
   view "the role (user) plays at (table)" with (table, user) has (role)
 then
-  RequestBoundary.respond (link: former "the invitation link to (table)" with (table), notes: former "the notes (user) wrote about (table)" with (table, user), openQuestions: former "the open questions about (table)" with (table), plan: former "the plan (user) wrote for (table)" with (table, user), questions: former "the questions about (table)" with (table), requestId, start: former "the suggestion to start (table)" with (table), table: former "(table) as (role) sees it" with (role, table))
+  RequestBoundary.respond (link: former "the invitation link to (table)" with (table), notes: former "the notes (user) wrote about (table)" with (table, user), openQuestions: former "the open questions about (table)" with (table), plan: former "the plan (user) wrote for (table)" with (table, user), questions: former "the questions about (table)" with (table), requestId, start: former "the suggestion to start (table)" with (table), table: former "(table) as (role) sees it" with (role, table), typing: former "who else is typing at (table) at (instant), as (user) sees it" with (instant, table, user))
 ```
 
 ### table.starting.AgreeToStart
@@ -6203,7 +6238,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when RequestBoundary.request (body, path: "/tables/send", requestId, session, table)
@@ -6215,7 +6250,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.talking.Send
@@ -6231,7 +6266,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.talking.Send
@@ -6246,7 +6281,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.talking.Send
@@ -6263,7 +6298,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when Tabling.expire (now: instant, table), asked by table.talking.Send:time-up#2
@@ -6277,7 +6312,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.talking.Send
@@ -6294,7 +6329,7 @@ then
 
 Authored path: `table.talking.Send`.
 - Covered by [The table](../design/compositions/table.md), line 68.
-- Covered by [The table](../design/compositions/table.md), line 73.
+- Covered by [The table](../design/compositions/table.md), line 75.
 
 ```reaction
 when Conversing.send (body, now: instant, sender: role, subject: table, message), asked by table.talking.Send:under-way#2
@@ -6304,11 +6339,127 @@ then
   RequestBoundary.respond (message, requestId)
 ```
 
+### table.talking.SignalTyping
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+then
+  Sessioning.use (session)
+```
+
+### table.talking.SignalTyping:not-open#2
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by table.talking.SignalTyping
+where
+  earlier, RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+  view "the role (user) plays at (table)" with (table, user)
+  view "(table) isn't open" with (table)
+then
+  RequestBoundary.respond (error: "NOT_OPEN", requestId)
+```
+
+### table.talking.SignalTyping:not-seated#2
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by table.talking.SignalTyping
+where
+  earlier, RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+  no view "the role (user) plays at (table)" with (table, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### table.talking.SignalTyping:time-up#2
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by table.talking.SignalTyping
+where
+  instant is the current flow's instant
+  earlier, RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+  view "the role (user) plays at (table)" with (table, user)
+  view "(table) is overdue at (instant)" with (instant, table)
+then
+  Tabling.expire (now: instant, table)
+```
+
+### table.talking.SignalTyping:time-up#3
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when Tabling.expire (now: instant, table), asked by table.talking.SignalTyping:time-up#2
+where
+  earlier, RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+then
+  RequestBoundary.respond (error: "TIME_UP", requestId)
+```
+
+### table.talking.SignalTyping:under-way#2
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by table.talking.SignalTyping
+where
+  instant is the current flow's instant
+  earlier, RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+  view "the role (user) plays at (table)" with (table, user) has (role)
+  view "(table) is under way at (instant)" with (instant, table)
+then
+  Typing.type (now: instant, subject: table, typist: role)
+```
+
+### table.talking.SignalTyping:under-way#3
+
+Authored path: `table.talking.SignalTyping`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+- Covered by [The table](../design/compositions/table.md), line 76.
+
+```reaction
+when Typing.type (now: instant, subject: table, typist: role), asked by table.talking.SignalTyping:under-way#2
+where
+  earlier, RequestBoundary.request (path: "/tables/typing", requestId, session, table)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### table.talking.StopTypingWhenSent
+
+Authored path: `table.talking.StopTypingWhenSent`.
+- Covered by [The table](../design/compositions/table.md), line 70.
+
+```reaction
+when Conversing.send (sender, subject: table)
+then
+  Typing.stop (subject: table, typist: sender)
+```
+
 ### table.talking.WriteNotes
 
 Authored path: `table.talking.WriteNotes`.
-- Covered by [The table](../design/compositions/table.md), line 70.
-- Covered by [The table](../design/compositions/table.md), line 74.
+- Covered by [The table](../design/compositions/table.md), line 72.
+- Covered by [The table](../design/compositions/table.md), line 77.
 
 ```reaction
 when RequestBoundary.request (body, path: "/tables/notes", requestId, session, table)
@@ -6319,8 +6470,8 @@ then
 ### table.talking.WriteNotes:not-seated#2
 
 Authored path: `table.talking.WriteNotes`.
-- Covered by [The table](../design/compositions/table.md), line 70.
-- Covered by [The table](../design/compositions/table.md), line 74.
+- Covered by [The table](../design/compositions/table.md), line 72.
+- Covered by [The table](../design/compositions/table.md), line 77.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.talking.WriteNotes
@@ -6334,8 +6485,8 @@ then
 ### table.talking.WriteNotes:seated#2
 
 Authored path: `table.talking.WriteNotes`.
-- Covered by [The table](../design/compositions/table.md), line 70.
-- Covered by [The table](../design/compositions/table.md), line 74.
+- Covered by [The table](../design/compositions/table.md), line 72.
+- Covered by [The table](../design/compositions/table.md), line 77.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by table.talking.WriteNotes
@@ -6349,8 +6500,8 @@ then
 ### table.talking.WriteNotes:seated#3
 
 Authored path: `table.talking.WriteNotes`.
-- Covered by [The table](../design/compositions/table.md), line 70.
-- Covered by [The table](../design/compositions/table.md), line 74.
+- Covered by [The table](../design/compositions/table.md), line 72.
+- Covered by [The table](../design/compositions/table.md), line 77.
 
 ```reaction
 when Noting.write (author: user, body, subject: table), asked by table.talking.WriteNotes:seated#2
@@ -6425,5 +6576,6 @@ not listed here have no explicit input contract.
 - `/tables/send` — requires `body`, `session`, `table`
 - `/tables/show` — requires `session`, `table`
 - `/tables/start` — requires `minutes`, `session`, `table`
+- `/tables/typing` — requires `session`, `table`
 - `/tables/withdraw` — requires `session`, `table`
 - `/timekeeper/expire` — requires `session`

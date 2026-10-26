@@ -955,7 +955,7 @@ export type TheWholePieWire = {
   "/tables/show": {
     input: {
       "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
-      "table": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Conversing"]["_messages"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Inviting"]["_invitations"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Noting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["PrioritiesNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Proposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reasoning"]["_about"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TargetNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TimeLimitProposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["WalkawayNoting"]["_note"]>[0], ["subject"]>]>>;
+      "table": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Conversing"]["_messages"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Inviting"]["_invitations"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Noting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["PrioritiesNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Proposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reasoning"]["_about"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TargetNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TimeLimitProposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Typing"]["_typing"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["WalkawayNoting"]["_note"]>[0], ["subject"]>]>>;
     };
     output: {
       "link": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Inviting"]["_invitations"]>>>, ["code"]>> | null;
@@ -1035,6 +1035,10 @@ export type TheWholePieWire = {
         "table": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>]>>;
         "timeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>>>, ["timeLimit"]>> | null;
       };
+      "typing": {
+        "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["name"]>>;
+        "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Typing"]["_typing"]>>>, ["typist"]>]>>;
+      }[];
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOUND" | "NOT_SIGNED_IN" };
   };
@@ -1049,6 +1053,14 @@ export type TheWholePieWire = {
       "proposal": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["TimeLimitProposing"]["propose"]>>, ["proposal"]>>;
     };
     error: { error: AppWideError | "ALREADY_ACCEPTED" | "ALREADY_AGREED" | "ALREADY_BEGUN" | "INVALID_INPUT" | "INVALID_TIME_LIMIT" | "NOT_ALL_SEATED" | "NOT_A_PARTICIPANT" | "NOT_ENOUGH_SEATS" | "NOT_FOUND" | "NOT_OPEN" | "NOT_PENDING_FOR_YOU" | "NOT_SIGNED_IN" | "NO_OTHER_PARTICIPANTS" | "PLAN_FIRST" | "UNKNOWN_TABLE" };
+  };
+  "/tables/typing": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+      "table": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["expire"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Typing"]["type"]>[0], ["subject"]>]>>;
+    };
+    output: Record<string, never>;
+    error: { error: AppWideError | "ALREADY_RECORDED" | "INVALID_INPUT" | "NOTHING_ASKED" | "NOT_DUE" | "NOT_FOUND" | "NOT_OPEN" | "NOT_SIGNED_IN" | "TIME_UP" | "UNKNOWN_TABLE" };
   };
   "/tables/withdraw": {
     input: {
@@ -1937,7 +1949,7 @@ export type TheWholePieWireHttp = {
   };
   "/tables/show": {
     input: {
-      "table": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Conversing"]["_messages"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Inviting"]["_invitations"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Noting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["PrioritiesNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Proposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reasoning"]["_about"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TargetNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TimeLimitProposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["WalkawayNoting"]["_note"]>[0], ["subject"]>]>>;
+      "table": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Conversing"]["_messages"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Inviting"]["_invitations"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Noting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["PrioritiesNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Proposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Reasoning"]["_about"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TargetNoting"]["_note"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["TimeLimitProposing"]["_proposals"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Typing"]["_typing"]>[0], ["subject"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["WalkawayNoting"]["_note"]>[0], ["subject"]>]>>;
     };
     output: {
       "link": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Inviting"]["_invitations"]>>>, ["code"]>> | null;
@@ -2017,6 +2029,10 @@ export type TheWholePieWireHttp = {
         "table": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>]>>;
         "timeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>>>, ["timeLimit"]>> | null;
       };
+      "typing": {
+        "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["name"]>>;
+        "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Typing"]["_typing"]>>>, ["typist"]>]>>;
+      }[];
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
@@ -2029,6 +2045,13 @@ export type TheWholePieWireHttp = {
       "deadline": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>>>, ["deadline"]>> | null;
       "proposal": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["TimeLimitProposing"]["propose"]>>, ["proposal"]>>;
     };
+    error: { error: HttpAppWideError | "CONFLICT" | "INTERNAL_ERROR" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/tables/typing": {
+    input: {
+      "table": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_table"]>[0], ["table"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["expire"]>[0], ["table"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Typing"]["type"]>[0], ["subject"]>]>>;
+    };
+    output: Record<string, never>;
     error: { error: HttpAppWideError | "CONFLICT" | "INTERNAL_ERROR" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
   "/tables/withdraw": {

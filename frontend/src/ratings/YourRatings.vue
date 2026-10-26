@@ -17,11 +17,24 @@ const rated = computed(() => (props.ratings.negotiations ?? 0) > 0 || (props.rat
     <h2>Your ratings</h2>
     <dl v-if="rated">
       <div>
-        <dt>Value created</dt>
+        <dt>
+          Value created
+          <InfoTip label="About value created">
+            How much of the most a deal could add, over what everyone gets by walking away, your deals actually added. If the
+            best possible deal adds 200 points and yours adds 150, you created 75%. Walking away, or running out of time,
+            creates nothing.
+          </InfoTip>
+        </dt>
         <dd class="display">{{ percent(ratings.create) }}</dd>
       </div>
       <div>
-        <dt>Value claimed</dt>
+        <dt>
+          Value claimed
+          <InfoTip label="About value claimed">
+            How much of what your deals added went to you. If a deal adds 150 points over everyone's walk-away points and 90
+            of them are yours, you claimed 60%. Half is an even split between two people.
+          </InfoTip>
+        </dt>
         <dd class="display">{{ percent(ratings.claim) }}</dd>
       </div>
       <div>

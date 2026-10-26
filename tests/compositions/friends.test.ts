@@ -136,6 +136,34 @@ describe("negotiating with friends", () => {
     expect((await nadia.show()).table).toMatchObject({ status: "OPEN", timeLimit: 30 });
   });
 
+  test("while Omar writes, Nadia sees that Manon is typing, until he sends it or stops for a few seconds", async () => {
+    const { api, register, hostFriends, advance } = await startWholePie();
+    const nadia = await hostFriends("nadia");
+    const omar = await nadia.join("omar");
+    const typing = { session: omar.session, table: nadia.table };
+    // Nobody types before the negotiation begins, and only someone seated can.
+    expect(await api.tables.typing(typing)).toEqual({ error: "NOT_OPEN" });
+    const { session: pia } = await register("pia");
+    expect(await api.tables.typing({ session: pia, table: nadia.table })).toEqual({ error: "NOT_FOUND" });
+    const { proposal } = ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 30 }));
+    ok(await api.tables.agree({ session: omar.session, table: nadia.table, proposal }));
+
+    ok(await api.tables.typing(typing));
+    expect((await nadia.show()).typing).toEqual([{ role: omar.role, name: "Manon" }]);
+    // Omar doesn't see his own typing.
+    expect((await omar.show()).typing).toEqual([]);
+    // Sending the message stops it at once.
+    ok(await api.tables.send({ ...typing, body: "Welcome, Hiro! Shall we start with salary?" }));
+    expect((await nadia.show()).typing).toEqual([]);
+
+    // A few seconds after he stops writing, it goes away too.
+    ok(await api.tables.typing(typing));
+    advance(0.05);
+    expect((await nadia.show()).typing).toHaveLength(1);
+    advance(0.1);
+    expect((await nadia.show()).typing).toEqual([]);
+  });
+
   test("a friends table needs a role of a published scenario", async () => {
     const { api, application, register } = await startWholePie();
     const { session } = await register("nadia");

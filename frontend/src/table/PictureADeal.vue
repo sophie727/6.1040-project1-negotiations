@@ -3,7 +3,7 @@ import { computed, reactive, ref, useId, watch } from "vue";
 import { api, type Table } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
-import BatnaTip from "./BatnaTip.vue";
+import { dateAfter, dayZero, daysBetween, fromIsoDate, isoDate } from "./dates.ts";
 import { formatAgreed, formatPoints } from "./format.ts";
 import { dealPoints, rangeOf } from "./points.ts";
 
@@ -76,6 +76,40 @@ async function propose() {
   emit("changed");
 }
 
+/**
+ * Sets a range's value to what the person typed, once they press Enter or leave the box: a number, or a date for a
+ * range of dates, kept within the range. Something that isn't a number or a date leaves the value as it was.
+ */
+function setTyped(issueId: string, event: Event) {
+  const box = event.target as HTMLInputElement;
+  const range = ranges.value[issueId];
+  const issue = props.table.issues.find(({ issue }) => issue === issueId);
+  if (range === undefined || issue === undefined) return;
+  const zero = dayZero(issue.unit);
+  const date = zero === null ? null : fromIsoDate(box.value);
+  const typed = zero === null ? Number(box.value) : date === null ? Number.NaN : daysBetween(zero, date);
+  if (box.value.trim() !== "" && Number.isFinite(typed)) terms[issueId] = Math.min(range.max, Math.max(range.min, typed));
+  // The box shows the value as it was kept, such as the range's end for a number beyond it.
+  box.value = typedValue(issueId);
+}
+
+/** A range's value as its box shows it: the number, or the date a date picker holds, such as "2027-02-07". */
+function typedValue(issueId: string): string {
+  const issue = props.table.issues.find(({ issue }) => issue === issueId);
+  const zero = dayZero(issue?.unit ?? null);
+  const value = Number(terms[issueId]);
+  return zero === null ? String(value) : isoDate(dateAfter(zero, value));
+}
+
+/** The first and last dates a range of dates allows, as a date picker takes them, or nulls for a range of numbers. */
+function dateBounds(issueId: string): { min: string; max: string } | null {
+  const issue = props.table.issues.find(({ issue }) => issue === issueId);
+  const zero = dayZero(issue?.unit ?? null);
+  const range = ranges.value[issueId];
+  if (zero === null || range === undefined) return null;
+  return { min: isoDate(dateAfter(zero, range.min)), max: isoDate(dateAfter(zero, range.max)) };
+}
+
 /** The option names at either end of a continuous issue, such as "$80K" and "$120K". */
 function ends(issueId: string): [string, string] {
   const issue = props.table.issues.find(({ issue }) => issue === issueId);
@@ -91,7 +125,7 @@ function ends(issueId: string): [string, string] {
       <button v-if="latest" type="button" class="text-button" @click="startFromLatest">Start from the latest proposal</button>
     </header>
     <p class="muted">
-      Try out terms to see how they compare to your BATNA of {{ formatPoints(table.batna) }} points <BatnaTip />. {{ others }}
+      Try out terms to see how they compare to your BATNA of {{ formatPoints(table.batna) }} points. {{ others }}
       won't see them until you propose.
     </p>
     <div class="issues">
@@ -104,6 +138,29 @@ function ends(issueId: string): [string, string] {
           </label>
         </div>
         <div v-else-if="ranges[issue.issue]" class="range">
+          <input
+            v-if="dateBounds(issue.issue)"
+            class="typed date"
+            type="date"
+            :min="dateBounds(issue.issue)!.min"
+            :max="dateBounds(issue.issue)!.max"
+            :value="typedValue(issue.issue)"
+            :aria-label="`${issue.name}, as a date`"
+            @change="setTyped(issue.issue, $event)"
+          />
+          <input
+            v-else
+            class="typed"
+            type="number"
+            inputmode="decimal"
+            step="any"
+            :min="ranges[issue.issue]!.min"
+            :max="ranges[issue.issue]!.max"
+            :value="typedValue(issue.issue)"
+            :aria-label="`${issue.name}, as a number${issue.unit ? ` in ${issue.unit}` : ''}`"
+            @change="setTyped(issue.issue, $event)"
+            @keydown.enter.prevent="setTyped(issue.issue, $event)"
+          />
           <input
             v-model.number="terms[issue.issue]"
             type="range"
@@ -176,11 +233,20 @@ fieldset {
   padding: 0;
   border: 0;
 }
+/*
+ * The issue's name. Floated, a legend is laid out like the fieldset's other content, at its top, so a range's typed box
+ * can line up beside it; the fieldset's gap spaces it from the controls below.
+ */
 legend {
-  margin-bottom: var(--space-2);
+  float: left;
   padding: 0;
   font-size: var(--text-sm);
   font-weight: 700;
+}
+/* Beside a typed box, the name's line is as tall as the box, and a long name stops short of it. */
+fieldset:has(.typed) legend {
+  padding-right: 156px;
+  line-height: 32px;
 }
 .choices {
   display: flex;
@@ -205,8 +271,28 @@ legend {
 .range input {
   accent-color: var(--color-accent);
 }
-.range input {
+.range input[type="range"] {
   width: 100%;
+}
+/* A box to type a range's value into instead of sliding to it, at the right of the issue's name. */
+fieldset {
+  position: relative;
+}
+.typed {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 148px;
+  height: 32px;
+  padding: 4px 8px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+}
+.typed:focus {
+  outline: none;
+  border-color: var(--color-accent);
 }
 .ends {
   display: flex;

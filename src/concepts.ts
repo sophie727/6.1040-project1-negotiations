@@ -16,6 +16,7 @@ import { registering } from "./concepts/Registering/registry.ts";
 import { reviewing } from "./concepts/Reviewing/registry.ts";
 import { agentSessioning, sessioning } from "./concepts/Sessioning/registry.ts";
 import { tabling } from "./concepts/Tabling/registry.ts";
+import { typing } from "./concepts/Typing/registry.ts";
 
 export const applicationConceptSet = conceptSet({
   Registering: registering,
@@ -27,6 +28,7 @@ export const applicationConceptSet = conceptSet({
   Posting: posting,
   Tabling: tabling,
   Conversing: conversing,
+  Typing: typing,
   Proposing: proposing,
   TimeLimitProposing: timeLimitProposing,
   Noting: noting,

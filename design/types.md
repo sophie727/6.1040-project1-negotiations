@@ -4,7 +4,7 @@ Every person in The Whole Pie is a Registering user, who signs in with a passwor
 
 A seat at a table belongs to a player: either a person, or one of the AI counterparts. A counterpart is a bot whose name starts with `bot:`: `bot:counterpart` takes a seat at each practice table, and at a scenario with more than two roles, a counterpart named for its role, `bot:counterpart:` followed by the role, takes each other seat the person doesn't. The agent process that plays them reads each role's brief from the table, so a bot's name is all a table needs to record.
 
-Everything said and offered at a table is said and offered by a role, not by a player, so the AI counterpart needs no account: its messages in Conversing and its proposals in Proposing come from the role it plays. A proposal offers a term sheet, which Proposing keeps without reading, and which Briefing scores. Each person keeps their own notes about each table in Noting.
+Everything said and offered at a table is said and offered by a role, not by a player, so the AI counterpart needs no account: its messages in Conversing and its proposals in Proposing come from the role it plays. A proposal offers a term sheet, which Proposing keeps without reading, and which Briefing scores. Each person keeps their own notes about each table in Noting. While a person writes a message, Typing lets the others at the table see that they are typing, as the role they play there.
 
 Before a negotiation begins, the roles at its table agree on how long it lasts, and they do it the way they agree on a deal: someone proposes a time limit, and it holds once everyone else accepts it. So a second instance of Proposing, TimeLimitProposing, keeps those proposals, whose terms are a time limit in minutes. Its proposals can say nothing but a number, so the negotiators can't start negotiating before the clock runs.
 
@@ -60,6 +60,10 @@ instantiate Tabling with
 instantiate Conversing with
   Subject is Tabling.Table
   Speaker is Briefing.Role
+
+instantiate Typing with
+  Subject is Tabling.Table
+  Typist is Briefing.Role
 
 instantiate Proposing with
   Subject is Tabling.Table
