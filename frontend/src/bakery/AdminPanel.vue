@@ -95,8 +95,13 @@ async function change(scenario: PostedScenario, path: string, call: () => Promis
 .posted {
   display: flex;
   flex-direction: column;
-  padding: 0;
+  max-height: 420px;
+  padding: 0 var(--space-2) 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(80, 124, 104, 0.5) transparent;
 }
 .posted li {
   display: flex;

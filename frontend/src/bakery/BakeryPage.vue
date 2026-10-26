@@ -92,8 +92,8 @@ const tables = computed(() => bakery.value?.tables ?? []);
     <YourRatings v-if="bakery?.ratings" :ratings="bakery.ratings" />
 
     <section v-if="tables.length > 0" class="panel">
-      <h2>Your negotiations</h2>
-      <ul class="tables">
+      <h2>Your negotiations <span class="count">{{ tables.length }}</span></h2>
+      <ul class="tables scrolls">
         <li v-for="table in tables" :key="table.table">
           <a :href="`/tables/${table.table}`" @click.prevent="go(`/tables/${table.table}`)">
             <span aria-hidden="true">{{ pastryFor(table.scenarioName) }}</span>
@@ -110,8 +110,8 @@ const tables = computed(() => bakery.value?.tables ?? []);
     </section>
 
     <section v-if="written.length > 0" class="panel">
-      <h2>Your scenarios</h2>
-      <ul class="tables">
+      <h2>Your scenarios <span class="count">{{ written.length }}</span></h2>
+      <ul class="tables scrolls">
         <li v-for="scenario in writtenInOrder" :key="scenario.scenario" :class="{ archived: scenario.archived }">
           <a :href="`/write/${scenario.scenario}`" @click.prevent="go(`/write/${scenario.scenario}`)">
             <span aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
@@ -138,47 +138,54 @@ const tables = computed(() => bakery.value?.tables ?? []);
 
 <style scoped>
 /*
- * The bakery's display case, from one edge of the screen to the other, in two drawings that repeat in step: the shelves
- * of pastries behind the scenarios, and the case's glass outline in front of them. The scenarios stand in the band of
- * glass between the shelves: from 21.8% to 78.7% of the case's height, above the pastries on the bottom shelf. When
- * there are more scenarios than fit, they slide sideways behind the glass.
+ * The bakery's display case, from one edge of the screen to the other, in two drawings that repeat in step, both 2034 by 1224 pixels and
+ * drawn at --scale: the shelves of pastries behind the scenarios, and the case's glass outline in front of them,
+ * stretched to the case's height. In the shelf drawing, the boards are rows 74 to 266 and 1010 to 1202, and the
+ * pastries on the bottom board start at row 958; the glass's lines end at row 9 and start at row 1214. The case is as
+ * tall as it takes for --gap of glass to show above the top board and below the bottom one, and the scenarios stand
+ * between the boards, above the bottom pastries, the first one lined up with the page's content, --inset from the
+ * screen's edge. When there are more scenarios than fit, they slide sideways behind the glass.
  */
 .case {
-  --case-height: 612px;
+  --scale: 0.4;
+  --gap: 38px;
+  --height: calc((2 * var(--gap) + 1129px * var(--scale)) * 1224 / 1205);
+  --shelves-top: calc(var(--height) * 9 / 1224 + var(--gap) - 74px * var(--scale));
+  --inset: max(var(--space-6), calc((100vw - 1168px) / 2));
   position: relative;
   width: 100vw;
-  height: var(--case-height);
+  height: var(--height);
   margin-inline: calc(50% - 50vw);
-  background: url("/display-case-shelves.webp") center top / auto 100% repeat-x;
+  background: url("/display-case-shelves.webp") center var(--shelves-top) / calc(2034px * var(--scale)) calc(1224px * var(--scale))
+    repeat-x;
 }
 .case::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: url("/display-case-glass.webp") center top / auto 100% repeat-x;
+  background: url("/display-case-glass.webp") center top / calc(2034px * var(--scale)) 100% repeat-x;
   pointer-events: none;
 }
 .gallery {
   position: absolute;
-  top: calc(var(--case-height) * 0.218);
+  top: calc(var(--shelves-top) + 267px * var(--scale));
   left: 0;
   right: 0;
-  height: calc(var(--case-height) * (0.787 - 0.218));
+  height: calc(691px * var(--scale));
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 236px;
+  grid-auto-columns: 157px;
   align-items: center;
-  gap: 30px;
-  /* The first window lines up with the page's content. */
-  padding-inline: max(var(--space-6), calc((100vw - 1168px) / 2));
+  gap: 32px;
+  padding-inline: var(--inset);
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
   scrollbar-color: rgba(80, 124, 104, 0.5) transparent;
 }
 @media (max-width: 600px) {
-  .gallery {
-    padding-inline: var(--space-4);
+  .case {
+    --inset: var(--space-4);
   }
 }
 /* Each scenario in an arched window: a teal hairline, a gold rule inside it, and the pastry on a mint plate. */
@@ -187,13 +194,13 @@ const tables = computed(() => bakery.value?.tables ?? []);
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 9px;
-  height: 320px;
-  padding: 30px 18px 28px;
+  gap: 5px;
+  height: 213px;
+  padding: 14px 11px;
   border: 1px solid rgba(80, 124, 104, 0.42);
-  border-radius: 118px 118px 4px 4px;
+  border-radius: 78.5px 78.5px 4px 4px;
   outline: 1px solid rgba(248, 186, 18, 0.75);
-  outline-offset: -9px;
+  outline-offset: -7px;
   background: var(--color-surface);
   color: var(--color-text);
   text-align: center;
@@ -201,7 +208,7 @@ const tables = computed(() => bakery.value?.tables ?? []);
 }
 .pastry-card:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 20px 30px -22px rgba(31, 58, 46, 0.6);
+  box-shadow: 0 16px 24px -18px rgba(31, 58, 46, 0.6);
 }
 /* The gold rule is the window's outline, so a focused window trades it for the usual focus ring. */
 .pastry-card:focus-visible {
@@ -211,13 +218,13 @@ const tables = computed(() => bakery.value?.tables ?? []);
 .pastry {
   display: grid;
   place-items: center;
-  width: 112px;
-  height: 112px;
-  margin-bottom: 10px;
+  width: 63px;
+  height: 63px;
+  margin-bottom: 5px;
   border-radius: 50%;
   background: var(--color-mint);
-  box-shadow: 0 0 0 6px var(--color-surface), 0 0 0 7px rgba(248, 186, 18, 0.75);
-  font-size: 54px;
+  box-shadow: 0 0 0 4px var(--color-surface), 0 0 0 5px rgba(248, 186, 18, 0.75);
+  font-size: 30px;
   line-height: 1;
 }
 /* A long name or list of roles is cut at two lines, so the window holds whatever a scenario's author wrote. */
@@ -229,14 +236,15 @@ const tables = computed(() => bakery.value?.tables ?? []);
   overflow: hidden;
 }
 .name {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
+  line-height: 1.15;
 }
 .pastry-card > .muted {
   color: var(--color-teal);
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 /* Surprise me! is the window painted teal. */
@@ -247,7 +255,7 @@ const tables = computed(() => bakery.value?.tables ?? []);
 }
 .surprise .pastry {
   background: rgba(253, 248, 195, 0.16);
-  box-shadow: 0 0 0 6px var(--color-teal), 0 0 0 7px rgba(253, 248, 195, 0.55);
+  box-shadow: 0 0 0 4px var(--color-teal), 0 0 0 5px rgba(253, 248, 195, 0.55);
 }
 .surprise > .muted {
   color: var(--color-mint);
@@ -280,6 +288,26 @@ const tables = computed(() => bakery.value?.tables ?? []);
   flex-direction: column;
   padding: 0;
   list-style: none;
+}
+/* How many rows a list has, beside its heading. */
+.count {
+  margin-left: var(--space-1);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+/*
+ * A long list scrolls inside its box, so the boxes below it stay close. It is seven and a half rows tall, so the row
+ * cut in half shows there is more, even where scrollbars stay hidden until someone scrolls.
+ */
+.scrolls {
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: var(--space-2);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(80, 124, 104, 0.5) transparent;
 }
 .tables li {
   display: flex;
