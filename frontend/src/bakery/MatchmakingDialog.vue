@@ -4,6 +4,7 @@ import { api, type Scenario } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
+import InfoTip from "../reusable/ui/InfoTip.vue";
 import { go } from "../router.ts";
 import { pastryFor } from "./pastries.ts";
 
@@ -168,14 +169,18 @@ onUnmounted(() => {
       <template v-else>
         <div class="spinner" aria-hidden="true">{{ scenario ? pastryFor(scenario.name) : "✨" }}</div>
         <p class="status" role="status">Looking for {{ waitingFor }}… <span class="muted">{{ clock }}</span></p>
-        <p v-if="scenario" class="muted">
-          As soon as someone else wants to negotiate {{ scenario.name }}, or is up for any scenario for {{ size }} people,
-          you'll go to a new table together, each with a side chosen at random. Keep this open; you can read other tabs
-          while you wait.
-        </p>
-        <p v-else class="muted">
-          You'll join the first people looking for a negotiation for {{ size }} people, whichever scenario they picked. If they're
-          up for anything too, you'll get a scenario at random. Keep this open; you can read other tabs while you wait.
+        <p class="muted">
+          Keep this open; you can read other tabs while you wait. Each of you gets a side chosen at random.
+          <InfoTip label="How matching works">
+            <template v-if="scenario">
+              As soon as someone else wants to negotiate {{ scenario.name }}, or is up for any scenario for {{ size }} people,
+              you'll go to a new table together.
+            </template>
+            <template v-else>
+              You'll join the first people looking for a negotiation for {{ size }} people, whichever scenario they picked. If
+              they're up for anything too, you'll get a scenario at random.
+            </template>
+          </InfoTip>
         </p>
         <button type="button" class="button outline" @click="cancel">Stop looking</button>
       </template>

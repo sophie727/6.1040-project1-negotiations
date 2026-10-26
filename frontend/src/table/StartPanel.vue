@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { api, type TableView } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
+import InfoTip from "../reusable/ui/InfoTip.vue";
 import { usePlan } from "./plan.ts";
 
 /**
@@ -79,7 +80,19 @@ async function agree() {
 
 <template>
   <section class="panel start" aria-label="Starting the negotiation">
-    <h2>Ready to start?</h2>
+    <h2>
+      Ready to start?
+      <InfoTip label="How starting works">
+        <span>
+          Whoever is ready first suggests how long to negotiate, which also says they're ready. Everyone else agrees, or suggests
+          a different length, which replaces it and waits for the others in turn.
+        </span>
+        <span>
+          The clock starts the moment everyone agrees, and not before, so take your time reading your brief. An AI
+          counterpart agrees to any length at once.
+        </span>
+      </InfoTip>
+    </h2>
     <template v-if="pending && !mine && !agreed">
       <p class="suggestion">
         <strong>{{ names.get(pending.proposer) }}</strong> is ready to start with

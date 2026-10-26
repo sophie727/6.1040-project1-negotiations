@@ -8,8 +8,8 @@ export interface ScenarioDefinition {
   /** The recommended time limit, in minutes. */
   timeLimit: number;
   issues: { name: string; kind: IssueKind; unit?: string; options: { name: string; universalValue?: number }[] }[];
-  /** Each role's points, by issue name and then option name. */
-  roles: { name: string; batna: number; brief: string; points: Record<string, Record<string, number>> }[];
+  /** Each role's points, by issue name and then option name, and its summary, which everyone sees before choosing a side. */
+  roles: { name: string; summary: string; batna: number; brief: string; points: Record<string, Record<string, number>> }[];
 }
 
 /** The Job Offer, from design/notes/example_cases.md. */
@@ -59,6 +59,7 @@ export const theJobOffer: ScenarioDefinition = {
   roles: [
     {
       name: "Manon",
+      summary: "Head of operations at Fernwood Analytics, meeting Hiro, the top candidate to lead client operations, to settle the terms of the job offer.",
       batna: 1000,
       brief: manon,
       points: {
@@ -71,6 +72,7 @@ export const theJobOffer: ScenarioDefinition = {
     },
     {
       name: "Hiro",
+      summary: "Fernwood Analytics' top choice to lead client operations, meeting Manon, its head of operations, to settle the terms of the job offer.",
       batna: 1000,
       brief: hiro,
       points: {

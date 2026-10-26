@@ -1,4 +1,5 @@
 import type { Issue } from "../api/client.ts";
+import { dayZero } from "./dates.ts";
 
 /** A role's points for each option, as the table view and the debrief return them. */
 export type Payoffs = readonly { option: string; points: number }[];
@@ -41,10 +42,13 @@ export function dealPoints(issues: readonly Issue[], terms: TermSheet, payoffs: 
   return total;
 }
 
-/** The lowest and highest universal values of a continuous issue, and a step that moves through its range in about a hundred notches. */
+/**
+ * The lowest and highest universal values of a continuous issue, and a step that moves through its range in about a
+ * hundred notches, or a day at a time through a range of dates.
+ */
 export function rangeOf(issue: Issue): { min: number; max: number; step: number } {
   const values = issue.options.flatMap(({ universalValue }) => (universalValue === null ? [] : [universalValue]));
   const [min, max] = [Math.min(...values), Math.max(...values)];
-  const step = 10 ** Math.max(0, Math.floor(Math.log10(Math.max(max - min, 1))) - 1);
+  const step = dayZero(issue.unit) !== null ? 1 : 10 ** Math.max(0, Math.floor(Math.log10(Math.max(max - min, 1))) - 1);
   return { min, max, step };
 }

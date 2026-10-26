@@ -23,10 +23,11 @@ export const spiceOf = view("how spicy (scenario) is", ({ scenario }, { spice },
 ).optional();
 
 /**
- * The published scenarios, by name, each with its recommended time limit, its roles, and how spicy it is. Only the
+ * The published scenarios, by name, each with its recommended time limit, its roles with their summaries, or null for a
+ * role without one, and how spicy it is. Only the
  * spice level leaves the server: the whole pie's points would tell the roles what the others get by walking away.
  */
-const scenarios = former("the published scenarios", (_input, { scenario, name, timeLimit, role, roleName, spice }) =>
+const scenarios = former("the published scenarios", (_input, { scenario, name, timeLimit, role, roleName, summary, spice }) =>
   each(Briefing._published({}).is({ scenario, name }))
     .where(whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit })), spiceOf({ scenario }).is({ spice }))
     .form({
@@ -34,7 +35,9 @@ const scenarios = former("the published scenarios", (_input, { scenario, name, t
       name,
       timeLimit,
       spice,
-      roles: each(Briefing._roles({ scenario }).is({ role, name: roleName })).form({ role, name: roleName }),
+      roles: each(Briefing._roles({ scenario }).is({ role, name: roleName }))
+        .where(whether(Briefing._role({ role }).is({ summary })))
+        .form({ role, name: roleName, summary }),
     }),
 );
 

@@ -57,6 +57,7 @@ export const theLaunchRoom: ScenarioDefinition = {
   roles: [
     {
       name: "Mandy",
+      summary: "Head of marketing at Solidum, agreeing with the heads of product and sales on how to launch Solidum Atlas, a new AI analytics assistant, before the CEO decides for them.",
       batna: 750,
       brief: mandy,
       points: {
@@ -70,6 +71,7 @@ export const theLaunchRoom: ScenarioDefinition = {
     },
     {
       name: "Presley",
+      summary: "Head of product at Solidum, agreeing with the heads of marketing and sales on how to launch Solidum Atlas, a new AI analytics assistant, before the CEO decides for them.",
       batna: 800,
       brief: presley,
       points: {
@@ -83,6 +85,7 @@ export const theLaunchRoom: ScenarioDefinition = {
     },
     {
       name: "Sally",
+      summary: "Head of sales at Solidum, agreeing with the heads of marketing and product on how to launch Solidum Atlas, a new AI analytics assistant, before the CEO decides for them.",
       batna: 850,
       brief: sally,
       points: {

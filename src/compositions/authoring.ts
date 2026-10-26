@@ -40,12 +40,12 @@ const scenariosBy = former("the scenarios (user) wrote", ({ user }, { scenario, 
 
 /**
  * (scenario) as its author writes it: its name, whether it is published, the time limit its author recommends, its
- * issues with their options, and each role with its BATNA, its brief, or null before it has one, and its points for each
- * option it has points for so far.
+ * issues with their options, and each role with its BATNA, its brief and its summary, each null before it has one, and its
+ * points for each option it has points for so far.
  */
 const draftOf = former(
   "(scenario) as its author writes it",
-  ({ scenario }, { name, published, timeLimit, role, roleName, batna, brief, option, points }) =>
+  ({ scenario }, { name, published, timeLimit, role, roleName, batna, brief, summary, option, points }) =>
     where(Briefing._scenario({ scenario }).is({ name, published }), whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit }))).form({
       scenario,
       name,
@@ -53,12 +53,17 @@ const draftOf = former(
       timeLimit,
       issues: issuesOf({ scenario }),
       roles: each(Briefing._roles({ scenario }).is({ role, name: roleName }))
-        .where(Briefing._role({ role }).is({ batna }), whether(Briefing._role({ role }).is({ brief })))
+        .where(
+          Briefing._role({ role }).is({ batna }),
+          whether(Briefing._role({ role }).is({ brief })),
+          whether(Briefing._role({ role }).is({ summary })),
+        )
         .form({
           role,
           name: roleName,
           batna,
           brief,
+          summary,
           payoffs: each(Briefing._payoffs({ role }).is({ option, points })).form({ option, points }),
         }),
     }),
@@ -361,6 +366,24 @@ const WriteBrief = endpoint(
   { validators: { input: textInput } },
 );
 
+/** Briefing takes a role's summary even after the scenario is published, since it changes nothing a deal is worth. */
+const DescribeRole = endpoint(
+  "/scenarios/roles/summary",
+  ({ session, role, summary, user }) =>
+    receive({ session, role, summary })
+      .then(Sessioning.use({ session }).responds({ subject: user }))
+      .then(
+        where(wroteRole({ user, role }))
+          .then(Briefing.describeRole({ role, summary }).responds({}))
+          .then(respond({}))
+          .named("author"),
+        where(no(wroteRole({ user, role })))
+          .then(respond({ error: "NOT_FOUND" }))
+          .named("not-author"),
+      ),
+  { validators: { input: textInput } },
+);
+
 /** Briefing refuses an option of another scenario than the role's, so the author's role is the only check needed here. */
 const SetPayoff = endpoint(
   "/scenarios/payoffs/set",
@@ -384,5 +407,5 @@ export const composition = {
   showing: { scenariosBy, draftOf, ShowMine, ShowDraft },
   drafting: { Create, Rename, RecommendTimeLimit, Discard, Publish },
   issues: { AddIssue, UpdateIssue, RemoveIssue, AddOption, UpdateOption, RemoveOption },
-  roles: { AddRole, UpdateRole, RemoveRole, WriteBrief, SetPayoff },
+  roles: { AddRole, UpdateRole, RemoveRole, WriteBrief, DescribeRole, SetPayoff },
 };

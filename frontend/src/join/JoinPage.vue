@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { api, type Invitation } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { pastryFor } from "../bakery/pastries.ts";
+import RoleSummary from "../bakery/RoleSummary.vue";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 
@@ -31,7 +32,8 @@ onMounted(async () => {
 });
 
 const seats = computed(() => invitation.value?.openSeats ?? []);
-const chosenName = computed(() => seats.value.find((seat) => seat.role === role.value)?.name);
+const chosenSeat = computed(() => seats.value.find((seat) => seat.role === role.value));
+const chosenName = computed(() => chosenSeat.value?.name);
 
 async function join() {
   if (role.value === null) return;
@@ -61,6 +63,7 @@ async function join() {
         </div>
       </fieldset>
       <p v-else-if="chosenName" class="muted">You'll play {{ chosenName }}.</p>
+      <RoleSummary v-if="chosenSeat" :name="chosenSeat.name" :summary="chosenSeat.summary" />
       <p class="muted">
         You'll read your confidential brief first. The clock starts once everyone agrees how long to negotiate{{
           invitation.recommendedTimeLimit === null ? "" : `; the author recommends ${invitation.recommendedTimeLimit} minutes`

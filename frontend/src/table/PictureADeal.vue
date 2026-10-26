@@ -3,6 +3,7 @@ import { computed, reactive, ref, useId, watch } from "vue";
 import { api, type Table } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
+import BatnaTip from "./BatnaTip.vue";
 import { formatAgreed, formatPoints } from "./format.ts";
 import { dealPoints, rangeOf } from "./points.ts";
 
@@ -90,8 +91,8 @@ function ends(issueId: string): [string, string] {
       <button v-if="latest" type="button" class="text-button" @click="startFromLatest">Start from the latest proposal</button>
     </header>
     <p class="muted">
-      Try out terms to see how they compare to your BATNA of {{ formatPoints(table.batna) }} points. {{ others }} won't see them
-      until you propose.
+      Try out terms to see how they compare to your BATNA of {{ formatPoints(table.batna) }} points <BatnaTip />. {{ others }}
+      won't see them until you propose.
     </p>
     <div class="issues">
       <fieldset v-for="issue in table.issues" :key="issue.issue">

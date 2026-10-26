@@ -1,9 +1,16 @@
 import type { Issue } from "../api/client.ts";
+import { dateAfter, dayZero, formatDate } from "./dates.ts";
 
-/** A number with an issue's unit: dollars as money, and anything else with its unit after it. */
+/**
+ * A number with an issue's unit: dollars as money, percent with a percent sign, days after a first day as a date, such
+ * as "February 7" for 37 days after January 1, and anything else with its unit after it.
+ */
 export function formatAmount(value: number, unit: string | null): string {
+  const zero = dayZero(unit);
+  if (zero !== null) return formatDate(dateAfter(zero, value), zero);
   const amount = (Math.round(value * 100) / 100).toLocaleString("en-US");
   if (unit === "dollars") return `$${amount}`;
+  if (unit === "percent") return `${amount}%`;
   return unit === null ? amount : `${amount} ${unit}`;
 }
 

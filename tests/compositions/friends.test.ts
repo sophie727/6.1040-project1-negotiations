@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { Session } from "../../src/concepts/Sessioning/Sessioning.ts";
 import { startWholePie } from "../support/app.ts";
 import { ok } from "../support/reusable/results.ts";
+import { theJobOffer } from "../../src/seed/theJobOffer.ts";
 
 /** The whole pie of The Job Offer, worth 1,100 points to each side. */
 const WHOLE_PIE = { "Start date": 0, Salary: 120000, "Health Insurance": "Full Coverage", Bonus: 0, "Position title": "Director" };
@@ -29,7 +30,7 @@ describe("negotiating with friends", () => {
       const { session } = ok(await api.auth.register({ username: "omar", password: "correct horse" }));
       expect(await api.tables.show({ session, table: nadia.table })).toEqual({ error: "NOT_FOUND" });
       expect(ok(await api.friends.invitation({ session, code: nadia.code }))).toEqual({
-        invitation: { scenarioName: "The Job Offer", inviter: "nadia", recommendedTimeLimit: 30, openSeats: [{ role: manon, name: "Manon" }] },
+        invitation: { scenarioName: "The Job Offer", inviter: "nadia", recommendedTimeLimit: 30, openSeats: [{ role: manon, name: "Manon", summary: theJobOffer.roles[0]!.summary }] },
       });
       expect(ok(await api.friends.join({ session, code: nadia.code, role: manon }))).toEqual({ table: nadia.table });
       return { session, show: async () => ok(await api.tables.show({ session, table: nadia.table })) };

@@ -106,7 +106,7 @@ async function discard() {
           </h1>
           <p class="state">
             <span class="badge" :class="published ? 'good' : 'warm'">{{ published ? "Published" : "Draft" }}</span>
-            <span v-if="published" class="muted">It's in the bakery, and it can't change anymore.</span>
+            <span v-if="published" class="muted">It's in the bakery, and only who each role is can change now.</span>
             <span v-else class="muted" aria-live="polite">
               {{ saving > 0 ? "Saving…" : saved ? "Every change is saved." : "Only you can see this draft until you publish it." }}
             </span>

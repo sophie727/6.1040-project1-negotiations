@@ -48,11 +48,11 @@ const waitingForSomeone = view("(table) is waiting for someone", ({ table }) =>
 
 /**
  * The invitation to (table) from (inviter), as someone invited sees it: the scenario and its recommended time limit,
- * the username of the person who sent it, and the empty seats they could take.
+ * the username of the person who sent it, and the empty seats they could take, each with its role's summary, or null.
  */
 const invitationTo = former(
   "the invitation to (table) from (inviter)",
-  ({ table, inviter }, { scenario, scenarioName, username, timeLimit, role, name }) =>
+  ({ table, inviter }, { scenario, scenarioName, username, timeLimit, role, name, summary }) =>
     where(
       Tabling._table({ table }).is({ scenario }),
       Briefing._scenario({ scenario }).is({ name: scenarioName }),
@@ -63,8 +63,8 @@ const invitationTo = former(
       inviter: username,
       recommendedTimeLimit: timeLimit,
       openSeats: each(openSeats({ table }).is({ role }))
-        .where(Briefing._role({ role }).is({ name }))
-        .form({ role, name }),
+        .where(Briefing._role({ role }).is({ name }), whether(Briefing._role({ role }).is({ summary })))
+        .form({ role, name, summary }),
     }),
 );
 

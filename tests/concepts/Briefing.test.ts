@@ -5,6 +5,7 @@ import {
   DifferentScenarios,
   Incomplete,
   InvalidBrief,
+  InvalidSummary,
   InvalidIssueName,
   InvalidOptionName,
   InvalidRoleName,
@@ -255,6 +256,26 @@ describe("Briefing", () => {
     ]);
     // Without a brief yet, the row leaves the brief out.
     expect(await briefing._role({ role: offer.manon })).toStrictEqual([{ scenario: offer.scenario, name: "Manon", batna: 300 }]);
+  });
+
+  test("a role's summary has at most 300 characters, a blank one clears it, and it can change after publishing", async () => {
+    const { briefing } = await setup();
+    const offer = await jobOffer(briefing);
+    await expectRefusal(
+      briefing.describeRole({ role: offer.hiro, summary: "x".repeat(301) }),
+      InvalidSummary,
+      "A role's summary must have at most 300 characters.",
+    );
+    await expectRefusal(briefing.describeRole({ role: "nobody" as Role, summary: "Hi" }), UnknownRole, "There is no such role.");
+    expect(await briefing.describeRole({ role: offer.hiro, summary: "  The candidate.  " })).toEqual({});
+    expect((await briefing._role({ role: offer.hiro }))[0]?.summary).toBe("The candidate.");
+
+    // A summary changes nothing a deal is worth, so it can change once the scenario is published.
+    await briefing.publish({ scenario: offer.scenario });
+    await briefing.describeRole({ role: offer.hiro, summary: "Fernwood's top choice for the role." });
+    expect((await briefing._role({ role: offer.hiro }))[0]?.summary).toBe("Fernwood's top choice for the role.");
+    await briefing.describeRole({ role: offer.hiro, summary: " " });
+    expect((await briefing._role({ role: offer.hiro }))[0]).not.toHaveProperty("summary");
   });
 
   test("publishing needs every payoff, and nothing about a published scenario can change", async () => {

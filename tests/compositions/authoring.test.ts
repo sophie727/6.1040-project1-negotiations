@@ -157,7 +157,7 @@ describe("writing a scenario", () => {
       { name: "Bedroom size", kind: "CONTINUOUS", unit: "square feet", options: [] },
       { name: "Ana's rent", options: [{ name: "$1,500", universalValue: 1500 }] },
     ]);
-    expect(draft.roles).toEqual([{ role: lease.ben, name: "Benjamin", batna: 250, brief: null, payoffs: [] }]);
+    expect(draft.roles).toEqual([{ role: lease.ben, name: "Benjamin", batna: 250, brief: null, summary: null, payoffs: [] }]);
 
     ok(await api.scenarios.discard({ session, scenario: lease.scenario }));
     expect(await api.scenarios.show({ session, scenario: lease.scenario })).toEqual({ error: "NOT_FOUND" });
@@ -187,5 +187,29 @@ describe("writing a scenario", () => {
     }
     // The author can still read it.
     expect(await lease.show()).toMatchObject({ name: "The Lease", published: true });
+  });
+
+  test("Sophie says who Ana and Ben are, even after publishing, and the bakery shows it to everyone", async () => {
+    const app = await startWholePie({ counterpart: null, coach: null });
+    const { api, register } = app;
+    const lease = await leaseDraft(app);
+    const { session } = lease;
+    const ana = "Moving into a two-bedroom with Ben, and hoping for the big bedroom.";
+    ok(await api.scenarios.roles.summary({ session, role: lease.ana, summary: ana }));
+    expect((await lease.show()).roles).toMatchObject([{ name: "Ana", summary: ana }, { name: "Ben", summary: null }]);
+
+    // Only the author can say who a role is.
+    const nadia = await register("nadia");
+    expect(await api.scenarios.roles.summary({ session: nadia.session, role: lease.ben, summary: "Mine now." })).toEqual({ error: "NOT_FOUND" });
+    expect(await api.scenarios.roles.summary({ session, role: lease.ben, summary: "x".repeat(301) })).toEqual({ error: "INVALID_SUMMARY" });
+
+    await finish(app, lease);
+    ok(await api.scenarios.publish({ session, scenario: lease.scenario }));
+    ok(await api.scenarios.roles.summary({ session, role: lease.ben, summary: "Ana's roommate, who'd rather pay less rent." }));
+    const bakery = ok(await api.bakery({ session: nadia.session }));
+    expect(bakery.scenarios.find(({ name }) => name === "The Lease")?.roles).toEqual([
+      { role: lease.ana, name: "Ana", summary: ana },
+      { role: lease.ben, name: "Ben", summary: "Ana's roommate, who'd rather pay less rent." },
+    ]);
   });
 });

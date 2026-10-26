@@ -5,15 +5,16 @@ import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
 import Icon from "../reusable/ui/Icon.vue";
-import Splitter from "../reusable/ui/Splitter.vue";
 import { storedShare } from "../reusable/ui/splitter.ts";
-import Markdown from "./Markdown.vue";
+import Splitter from "../reusable/ui/Splitter.vue";
+import BatnaTip from "./BatnaTip.vue";
 import Conversation from "./Conversation.vue";
 import Countdown from "./Countdown.vue";
+import Markdown from "./Markdown.vue";
 import Notes from "./Notes.vue";
 import PictureADeal from "./PictureADeal.vue";
-import PrepSheet from "./PrepSheet.vue";
 import { hasCounterpart, othersAt, severalOthers } from "./players.ts";
+import PrepSheet from "./PrepSheet.vue";
 
 /**
  * The Table: the countdown and the conversation, with its proposals, on the left; on the right, the person's brief and
@@ -216,7 +217,7 @@ const materialsId = useId();
     </div>
 
     <Dialog v-if="confirmingWalkAway" title="Walk away?" @close="confirmingWalkAway = false">
-      <p>If you walk away, the negotiation ends without a deal, and each side gets its BATNA. Then you'll see the whole pie.</p>
+      <p>If you walk away, the negotiation ends without a deal, and each side gets its BATNA <BatnaTip />. Then you'll see the whole pie.</p>
       <div class="dialog-actions">
         <button type="button" class="button outline" @click="confirmingWalkAway = false">Keep negotiating</button>
         <button type="button" class="button danger" @click="walkAway">Walk away</button>

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { api, type Bakery, type Scenario, type WrittenScenario } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import YourRatings from "../ratings/YourRatings.vue";
+import Icon from "../reusable/ui/Icon.vue";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 import { pastryFor, statusLabels } from "./pastries.ts";
@@ -47,12 +48,18 @@ const tables = computed(() => bakery.value?.tables ?? []);
 
 <template>
   <section class="page">
-    <header class="page-head">
-      <h1>The Bakery</h1>
-      <p class="lead">
-        Pick a scenario from the case. Next, you'll choose who to negotiate with: an AI counterpart, friends you invite, or
-        someone new.
-      </p>
+    <header class="page-head head">
+      <div>
+        <h1>The Bakery</h1>
+        <p class="lead">
+          Pick a scenario from the case. Next, you'll choose who to negotiate with: an AI counterpart, friends you invite, or
+          someone new.
+        </p>
+      </div>
+      <a class="button outline write" href="/write" @click.prevent="go('/write')">
+        <span class="plus" aria-hidden="true"><Icon name="plus" :size="16" /></span>
+        Write your own scenario
+      </a>
     </header>
     <p v-if="error" class="refusal" role="alert">{{ error }}</p>
 
@@ -71,11 +78,6 @@ const tables = computed(() => bakery.value?.tables ?? []);
           <span class="name display">Surprise me!</span>
           <span class="muted">A random scenario and side</span>
         </button>
-        <a class="pastry-card write" href="/write" @click.prevent="go('/write')">
-          <span class="pastry" aria-hidden="true">🧑‍🍳</span>
-          <span class="name display">Write your own</span>
-          <span class="muted">A scenario of yours, for everyone to negotiate</span>
-        </a>
       </div>
     </div>
 
@@ -239,11 +241,28 @@ const tables = computed(() => bakery.value?.tables ?? []);
 .surprise > .muted {
   color: var(--color-mint);
 }
-/* Writing your own is an empty window, waiting to be filled. */
+/* Writing your own scenario is a button above the case, beside the bakery's title. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
 .write {
-  border-style: dashed;
-  border-color: rgba(80, 124, 104, 0.6);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   text-decoration: none;
+}
+.plus {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-surface);
 }
 .tables {
   display: flex;

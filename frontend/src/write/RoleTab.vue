@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from "vue";
 import { api, type Draft, type DraftOption, type DraftRole } from "../api/client.ts";
-import HowTo from "../reusable/ui/HowTo.vue";
+import InfoTip from "../reusable/ui/InfoTip.vue";
 import Markdown from "../table/Markdown.vue";
 import { briefFor, narrativeOf } from "./brief.ts";
 import { bestOn, pointsOf, type Save, scaleOf, stepOf } from "./draft.ts";
 import PayoffChart from "./PayoffChart.vue";
 
 /**
- * A role's tab: their confidential brief, written as the negotiator playing them will read it, and beside it what each
+ * A role's tab: who they are, a sentence or two everyone sees before choosing a side, which can change even after
+ * publishing; their confidential brief, written as the negotiator playing them will read it; and beside it what each
  * option is worth to them, drawn as a chart for each issue, with their BATNA. The preview shows the whole brief, with
  * the points the page adds below what the author wrote when they publish.
  */
@@ -17,6 +18,8 @@ const props = defineProps<{ draft: Draft; role: DraftRole; save: Save; readonly:
 const narrative = ref(narrativeOf(props.role.brief, props.role.name));
 const showing = ref<"write" | "preview">(props.readonly ? "preview" : "write");
 const briefProblem = ref<string | null>(null);
+const summary = ref(props.role.summary ?? "");
+const summaryProblem = ref<string | null>(null);
 const pointsProblem = ref<string | null>(null);
 
 const placeholder = computed(
@@ -47,6 +50,12 @@ async function writeBrief() {
 onBeforeUnmount(() => {
   if (timer !== undefined) void writeBrief();
 });
+
+/** Saves who the role is, unless it hasn't changed; a blank summary clears it. */
+async function writeSummary() {
+  if (summary.value.trim() === (props.role.summary ?? "")) return;
+  summaryProblem.value = await props.save("/scenarios/roles/summary", api.scenarios.roles.summary({ role: props.role.role, summary: summary.value }));
+}
 
 /** Shows the whole brief, saving what the author wrote first. */
 function preview() {
@@ -81,6 +90,22 @@ async function setBatna(event: Event) {
 <template>
   <div class="role">
     <section class="panel brief">
+      <label class="field">
+        Who {{ role.name }} is
+        <textarea
+          v-model="summary"
+          class="box"
+          rows="2"
+          maxlength="300"
+          :placeholder="`Such as: the head of operations at a data company, hiring someone to lead a team.`"
+          @blur="writeSummary"
+        />
+        <span class="hint">
+          Everyone sees this in the bakery when they choose a side, so keep secrets for the brief. You can change it even
+          after you publish.
+        </span>
+      </label>
+      <p v-if="summaryProblem" class="refusal" role="alert">{{ summaryProblem }}</p>
       <header>
         <h2>{{ role.name }}'s brief</h2>
         <div class="tabs" role="tablist" aria-label="Write or preview the brief">
@@ -91,7 +116,7 @@ async function setBatna(event: Event) {
       <template v-if="showing === 'write'">
         <textarea
           v-model="narrative"
-          class="box"
+          class="box narrative"
           rows="20"
           maxlength="15000"
           :placeholder="placeholder"
@@ -112,43 +137,52 @@ async function setBatna(event: Event) {
     </section>
 
     <section class="panel worth">
-      <h2>What each option is worth to {{ role.name }}</h2>
+      <h2>
+        What each option is worth to {{ role.name }}
+        <InfoTip label="How points work">
+          <span>
+            Points are how {{ role.name }} keeps score. Only whoever plays {{ role.name }} sees them, and the coach uses every
+            role's to reveal the whole pie afterward.
+          </span>
+          <span>
+            A deal is worth the points of what it settles on every issue, added up. Give the issues {{ role.name }} cares about
+            most the most points, and give each role different priorities, so there's something to trade.
+          </span>
+        </InfoTip>
+      </h2>
       <p v-if="readonly" class="muted">
         A deal is worth the points of what it settles on every issue, added up, so the issues that matter most to {{ role.name }}
         stand tallest.
       </p>
       <p v-else class="muted">
-        Drag a bar or a point, or type a number, to set an option's points. A deal is worth the points of what it settles on every
-        issue, added up, so the issues that matter most to {{ role.name }} should stand tallest.
+        Drag a bar or a point up or down, or type a number under it, to set an option's points.
+        <InfoTip label="More ways to set points">
+          <span>
+            You can also click a bar or point and press the arrow keys to move it a step, or Page Up and Page Down to move it ten.
+            Typing lets you set any number, including a negative one, for an outcome {{ role.name }} would hate.
+          </span>
+          <span>
+            Every chart of {{ role.name }}'s shares one scale, so the issues that matter most to them stand tallest. On a range,
+            the line shows what every value between two points is worth.
+          </span>
+        </InfoTip>
       </p>
-      <HowTo v-if="!readonly" question="How do points work?">
-        <ul>
-          <li>
-            Points are how {{ role.name }} keeps score. Only the negotiator playing {{ role.name }} sees them, and the coach
-            uses everyone's to show the whole pie afterward.
-          </li>
-          <li>
-            A deal's points are what it settles on each issue, added up. Give the issues that matter most to {{ role.name }} the
-            most points, and give the roles different priorities, so there's room to trade.
-          </li>
-          <li>
-            On a range, you set the points of each point on it, and a value between two points earns points between theirs.
-          </li>
-          <li>
-            The BATNA is what {{ role.name }} gets with no deal. A deal is only worth taking if it beats it, so set it below the
-            best deal and above the worst.
-          </li>
-        </ul>
-      </HowTo>
       <div class="sums">
-        <label class="field batna">
-          BATNA
+        <div class="field batna">
+          <span class="batna-label">
+            <label :for="`batna-${role.role}`">BATNA</label>
+            <InfoTip label="What's a BATNA?">
+              {{ role.name }}'s Best Alternative To a Negotiated Agreement: the points {{ role.name }} gets with no deal, if
+              someone walks away or time runs out. Set it above {{ role.name }}'s worst deal and below their best, so some deals
+              are worth taking and some aren't.
+            </InfoTip>
+          </span>
           <span class="with-unit">
-            <input type="number" :value="role.batna" :disabled="readonly" @change="setBatna" />
+            <input :id="`batna-${role.role}`" type="number" :value="role.batna" :disabled="readonly" @change="setBatna" />
             <span class="muted">points</span>
           </span>
           <span class="hint">What {{ role.name }} gets by walking away, with no deal.</span>
-        </label>
+        </div>
         <div class="best">
           <span class="muted">The best deal for {{ role.name }}</span>
           <strong class="display">{{ shown(best) }} points</strong>
@@ -190,7 +224,11 @@ async function setBatna(event: Event) {
 .brief h2 {
   font-size: var(--text-lg);
 }
-.brief textarea {
+.batna-label {
+  display: flex;
+  align-items: center;
+}
+.brief .narrative {
   min-height: 420px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--text-sm);

@@ -157,10 +157,11 @@ export type TheWholePieWire = {
       } | null;
       "scenarios": ({
         "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_published"]>>>, ["name"]>>;
-        "roles": {
+        "roles": ({
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["name"]>>;
-          "role": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["role"]>>;
-        }[];
+          "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["role"]>]>>;
+          "summary": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["summary"]>> | null;
+        })[];
         "scenario": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_jointBatna"]>[0], ["scenario"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_wholePie"]>[0], ["scenario"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>[0], ["scenario"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_published"]>>>, ["scenario"]>]>>;
         "spice": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.computations)["spiceLevel"]["fn"]>>, []>>;
         "timeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>>>, ["timeLimit"]>> | null;
@@ -437,10 +438,11 @@ export type TheWholePieWire = {
     } | {
       "invitation": {
         "inviter": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>>;
-        "openSeats": {
+        "openSeats": ({
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["name"]>>;
           "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>>>, ["role"]>]>>;
-        }[];
+          "summary": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["summary"]>> | null;
+        })[];
         "recommendedTimeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>>>, ["timeLimit"]>> | null;
         "scenarioName": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_scenario"]>>>, ["name"]>>;
       };
@@ -687,6 +689,15 @@ export type TheWholePieWire = {
     output: Record<string, never>;
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOUND" | "NOT_SIGNED_IN" | "PUBLISHED" | "UNKNOWN_ROLE" };
   };
+  "/scenarios/roles/summary": {
+    input: {
+      "role": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["describeRole"]>[0], ["role"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["use"]>[0], ["session"]>>;
+      "summary": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["describeRole"]>[0], ["summary"]>>;
+    };
+    output: Record<string, never>;
+    error: { error: AppWideError | "INVALID_INPUT" | "INVALID_SUMMARY" | "NOT_FOUND" | "NOT_SIGNED_IN" | "UNKNOWN_ROLE" };
+  };
   "/scenarios/roles/update": {
     input: {
       "batna": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["updateRole"]>[0], ["batna"]>>;
@@ -726,6 +737,7 @@ export type TheWholePieWire = {
             "points": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_payoffs"]>>>, ["points"]>>;
           }[];
           "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["role"]>]>>;
+          "summary": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["summary"]>> | null;
         })[];
         "scenario": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_scenario"]>[0], ["scenario"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>[0], ["scenario"]>]>>;
         "timeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>>>, ["timeLimit"]>> | null;
@@ -1140,10 +1152,11 @@ export type TheWholePieWireHttp = {
       } | null;
       "scenarios": ({
         "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_published"]>>>, ["name"]>>;
-        "roles": {
+        "roles": ({
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["name"]>>;
-          "role": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["role"]>>;
-        }[];
+          "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["role"]>]>>;
+          "summary": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["summary"]>> | null;
+        })[];
         "scenario": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_jointBatna"]>[0], ["scenario"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_wholePie"]>[0], ["scenario"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>[0], ["scenario"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_published"]>>>, ["scenario"]>]>>;
         "spice": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.computations)["spiceLevel"]["fn"]>>, []>>;
         "timeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>>>, ["timeLimit"]>> | null;
@@ -1417,10 +1430,11 @@ export type TheWholePieWireHttp = {
     } | {
       "invitation": {
         "inviter": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Registering"]["_username"]>>>, ["username"]>>;
-        "openSeats": {
+        "openSeats": ({
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["name"]>>;
           "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_seats"]>>>, ["role"]>]>>;
-        }[];
+          "summary": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["summary"]>> | null;
+        })[];
         "recommendedTimeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>>>, ["timeLimit"]>> | null;
         "scenarioName": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_scenario"]>>>, ["name"]>>;
       };
@@ -1644,6 +1658,14 @@ export type TheWholePieWireHttp = {
     output: Record<string, never>;
     error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
+  "/scenarios/roles/summary": {
+    input: {
+      "role": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["describeRole"]>[0], ["role"]>>;
+      "summary": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["describeRole"]>[0], ["summary"]>>;
+    };
+    output: Record<string, never>;
+    error: { error: HttpAppWideError | "INTERNAL_ERROR" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
   "/scenarios/roles/update": {
     input: {
       "batna": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["updateRole"]>[0], ["batna"]>>;
@@ -1681,6 +1703,7 @@ export type TheWholePieWireHttp = {
             "points": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_payoffs"]>>>, ["points"]>>;
           }[];
           "role": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>[0], ["role"]>, AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_roles"]>>>, ["role"]>]>>;
+          "summary": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Briefing"]["_role"]>>>, ["summary"]>> | null;
         })[];
         "scenario": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Briefing"]["_scenario"]>[0], ["scenario"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>[0], ["scenario"]>]>>;
         "timeLimit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Tabling"]["_recommendedTimeLimit"]>>>, ["timeLimit"]>> | null;

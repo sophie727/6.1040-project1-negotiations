@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount } from "vue";
 import type { TableView } from "../api/client.ts";
+import BatnaTip from "./BatnaTip.vue";
 import { formatPoints } from "./format.ts";
 import { type PlanParts, usePlan } from "./plan.ts";
 
@@ -51,7 +52,7 @@ const parts: { part: keyof PlanParts; label: string; hint: string }[] = [
           @input="edit(part, ($event.target as HTMLTextAreaElement).value)"
           @blur="save"
         />
-        <span class="hint">{{ hint }}</span>
+        <span class="hint">{{ hint }} <BatnaTip v-if="part === 'walkaway'" /></span>
       </label>
       <p v-if="error" class="refusal" role="alert">{{ error }}</p>
       <p v-else class="muted" aria-live="polite">{{ status === "saved" ? "Saved" : status === "saving" ? "Saving…" : "Not saved yet" }}</p>

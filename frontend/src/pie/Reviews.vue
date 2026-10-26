@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { api, type ReviewTarget, type TableId } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
+import InfoTip from "../reusable/ui/InfoTip.vue";
 
 /**
  * How it was to deal with each other person at the table: the person gives each of them 1 to 5 stars, once. The stars
@@ -31,7 +32,19 @@ async function review(target: ReviewTarget, stars: number) {
 
 <template>
   <section v-if="reviews.length > 0" class="panel reviews">
-    <h2>How was it to negotiate with them?</h2>
+    <h2>
+      How was it to negotiate with them?
+      <InfoTip label="How reviews work">
+        <span>
+          Give each person 1 to 5 stars for what they were like to deal with: honest, respectful, and easy to work with, rather
+          than how good a deal they got.
+        </span>
+        <span>
+          Reviews are anonymous. People see only the average of their stars and how many reviews they have, and so does whoever
+          they negotiate with next. A review can't be changed once you give it.
+        </span>
+      </InfoTip>
+    </h2>
     <p class="muted">Your stars count toward their relationship rating. You can review each person once.</p>
     <ul>
       <li v-for="target in reviews" :key="target.role">

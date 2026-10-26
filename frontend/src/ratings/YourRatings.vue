@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Ratings } from "../api/client.ts";
+import InfoTip from "../reusable/ui/InfoTip.vue";
 import { averageStars, percent } from "./format.ts";
 
 /**
@@ -24,7 +25,13 @@ const rated = computed(() => (props.ratings.negotiations ?? 0) > 0 || (props.rat
         <dd class="display">{{ percent(ratings.claim) }}</dd>
       </div>
       <div>
-        <dt>Relationship</dt>
+        <dt>
+          Relationship
+          <InfoTip label="About the relationship rating">
+            The average of the stars, from 1 to 5, that people gave you after negotiating with you, for what you were like to
+            deal with. Nobody sees who gave which.
+          </InfoTip>
+        </dt>
         <dd class="display">{{ ratings.stars === null ? "—" : `★ ${averageStars(ratings.stars)}` }}</dd>
       </div>
     </dl>

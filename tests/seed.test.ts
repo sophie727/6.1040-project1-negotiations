@@ -4,6 +4,7 @@ import { MemoryProvider } from "../src/concepts/Federating/provider.ts";
 import type { TermSheet } from "../src/concepts/Briefing/Briefing.ts";
 import { publishScenario, seed } from "../src/seed/seed.ts";
 import { theJobOffer } from "../src/seed/theJobOffer.ts";
+import { ok } from "./support/reusable/results.ts";
 import { testDatabase } from "./support/reusable/mongo.ts";
 
 /** Seeds an empty database, and returns the scenario named `name` with ways to write and read its term sheets by name. */
@@ -46,6 +47,7 @@ describe("seeding", () => {
     expect(await Tabling._recommendedTimeLimit({ scenario })).toEqual([{ timeLimit: 30 }]);
     expect(Object.keys(roles)).toEqual(["Manon", "Hiro"]);
     for (const role of Object.values(roles)) expect((await Briefing._role({ role }))[0]?.brief).toStartWith("# Confidential brief");
+    expect((await Briefing._role({ role: roles.Hiro! }))[0]?.summary).toBe(theJobOffer.roles.find(({ name }) => name === "Hiro")!.summary);
 
     const [pie] = await Briefing._wholePie({ scenario });
     expect(pie?.jointPoints).toBe(2200);
@@ -94,6 +96,20 @@ describe("seeding", () => {
     const published = await application.concepts.Briefing._published();
     expect(published.map(({ name }) => name)).toEqual(["The Job Offer", "The Launch Room"]);
     expect(published[0]).toEqual(jobOffer!);
+  });
+
+  test("a Job Offer published before roles had summaries gets them, and an author's own summary stays", async () => {
+    const application = assembleApplication({ database: await testDatabase(), commons: new MemoryProvider() });
+    const { Briefing } = application.concepts;
+    await publishScenario(application, { ...theJobOffer, roles: theJobOffer.roles.map((role) => ({ ...role, summary: "" })) });
+    const scenario = (await Briefing._published())[0]!.scenario;
+    const roles = new Map((await Briefing._roles({ scenario })).map(({ role, name }) => [name, role]));
+    const [hiro, manon] = [roles.get("Hiro")!, roles.get("Manon")!];
+    ok(await Briefing.describeRole({ role: hiro, summary: "Hiro, as the author put it." }));
+
+    await seed(application);
+    expect((await Briefing._role({ role: hiro }))[0]?.summary).toBe("Hiro, as the author put it.");
+    expect((await Briefing._role({ role: manon }))[0]?.summary).toBe(theJobOffer.roles.find(({ name }) => name === "Manon")!.summary);
   });
 });
 

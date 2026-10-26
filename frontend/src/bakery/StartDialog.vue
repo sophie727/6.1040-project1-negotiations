@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import type { Scenario } from "../api/client.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
 import { pastryFor } from "./pastries.ts";
+import RoleSummary from "./RoleSummary.vue";
 import { spiceLevelOf } from "./spice.ts";
 import SpiceLevel from "./SpiceLevel.vue";
 import { DEFAULT_TIME_LIMIT, type Opponents, startPractice, startWithFriends } from "./start.ts";
@@ -20,6 +21,7 @@ const emit = defineEmits<{ close: []; matchmake: [] }>();
 /** Who plays the other sides, once the person has picked the AI or friends. */
 const opponents = ref<"ai" | "friends" | null>(null);
 const role = ref(props.scenario?.roles[0]?.role);
+const chosen = computed(() => props.scenario?.roles.find((each) => each.role === role.value));
 const working = ref(false);
 const error = ref<string | null>(null);
 
@@ -124,6 +126,7 @@ async function start() {
           </label>
         </div>
       </fieldset>
+      <RoleSummary v-if="chosen" :name="chosen.name" :summary="chosen.summary" />
       <p v-if="error" class="refusal" role="alert">{{ error }}</p>
       <button type="submit" class="button primary large" :disabled="working || role === undefined">
         {{ opponents === "ai" ? "Read your brief" : "Open the table and get a link" }}

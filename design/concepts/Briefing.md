@@ -20,9 +20,11 @@ She then adds two roles:
 - Hiro, the candidate, whose payoffs give $80K 0 points and $120K 600 points. For Health Insurance, Not included gets 0 points, Half Coverage 150 points, and Full Coverage 300 points. His BATNA is 1,000 points. A role's BATNA, the Best Alternative To A Negotiated Agreement, is what that role would get if no deal is reached, so Hiro should turn down any agreement worth less than 1,000 points to him.
 - Manon, the employer, with payoffs and a BATNA of her own. She also gives Manon a brief--that is, a confidential description of Hiro's situation and priorities.
 
+Each role can also have a summary, which, unlike the brief, everyone may read before choosing a side: Hiro's says he has been offered a job at Fernwood Analytics and is meeting Manon to settle its terms.
+
 While the scenario is a draft, Sophie can still change her mind. She first called the bonus issue "Signing bonus", and renames it "Bonus". She added a fourth title, "Intern", and removes it, along with the points each role had for it. She first made the position title a continuous issue, and changing it to discrete removes the options it had, since an option of a range has a universal value that a discrete option can't have. She raises Manon's BATNA, and she could rename the scenario, remove a role, or discard the whole draft.
 
-Sophie tries to publish, but she can't because Hiro doesn't have a brief yet: she's only allowed to publish the scenario when there are at least two roles, each with a brief and payoffs for all issues and options. She gives Hiro a brief, and then publishes the scenario. After publishing, she's no longer able to change the scenario, and instead, Briefing scores and compares deals. In particular, Briefing can now score any term sheet for this scenario. A term sheet with a salary of 100000 and health insurance Full Coverage is worth 600 points to Hiro: 300 for salary, halfway between 0 and 600, and 300 for insurance. A term sheet can't agree on anything between Half Coverage and Full Coverage, because health insurance is discrete. Finally, Briefing finds the whole pie: a term sheet with the most points for Hiro and Manon together that satisfies both BATNAs, showing what the "best" agreement might be.
+Sophie tries to publish, but she can't because Hiro doesn't have a brief yet: she's only allowed to publish the scenario when there are at least two roles, each with a brief and payoffs for all issues and options. She gives Hiro a brief, and then publishes the scenario. After publishing, she's no longer able to change the scenario, except for its roles' summaries, which change nothing a deal is worth, and instead, Briefing scores and compares deals. In particular, Briefing can now score any term sheet for this scenario. A term sheet with a salary of 100000 and health insurance Full Coverage is worth 600 points to Hiro: 300 for salary, halfway between 0 and 600, and 300 for insurance. A term sheet can't agree on anything between Half Coverage and Full Coverage, because health insurance is discrete. Finally, Briefing finds the whole pie: a term sheet with the most points for Hiro and Manon together that satisfies both BATNAs, showing what the "best" agreement might be.
 
 ## Types
 
@@ -64,6 +66,7 @@ a seq of Roles with
   a name String
   a batna Number
   an optional brief String
+  an optional summary String
   unique scenario and name
 
 a set of Payoffs with
@@ -72,7 +75,7 @@ a set of Payoffs with
   a points Number
   unique role and option
 
-Rule: every name and unit is trimmed (spaces at the start/end removed) before being stored, measured, and compared.
+Rule: every name, unit, and summary is trimmed (spaces at the start/end removed) before being stored, measured, and compared.
 Rule: only a continuous issue has a unit.
 Rule: an option has a universalValue exactly when its issue is continuous, and no two options of one issue share a universalValue.
 Rule: a payoff's role and option belong to the same scenario, and a payoff goes when its role or option does.
@@ -189,6 +192,22 @@ setBrief(role: Role, brief: String) : returns ()
   where the role's scenario is unpublished and brief is accepted
   then
     set the role's brief to brief
+    returns
+
+describeRole(role: Role, summary: String) : returns ()
+  where role is not in Roles
+  then
+    refuses UNKNOWN_ROLE "There is no such role."
+  where role is in Roles and summary is longer than 300 characters
+  then
+    refuses INVALID_SUMMARY "A role's summary must have at most 300 characters."
+  where role is in Roles and summary is blank
+  then
+    remove the role's summary
+    returns
+  where role is in Roles and summary is accepted
+  then
+    set the role's summary to summary
     returns
 
 rename(scenario: Scenario, name: String) : returns ()
@@ -372,8 +391,8 @@ _roles(scenario: Scenario) : many (role: Role, name: String)
   Returns the scenario's roles, or no rows when it has none.
   Orders rows by when each role was added.
 
-_role(role: Role) : optional (scenario: Scenario, name: String, batna: Number, brief?: String)
-  Returns the role's scenario, name, BATNA, and brief if it has one, or no row for an unknown role.
+_role(role: Role) : optional (scenario: Scenario, name: String, batna: Number, brief?: String, summary?: String)
+  Returns the role's scenario, name, BATNA, and its brief and summary if it has them, or no row for an unknown role.
 
 _payoffs(role: Role) : many (issue: Issue, option: Option, points: Number)
   Returns the role's points for each option, or no rows when it has none.

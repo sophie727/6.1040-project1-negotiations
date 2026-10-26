@@ -1,5 +1,5 @@
 import type { ActionRefusal } from "@mit-sdg/sync-engine/assembly";
-import type { Option } from "../concepts/Briefing/Briefing.ts";
+import type { Option, Scenario } from "../concepts/Briefing/Briefing.ts";
 import type { User } from "../concepts/Registering/Registering.ts";
 import type { assembleApplication } from "../assembly.ts";
 import { type ScenarioDefinition, theJobOffer } from "./theJobOffer.ts";
@@ -18,13 +18,27 @@ const CASE_BANK = "wholepie";
 
 /**
  * Creates and publishes each built-in scenario that no published scenario is named after yet: every one on a server's
- * first start with an empty database, and only those added since on a database that has the others. It goes through
- * the concepts' actions, as an author would, so reactions see every step.
+ * first start with an empty database, and only those added since on a database that has the others. A built-in
+ * scenario published before roles had summaries gets its roles' summaries, which can change after publishing. It goes
+ * through the concepts' actions, as an author would, so reactions see every step.
  */
 export async function seed({ concepts }: { concepts: Concepts }): Promise<void> {
-  const published = new Set((await concepts.Briefing._published()).map(({ name }) => name));
+  const published = new Map((await concepts.Briefing._published()).map(({ scenario, name }) => [name, scenario]));
   for (const definition of builtInScenarios) {
-    if (!published.has(definition.name)) await publishScenario({ concepts }, definition);
+    const scenario = published.get(definition.name);
+    if (scenario === undefined) await publishScenario({ concepts }, definition);
+    else await describeMissingRoles(concepts, scenario, definition);
+  }
+}
+
+/** Gives each role of the published `scenario` that has no summary yet the summary `definition` has for it. */
+async function describeMissingRoles(concepts: Concepts, scenario: Scenario, definition: ScenarioDefinition): Promise<void> {
+  for (const { role, name } of await concepts.Briefing._roles({ scenario })) {
+    const summary = definition.roles.find((each) => each.name === name)?.summary;
+    const [found] = await concepts.Briefing._role({ role });
+    if (summary !== undefined && found !== undefined && !("summary" in found)) {
+      await must(concepts.Briefing.describeRole({ role, summary }), `describe ${name} in "${definition.name}"`);
+    }
   }
 }
 
@@ -54,9 +68,10 @@ async function create(concepts: Concepts, author: User, definition: ScenarioDefi
     }
     options.set(name, byName);
   }
-  for (const { name, batna, brief, points } of definition.roles) {
+  for (const { name, summary, batna, brief, points } of definition.roles) {
     const { role } = await must(concepts.Briefing.addRole({ scenario, name, batna }), what);
     await must(concepts.Briefing.setBrief({ role, brief }), what);
+    await must(concepts.Briefing.describeRole({ role, summary }), what);
     for (const [issueName, byOption] of Object.entries(points)) {
       for (const [optionName, worth] of Object.entries(byOption)) {
         const option = options.get(issueName)?.get(optionName);

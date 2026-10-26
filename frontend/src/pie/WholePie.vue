@@ -4,9 +4,10 @@ import { api, type DebriefView, type TableView } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
+import BatnaTip from "../table/BatnaTip.vue";
 import { formatAgreed, formatPoints } from "../table/format.ts";
-import { hasCounterpart } from "../table/players.ts";
 import Markdown from "../table/Markdown.vue";
+import { hasCounterpart } from "../table/players.ts";
 import { issuePoints } from "../table/points.ts";
 import PieChart from "./PieChart.vue";
 import Reviews from "./Reviews.vue";
@@ -279,7 +280,7 @@ const lesson = computed(() => {
               </tfoot>
             </table>
             <p class="muted">
-              BATNAs: {{ rolesYouFirst.map((role) => `${role.role === me?.role ? "yours" : role.name + "'s"} was ${formatPoints(role.batna)}`).join(", ") }}.
+              BATNAs <BatnaTip />: {{ rolesYouFirst.map((role) => `${role.role === me?.role ? "yours" : role.name + "'s"} was ${formatPoints(role.batna)}`).join(", ") }}.
             </p>
           </section>
         </div>

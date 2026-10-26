@@ -4,10 +4,32 @@ import type { TableMaterial } from "./counterpart.ts";
 type Issue = TableMaterial["issues"][number];
 type Terms = Readonly<Record<string, string | number>>;
 
-/** A number with an issue's unit: dollars as money, and anything else with its unit after it. */
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The date `days` after the first day a unit such as "days after January 1, 2027" counts from, such as "February 7" for
+ * 37, with its year only when it isn't the first day's; or null for any other unit. A first day without a year falls in
+ * 2027, a year that isn't a leap year. The page reads these units the same way, in `frontend/src/table/dates.ts`.
+ */
+function dateFor(days: number, unit: string | null): string | null {
+  const match = /^days after ([a-z]+) (\d{1,2})(?:, (\d{4}))?$/i.exec(unit?.trim() ?? "");
+  const month = MONTHS.findIndex((name) => name.toLowerCase() === match?.[1]?.toLowerCase());
+  if (match === null || month < 0) return null;
+  const zero = new Date(Date.UTC(match[3] === undefined ? 2027 : Number(match[3]), month, Number(match[2])));
+  if (zero.getUTCMonth() !== month) return null;
+  const date = new Date(zero.getTime() + Math.round(days) * DAY_MS);
+  const sameYear = date.getUTCFullYear() === zero.getUTCFullYear();
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", ...(sameYear ? {} : { year: "numeric" }), timeZone: "UTC" });
+}
+
+/** A number with an issue's unit: dollars as money, percent with a percent sign, days after a first day as a date, and anything else with its unit after it. */
 function amount(value: number, unit: string | null): string {
+  const date = dateFor(value, unit);
+  if (date !== null) return date;
   const shown = (Math.round(value * 100) / 100).toLocaleString("en-US");
   if (unit === "dollars") return `$${shown}`;
+  if (unit === "percent") return `${shown}%`;
   return unit === null ? shown : `${shown} ${unit}`;
 }
 

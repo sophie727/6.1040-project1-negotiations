@@ -65,6 +65,9 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
   - Refuses `UNKNOWN_ROLE`: There is no such role.
   - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_BRIEF`: A brief must have 1 to 20,000 characters.
+- `describeRole(role: Role, summary: String) : returns ()`
+  - Refuses `UNKNOWN_ROLE`: There is no such role.
+  - Refuses `INVALID_SUMMARY`: A role's summary must have at most 300 characters.
 - `rename(scenario: Scenario, name: String) : returns ()`
   - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
   - Refuses `PUBLISHED`: A published scenario can't be changed.
@@ -116,7 +119,7 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
 - `_issues(scenario: Scenario) : many (issue: Issue, name: String, kind: IssueKind, unit?: String)`
 - `_options(issue: Issue) : many (option: Option, name: String, universalValue?: Number)`
 - `_roles(scenario: Scenario) : many (role: Role, name: String)`
-- `_role(role: Role) : optional (scenario: Scenario, name: String, batna: Number, brief?: String)`
+- `_role(role: Role) : optional (scenario: Scenario, name: String, batna: Number, brief?: String, summary?: String)`
 - `_payoffs(role: Role) : many (issue: Issue, option: Option, points: Number)`
 - `_dealValidity(scenario: Scenario, terms: TermSheet) : many (issue?: String, problem: String)`
 - `_dealPayoff(role: Role, terms: TermSheet) : optional (points: Number)`
@@ -890,7 +893,7 @@ Authored path: `authoring.showing.draftOf`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
 
 ```former
-Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, timeLimit, role, roleName, batna, brief, option, points); promises exactly one record — forms:
+Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, timeLimit, role, roleName, batna, brief, summary, option, points); promises exactly one record — forms:
   a record of
     where Briefing._scenario (scenario) has (name, published)
     where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
@@ -900,6 +903,7 @@ Former "(scenario) as its author writes it" — inputs (scenario); bindings (nam
     roles: each Briefing._roles (scenario) has (name: roleName, role)
       where Briefing._role (role) has (batna)
       where whether Briefing._role (role) has (brief)
+      where whether Briefing._role (role) has (summary)
       form a record of
         batna
         brief
@@ -909,6 +913,7 @@ Former "(scenario) as its author writes it" — inputs (scenario); bindings (nam
             option
             points
         role
+        summary
     scenario
     timeLimit
 ```
@@ -1083,7 +1088,7 @@ Authored path: `friends.joining.invitationTo`.
 - Covered by [Friends](../design/compositions/friends.md), line 20.
 
 ```former
-Former "the invitation to (table) from (inviter)" — inputs (table, inviter); bindings (scenario, scenarioName, username, timeLimit, role, name); promises exactly one record — forms:
+Former "the invitation to (table) from (inviter)" — inputs (table, inviter); bindings (scenario, scenarioName, username, timeLimit, role, name, summary); promises exactly one record — forms:
   a record of
     where Tabling._table (table) has (scenario)
     where Briefing._scenario (scenario) has (name: scenarioName)
@@ -1092,9 +1097,11 @@ Former "the invitation to (table) from (inviter)" — inputs (table, inviter); b
     inviter: username
     openSeats: each view "the empty seats at (table)" with (table) has (role)
       where Briefing._role (role) has (name)
+      where whether Briefing._role (role) has (summary)
       form a record of
         name
         role
+        summary
     recommendedTimeLimit: timeLimit
     scenarioName
 ```
@@ -1176,16 +1183,18 @@ Authored path: `practice.choosing.scenarios`.
 - Covered by [Practice](../design/compositions/practice.md), line 7.
 
 ```former
-Former "the published scenarios" — inputs (); bindings (scenario, name, timeLimit, role, roleName, spice); promises exactly one record — forms:
+Former "the published scenarios" — inputs (); bindings (scenario, name, timeLimit, role, roleName, summary, spice); promises exactly one record — forms:
   each Briefing._published () has (name, scenario)
     where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
     where view "how spicy (scenario) is" with (scenario) has (spice)
     form a record of
       name
       roles: each Briefing._roles (scenario) has (name: roleName, role)
+        where whether Briefing._role (role) has (summary)
         form a record of
           name: roleName
           role
+          summary
       scenario
       spice
       timeLimit
@@ -2063,6 +2072,62 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.roles.DescribeRole
+
+Authored path: `authoring.roles.DescribeRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/roles/summary", requestId, role, session, summary)
+then
+  Sessioning.use (session)
+```
+
+### authoring.roles.DescribeRole:author#2
+
+Authored path: `authoring.roles.DescribeRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.DescribeRole
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/summary", requestId, role, session, summary)
+  view "(user) wrote the scenario of (role)" with (role, user)
+then
+  Briefing.describeRole (role, summary)
+```
+
+### authoring.roles.DescribeRole:author#3
+
+Authored path: `authoring.roles.DescribeRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when Briefing.describeRole (role, summary), asked by authoring.roles.DescribeRole:author#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/summary", requestId, role, session, summary)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.roles.DescribeRole:not-author#2
+
+Authored path: `authoring.roles.DescribeRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.DescribeRole
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/summary", requestId, role, session, summary)
+  no view "(user) wrote the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
 ### authoring.roles.RemoveRole
 
 Authored path: `authoring.roles.RemoveRole`.
@@ -2123,7 +2188,7 @@ then
 
 Authored path: `authoring.roles.SetPayoff`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
 
 ```reaction
 when RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
@@ -2135,7 +2200,7 @@ then
 
 Authored path: `authoring.roles.SetPayoff`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
@@ -2150,7 +2215,7 @@ then
 
 Authored path: `authoring.roles.SetPayoff`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
 
 ```reaction
 when Briefing.setPayoff (option, points, role), asked by authoring.roles.SetPayoff:author#2
@@ -2164,7 +2229,7 @@ then
 
 Authored path: `authoring.roles.SetPayoff`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
@@ -5718,6 +5783,7 @@ not listed here have no explicit input contract.
 - `/scenarios/roles/add` — requires `batna`, `name`, `scenario`, `session`
 - `/scenarios/roles/brief` — requires `brief`, `role`, `session`
 - `/scenarios/roles/remove` — requires `role`, `session`
+- `/scenarios/roles/summary` — requires `role`, `session`, `summary`
 - `/scenarios/roles/update` — requires `batna`, `name`, `role`, `session`
 - `/scenarios/show` — requires `scenario`, `session`
 - `/settings/prep-sheet` — requires `on`, `session`

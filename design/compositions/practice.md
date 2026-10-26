@@ -4,7 +4,7 @@ The bakery is where a person picks something to negotiate. A practice table seat
 
 ## Choosing a scenario
 
-The [bakery endpoint](reaction:practice.choosing.ShowBakery) responds with the person's [ratings](ratings.md#showing-ratings), and two lists. The first is [the published scenarios](former:practice.choosing.scenarios), by name, each with the time limit its author recommends, its roles, and [how spicy it is](#how-spicy-a-scenario-is). The second is [the tables the person has a seat at](former:practice.choosing.tablesOf), most recently opened first, each with its scenario, the person's role, its status, and the usernames of the other people at it, so the person can go back to a negotiation or its debrief.
+The [bakery endpoint](reaction:practice.choosing.ShowBakery) responds with the person's [ratings](ratings.md#showing-ratings), and two lists. The first is [the published scenarios](former:practice.choosing.scenarios), by name, each with the time limit its author recommends, its roles with their summaries, so a person can tell who each side is before choosing one, and [how spicy it is](#how-spicy-a-scenario-is). The second is [the tables the person has a seat at](former:practice.choosing.tablesOf), most recently opened first, each with its scenario, the person's role, its status, and the usernames of the other people at it, so the person can go back to a negotiation or its debrief.
 
 ```endpoints
 practice.choosing.ShowBakery at /bakery

@@ -20,6 +20,7 @@ export class UnknownRoleOrOption extends Error {}
 export class DifferentScenarios extends Error {}
 export class UnknownRole extends Error {}
 export class InvalidBrief extends Error {}
+export class InvalidSummary extends Error {}
 export class AlreadyPublished extends Error {}
 export class Incomplete extends Error {}
 
@@ -37,6 +38,7 @@ export type TermSheet = Readonly<Record<string, string | number>>;
 
 const MAX_NAME = 100;
 const MAX_BRIEF = 20_000;
+const MAX_SUMMARY = 300;
 /** Slack for comparing points that come out of interpolation, which can carry rounding error. */
 const EPSILON = 1e-7;
 
@@ -70,6 +72,7 @@ interface RoleDocument {
   name: string;
   batna: number;
   brief?: string;
+  summary?: string;
 }
 
 interface PayoffDocument {
@@ -242,6 +245,19 @@ export class BriefingConcept<Author extends string> {
     if (await this.#isPublished(found.scenario)) throw new Published("A published scenario can't be changed.");
     if (brief.trim() === "" || brief.length > MAX_BRIEF) throw new InvalidBrief("A brief must have 1 to 20,000 characters.");
     await this.roles.updateOne({ _id: role }, { $set: { brief } });
+    return {};
+  }
+
+  /**
+   * Sets who `role` is, in a sentence or two everyone may read before choosing a side, or clears it when `summary` is
+   * blank. It changes nothing a deal is worth, so, unlike the rest of a scenario, it can change after publishing.
+   */
+  async describeRole({ role, summary }: { role: Role; summary: string }) {
+    const found = await this.roles.findOne({ _id: role });
+    if (found === null) throw new UnknownRole("There is no such role.");
+    const stored = summary.trim();
+    if (stored.length > MAX_SUMMARY) throw new InvalidSummary("A role's summary must have at most 300 characters.");
+    await this.roles.updateOne({ _id: role }, stored === "" ? { $unset: { summary: "" } } : { $set: { summary: stored } });
     return {};
   }
 
@@ -429,9 +445,9 @@ export class BriefingConcept<Author extends string> {
   async _role({ role }: { role: Role }) {
     const found = await this.roles.findOne({ _id: role });
     if (found === null) return [];
-    const { scenario, name, batna, brief } = found;
-    // A role without a brief yet has no brief field, rather than an undefined one, which a read would bind as a value.
-    return [{ scenario, name, batna, ...(brief === undefined ? {} : { brief }) }];
+    const { scenario, name, batna, brief, summary } = found;
+    // A role without a brief or summary yet has no such field, rather than an undefined one, which a read would bind as a value.
+    return [{ scenario, name, batna, ...(brief === undefined ? {} : { brief }), ...(summary === undefined ? {} : { summary }) }];
   }
 
   async _payoffs({ role }: { role: Role }) {
