@@ -77,20 +77,39 @@ async function propose() {
 }
 
 /**
- * Sets a range's value to what the person typed, once they press Enter or leave the box: a number, or a date for a
- * range of dates, kept within the range. Something that isn't a number or a date leaves the value as it was.
+ * What the person is typing into a range's box. While they're in it, the box keeps exactly what they type: the slider
+ * doesn't move, and nothing is checked, however slowly they type. Leaving the box, or pressing Enter, applies it.
  */
-function setTyped(issueId: string, event: Event) {
-  const box = event.target as HTMLInputElement;
+const typing = ref<{ issue: string; text: string } | null>(null);
+
+/** What a range's box shows: what the person is typing into it, or else the range's value. */
+function boxText(issueId: string): string {
+  return typing.value?.issue === issueId ? typing.value.text : typedValue(issueId);
+}
+
+function startTyping(issueId: string) {
+  typing.value = { issue: issueId, text: typedValue(issueId) };
+}
+
+function keepTyping(issueId: string, event: Event) {
+  typing.value = { issue: issueId, text: (event.target as HTMLInputElement).value };
+}
+
+/**
+ * Applies what the person typed into a range's box, once they leave it: a number, or a date for a range of dates, kept
+ * within the range, and the slider moves to it. Something that isn't a number or a whole date leaves the value as it was,
+ * and the box shows the value again.
+ */
+function applyTyped(issueId: string) {
+  const text = typing.value?.issue === issueId ? typing.value.text.trim() : "";
+  typing.value = null;
   const range = ranges.value[issueId];
   const issue = props.table.issues.find(({ issue }) => issue === issueId);
-  if (range === undefined || issue === undefined) return;
+  if (range === undefined || issue === undefined || text === "") return;
   const zero = dayZero(issue.unit);
-  const date = zero === null ? null : fromIsoDate(box.value);
-  const typed = zero === null ? Number(box.value) : date === null ? Number.NaN : daysBetween(zero, date);
-  if (box.value.trim() !== "" && Number.isFinite(typed)) terms[issueId] = Math.min(range.max, Math.max(range.min, typed));
-  // The box shows the value as it was kept, such as the range's end for a number beyond it.
-  box.value = typedValue(issueId);
+  const date = zero === null ? null : fromIsoDate(text);
+  const typed = zero === null ? Number(text) : date === null ? Number.NaN : daysBetween(zero, date);
+  if (Number.isFinite(typed)) terms[issueId] = Math.min(range.max, Math.max(range.min, typed));
 }
 
 /** A range's value as its box shows it: the number, or the date a date picker holds, such as "2027-02-07". */
@@ -144,9 +163,12 @@ function ends(issueId: string): [string, string] {
             type="date"
             :min="dateBounds(issue.issue)!.min"
             :max="dateBounds(issue.issue)!.max"
-            :value="typedValue(issue.issue)"
+            :value="boxText(issue.issue)"
             :aria-label="`${issue.name}, as a date`"
-            @change="setTyped(issue.issue, $event)"
+            @focus="startTyping(issue.issue)"
+            @input="keepTyping(issue.issue, $event)"
+            @blur="applyTyped(issue.issue)"
+            @keydown.enter.prevent="($event.target as HTMLInputElement).blur()"
           />
           <input
             v-else
@@ -156,10 +178,12 @@ function ends(issueId: string): [string, string] {
             step="any"
             :min="ranges[issue.issue]!.min"
             :max="ranges[issue.issue]!.max"
-            :value="typedValue(issue.issue)"
+            :value="boxText(issue.issue)"
             :aria-label="`${issue.name}, as a number${issue.unit ? ` in ${issue.unit}` : ''}`"
-            @change="setTyped(issue.issue, $event)"
-            @keydown.enter.prevent="setTyped(issue.issue, $event)"
+            @focus="startTyping(issue.issue)"
+            @input="keepTyping(issue.issue, $event)"
+            @blur="applyTyped(issue.issue)"
+            @keydown.enter.prevent="($event.target as HTMLInputElement).blur()"
           />
           <input
             v-model.number="terms[issue.issue]"

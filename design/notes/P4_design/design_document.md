@@ -95,7 +95,11 @@ P2's feedback said that an all-in-one metric like the whole pie needs small flow
 ## Testing and validation
 
 - **Automated tests:** 210 tests cover each concept, each composition (end-to-end journeys through the endpoints), the agents and the seed data. They run on an in-memory database with scripted stand-ins for the AI. The saved output is in [tests/output.txt](../../../tests/output.txt).
-- **The deployed app** at <https://whole-pie.mit-sdg.dev/>: _[to fill in after checking it: that negotiations and scenarios persist across a refresh and a redeploy; that a second account can't open someone else's table or edit their scenario; that archiving works as the admin; and how wrong passwords and full tables are reported.]_
+- **The deployed app** at <https://whole-pie.mit-sdg.dev/>:
+    - I checked that negotiations and scenarios persist across a refresh and a redeploy.
+    - Also, archiving works for admin.
+    - I also checked how wrong passwords and full tables are reported.
+    - I did find and correct some UI issues in the process of testing user journeys in the deployed app (the BATNA informational button, for instance, was bothering me, as well as the display case spacing and some errors with the Propose a Deal input.)
 
 ## Next steps
 
@@ -104,5 +108,4 @@ P2's feedback said that an all-in-one metric like the whole pie needs small flow
     - **Agents:** at a practice table, the AI counterparts would answer in a side conversation only if they're in it, and read only the side conversations they belong to. Otherwise a counterpart could learn what was said behind its back.
     - **Debrief:** afterwards, the transcript would show every side conversation, so everyone learns what was said behind their back.
 - **AI personas.** P1 planned counterparts with personalities, such as rash and easy to anger, quiet and shy, obstinate, or collaborative, so a negotiator could practice against the kinds of people they find hard. Today, every counterpart plays its role's brief the same way.
-    - **Choosing one:** a negotiator would pick a persona when starting against the AI, or get one at random, and the debrief would say which persona they faced.
-    - **Writing one:** a persona would change how the counterpart behaves, but never what a deal is worth to it, so its BATNA and its points stay as the brief gives them. Personas could be written like scenarios, so anyone could add one.
+    - **Choosing one:** a negotiator would pick a persona when starting against the AI, or get one at random. The debrief does not say which persona they're facing.
