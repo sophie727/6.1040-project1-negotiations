@@ -2,15 +2,16 @@ import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { count, no, now, reaction, view, when, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
 import { inputOf, textInput } from "./reusable/inputs.ts";
+import { inBakery } from "./practice.ts";
 import { seatedAs } from "./table.ts";
 
 const { Briefing, Matchmaking, Sessioning, Tabling } = concepts;
 
 // Looking
 
-/** (scenario) is published, so people can look for others to negotiate it with. */
+/** (scenario) is in the bakery, so people can look for others to negotiate it with. */
 const findable = view("people can look for others to negotiate (scenario) with", ({ scenario }) =>
-  where(Briefing._scenario({ scenario }).is({ published: true })),
+  where(inBakery({ scenario })),
 ).holds();
 
 /** How many people a negotiation of (scenario) needs: one for each of its roles. */

@@ -40,13 +40,11 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
   - Refuses `NAME_TAKEN`: A scenario with that name already exists.
 - `addIssue(scenario: Scenario, name: String, kind: IssueKind, unit?: String) : returns (issue: Issue)`
   - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_ISSUE_NAME`: An issue name must have 1 to 100 characters.
   - Refuses `ISSUE_EXISTS`: This scenario already has an issue with that name.
   - Refuses `UNIT_NOT_ALLOWED`: Only a continuous issue has a unit.
 - `addOption(issue: Issue, name: String, universalValue?: Number) : returns (option: Option)`
   - Refuses `UNKNOWN_ISSUE`: There is no such issue.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_OPTION_NAME`: An option name must have 1 to 100 characters.
   - Refuses `OPTION_EXISTS`: This issue already has an option with that name.
   - Refuses `VALUE_REQUIRED`: An option of a continuous issue needs a universal value.
@@ -54,40 +52,32 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
   - Refuses `VALUE_TAKEN`: This issue already has an option at that universal value.
 - `addRole(scenario: Scenario, name: String, batna: Number) : returns (role: Role)`
   - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_ROLE_NAME`: A role name must have 1 to 100 characters.
   - Refuses `ROLE_EXISTS`: This scenario already has a role with that name.
 - `setPayoff(role: Role, option: Option, points: Number) : returns ()`
   - Refuses `UNKNOWN_ROLE_OR_OPTION`: There is no such role or option.
   - Refuses `DIFFERENT_SCENARIOS`: The role and the option belong to different scenarios.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
 - `setBrief(role: Role, brief: String) : returns ()`
   - Refuses `UNKNOWN_ROLE`: There is no such role.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_BRIEF`: A brief must have 1 to 20,000 characters.
 - `describeRole(role: Role, summary: String) : returns ()`
   - Refuses `UNKNOWN_ROLE`: There is no such role.
   - Refuses `INVALID_SUMMARY`: A role's summary must have at most 300 characters.
 - `rename(scenario: Scenario, name: String) : returns ()`
   - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_SCENARIO_NAME`: A scenario name must have 1 to 100 characters.
   - Refuses `NAME_TAKEN`: A scenario with that name already exists.
 - `discard(scenario: Scenario) : returns ()`
   - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
 - `updateIssue(issue: Issue, name: String, kind: IssueKind, unit?: String) : returns ()`
   - Refuses `UNKNOWN_ISSUE`: There is no such issue.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_ISSUE_NAME`: An issue name must have 1 to 100 characters.
   - Refuses `ISSUE_EXISTS`: This scenario already has an issue with that name.
   - Refuses `UNIT_NOT_ALLOWED`: Only a continuous issue has a unit.
 - `removeIssue(issue: Issue) : returns ()`
   - Refuses `UNKNOWN_ISSUE`: There is no such issue.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
 - `updateOption(option: Option, name: String, universalValue?: Number) : returns ()`
   - Refuses `UNKNOWN_OPTION`: There is no such option.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_OPTION_NAME`: An option name must have 1 to 100 characters.
   - Refuses `OPTION_EXISTS`: This issue already has an option with that name.
   - Refuses `VALUE_REQUIRED`: An option of a continuous issue needs a universal value.
@@ -95,25 +85,18 @@ Defined in [Briefing](../design/concepts/Briefing.md), line 1.
   - Refuses `VALUE_TAKEN`: This issue already has an option at that universal value.
 - `removeOption(option: Option) : returns ()`
   - Refuses `UNKNOWN_OPTION`: There is no such option.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
 - `updateRole(role: Role, name: String, batna: Number) : returns ()`
   - Refuses `UNKNOWN_ROLE`: There is no such role.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
   - Refuses `INVALID_ROLE_NAME`: A role name must have 1 to 100 characters.
   - Refuses `ROLE_EXISTS`: This scenario already has a role with that name.
 - `removeRole(role: Role) : returns ()`
   - Refuses `UNKNOWN_ROLE`: There is no such role.
-  - Refuses `PUBLISHED`: A published scenario can't be changed.
-- `publish(scenario: Scenario) : returns (scenario: Scenario)`
-  - Refuses `UNKNOWN_SCENARIO`: There is no such scenario.
-  - Refuses `ALREADY_PUBLISHED`: This scenario is already published.
-  - Refuses `INCOMPLETE`: A scenario needs an issue, at least two roles, at least two options for every issue, and every payoff and brief before it can be published.
 
 #### Queries
 
-- `_published() : many (scenario: Scenario, name: String)`
-- `_scenario(scenario: Scenario) : optional (name: String, author: Author, published: Flag)`
-- `_authoredBy(author: Author) : many (scenario: Scenario, name: String, published: Flag)`
+- `_scenario(scenario: Scenario) : optional (name: String, author: Author)`
+- `_complete(scenario: Scenario) : optional (complete: Flag)`
+- `_authoredBy(author: Author) : many (scenario: Scenario, name: String)`
 - `_issue(issue: Issue) : optional (scenario: Scenario, name: String, kind: IssueKind, unit?: String)`
 - `_option(option: Option) : optional (scenario: Scenario, issue: Issue, name: String, universalValue?: Number)`
 - `_issues(scenario: Scenario) : many (issue: Issue, name: String, kind: IssueKind, unit?: String)`
@@ -147,9 +130,9 @@ Defined in [Conversing](../design/concepts/Conversing.md), line 1.
 
 #### Instances
 
-- `Conversing` — instance of `Conversing` — [The Whole Pie types](../design/types.md), line 56.
-  - `Speaker` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 58.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 57.
+- `Conversing` — instance of `Conversing` — [The Whole Pie types](../design/types.md), line 59.
+  - `Speaker` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 61.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 60.
 
 ### Federating
 
@@ -190,9 +173,9 @@ Defined in [Inviting](../design/concepts/Inviting.md), line 1.
 
 #### Instances
 
-- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 78.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 80.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 79.
+- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 81.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 83.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 82.
 
 ### Matchmaking
 
@@ -221,10 +204,10 @@ Defined in [Matchmaking](../design/concepts/Matchmaking.md), line 1.
 
 #### Instances
 
-- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 82.
-  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 85.
-  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 84.
-  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 83.
+- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 85.
+  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 88.
+  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 87.
+  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 86.
 
 ### Noting
 
@@ -241,18 +224,42 @@ Defined in [Noting](../design/concepts/Noting.md), line 1.
 
 #### Instances
 
-- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 70.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 71.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 72.
-- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 103.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 104.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 105.
-- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 95.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 96.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 97.
-- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 99.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 100.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 101.
+- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 73.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 74.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 75.
+- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 106.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 107.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 108.
+- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 98.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 99.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 100.
+- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 102.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 103.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 104.
+
+### Posting
+
+Defined in [Posting](../design/concepts/Posting.md), line 1.
+
+#### Actions
+
+- `post(item: Item) : returns ()`
+  - Refuses `ALREADY_POSTED`: This is already posted.
+- `archive(item: Item) : returns ()`
+  - Refuses `NOT_POSTED`: Only something posted can be archived.
+  - Refuses `ALREADY_ARCHIVED`: This is already archived.
+- `unarchive(item: Item) : returns ()`
+  - Refuses `NOT_ARCHIVED`: This isn't archived.
+
+#### Queries
+
+- `_posts() : many (item: Item, archived: Flag)`
+- `_post(item: Item) : one (posted: Flag, archived: Flag)`
+
+#### Instances
+
+- `Posting` — instance of `Posting` — [The Whole Pie types](../design/types.md), line 51.
+  - `Item` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 52.
 
 ### Preferring
 
@@ -269,8 +276,8 @@ Defined in [Preferring](../design/concepts/Preferring.md), line 1.
 
 #### Instances
 
-- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 107.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 108.
+- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 110.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 111.
 
 ### Proposing
 
@@ -303,14 +310,14 @@ Defined in [Proposing](../design/concepts/Proposing.md), line 1.
 
 #### Instances
 
-- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 60.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 62.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 61.
-  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 63.
-- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 65.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 67.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 66.
-  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 68.
+- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 63.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 65.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 64.
+  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 66.
+- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 68.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 70.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 69.
+  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 71.
 
 ### Rating
 
@@ -328,9 +335,9 @@ Defined in [Rating](../design/concepts/Rating.md), line 1.
 
 #### Instances
 
-- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 91.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 92.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 93.
+- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 94.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 95.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 96.
 
 ### Reasoning
 
@@ -372,9 +379,9 @@ Defined in [Reasoning](../design/concepts/Reasoning.md), line 1.
 
 #### Instances
 
-- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 74.
-  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 76.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 75.
+- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 77.
+  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 79.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 78.
 
 ### Registering
 
@@ -413,9 +420,9 @@ Defined in [Reviewing](../design/concepts/Reviewing.md), line 1.
 
 #### Instances
 
-- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 87.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 89.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 88.
+- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 90.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 92.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 91.
 
 ### Sessioning
 
@@ -487,10 +494,10 @@ Defined in [Tabling](../design/concepts/Tabling.md), line 1.
 
 #### Instances
 
-- `Tabling` — instance of `Tabling` — [The Whole Pie types](../design/types.md), line 51.
-  - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 54.
-  - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 53.
-  - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 52.
+- `Tabling` — instance of `Tabling` — [The Whole Pie types](../design/types.md), line 54.
+  - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 57.
+  - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 56.
+  - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 55.
 
 ## Application types
 
@@ -514,16 +521,28 @@ _Views name reusable conditions. Multiple `where` blocks are alternatives._
 ### (kind) is a kind of issue
 
 Authored path: `authoring.access.isIssueKind`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
 
 ```view
 (kind) is a kind of issue — inputs (kind); outputs (); bindings ()
   where kind is among ["CONTINUOUS", "DISCRETE"]
 ```
 
+### (scenario) is in the bakery
+
+Authored path: `practice.choosing.inBakery`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Practice](../design/compositions/practice.md), line 7.
+
+```view
+(scenario) is in the bakery — inputs (scenario); outputs (); bindings ()
+  where Posting._post (item: scenario) has (archived: false, posted: true)
+```
+
 ### (role) of (scenario) can be practiced
 
 Authored path: `practice.starting.playable`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
 - Covered by [Friends](../design/compositions/friends.md), line 7.
 - Covered by [Practice](../design/compositions/practice.md), line 37.
 
@@ -531,7 +550,7 @@ Authored path: `practice.starting.playable`.
 (role) of (scenario) can be practiced — inputs (scenario, role); outputs (); bindings ()
   where
     Briefing._role (role) has (scenario)
-    Briefing._scenario (scenario) has (published: true)
+    view "(scenario) is in the bakery" with (scenario)
 ```
 
 ### (table) has ended
@@ -652,6 +671,54 @@ Authored path: `authoring.access.wrote`.
   where Briefing._scenario (scenario) has (author: user)
 ```
 
+### (user) is still writing (scenario)
+
+Authored path: `authoring.access.drafting`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 9.
+
+```view
+(user) is still writing (scenario) — inputs (user, scenario); outputs (); bindings ()
+  where
+    view "(user) wrote (scenario)" with (scenario, user)
+    Posting._post (item: scenario) has (posted: false)
+```
+
+### (user) is still writing the scenario of (issue)
+
+Authored path: `authoring.access.draftingIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 9.
+
+```view
+(user) is still writing the scenario of (issue) — inputs (user, issue); outputs (); bindings (scenario)
+  where
+    Briefing._issue (issue) has (scenario)
+    view "(user) is still writing (scenario)" with (scenario, user)
+```
+
+### (user) is still writing the scenario of (option)
+
+Authored path: `authoring.access.draftingOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 9.
+
+```view
+(user) is still writing the scenario of (option) — inputs (user, option); outputs (); bindings (scenario)
+  where
+    Briefing._option (option) has (scenario)
+    view "(user) is still writing (scenario)" with (scenario, user)
+```
+
+### (user) is still writing the scenario of (role)
+
+Authored path: `authoring.access.draftingRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 9.
+
+```view
+(user) is still writing the scenario of (role) — inputs (user, role); outputs (); bindings (scenario)
+  where
+    Briefing._role (role) has (scenario)
+    view "(user) is still writing (scenario)" with (scenario, user)
+```
+
 ### (user) wrote the scenario of (issue)
 
 Authored path: `authoring.access.wroteIssue`.
@@ -749,11 +816,12 @@ how spicy (scenario) is — inputs (scenario); outputs (spice); bindings (jointP
 ### people can look for others to negotiate (scenario) with
 
 Authored path: `matchmaking.looking.findable`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
 - Covered by [Matchmaking](../design/compositions/matchmaking.md), line 7.
 
 ```view
 people can look for others to negotiate (scenario) with — inputs (scenario); outputs (); bindings ()
-  where Briefing._scenario (scenario) has (published: true)
+  where view "(scenario) is in the bakery" with (scenario)
 ```
 
 ### the role (user) plays at (table)
@@ -890,13 +958,15 @@ Former "the issues of (scenario)" — inputs (scenario); bindings (issue, name, 
 ### (scenario) as its author writes it
 
 Authored path: `authoring.showing.draftOf`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
 
 ```former
-Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, timeLimit, role, roleName, batna, brief, summary, option, points); promises exactly one record — forms:
+Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, archived, timeLimit, role, roleName, batna, brief, summary, option, points); promises exactly one record — forms:
   a record of
-    where Briefing._scenario (scenario) has (name, published)
+    where Briefing._scenario (scenario) has (name)
+    where Posting._post (item: scenario) has (archived, posted: published)
     where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
+    archived
     issues: former "the issues of (scenario)" with (scenario)
     name
     published
@@ -1177,29 +1247,6 @@ Former "the prompts (agent) has taken and not finished" — inputs (agent); bind
       prompt
 ```
 
-### the published scenarios
-
-Authored path: `practice.choosing.scenarios`.
-- Covered by [Practice](../design/compositions/practice.md), line 7.
-
-```former
-Former "the published scenarios" — inputs (); bindings (scenario, name, timeLimit, role, roleName, summary, spice); promises exactly one record — forms:
-  each Briefing._published () has (name, scenario)
-    where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
-    where view "how spicy (scenario) is" with (scenario) has (spice)
-    form a record of
-      name
-      roles: each Briefing._roles (scenario) has (name: roleName, role)
-        where whether Briefing._role (role) has (summary)
-        form a record of
-          name: roleName
-          role
-          summary
-      scenario
-      spice
-      timeLimit
-```
-
 ### the questions about (table)
 
 Authored path: `table.showing.questionsAbout`.
@@ -1218,15 +1265,41 @@ Former "the questions about (table)" — inputs (table); bindings (prompt, ask, 
 ### the scenarios (user) wrote
 
 Authored path: `authoring.showing.scenariosBy`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
 
 ```former
-Former "the scenarios (user) wrote" — inputs (user); bindings (scenario, name, published); promises exactly one record — forms:
-  each Briefing._authoredBy (author: user) has (name, published, scenario)
+Former "the scenarios (user) wrote" — inputs (user); bindings (scenario, name, published, archived); promises exactly one record — forms:
+  each Briefing._authoredBy (author: user) has (name, scenario)
+    where Posting._post (item: scenario) has (archived, posted: published)
     form a record of
+      archived
       name
       published
       scenario
+```
+
+### the scenarios in the bakery
+
+Authored path: `practice.choosing.scenarios`.
+- Covered by [Practice](../design/compositions/practice.md), line 7.
+
+```former
+Former "the scenarios in the bakery" — inputs (); bindings (scenario, name, timeLimit, role, roleName, summary, spice); promises exactly one record — forms:
+  each Posting._posts () has (archived: false, item: scenario)
+    where Briefing._scenario (scenario) has (name)
+    where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
+    where view "how spicy (scenario) is" with (scenario) has (spice)
+    form a record of
+      name
+      roles: each Briefing._roles (scenario) has (name: roleName, role)
+        where whether Briefing._role (role) has (summary)
+        form a record of
+          name: roleName
+          role
+          summary
+      scenario
+      spice
+      timeLimit
 ```
 
 ### the suggestion to start (table)
@@ -1301,11 +1374,123 @@ then
   RequestBoundary.respond (error: message, requestId)
 ```
 
+### authoring.archiving.Archive
+
+Authored path: `authoring.archiving.Archive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.archiving.Archive:author#2
+
+Authored path: `authoring.archiving.Archive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Archive
+where
+  earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  Posting.archive (item: scenario)
+```
+
+### authoring.archiving.Archive:author#3
+
+Authored path: `authoring.archiving.Archive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Posting.archive (item: scenario), asked by authoring.archiving.Archive:author#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.archiving.Archive:not-author#2
+
+Authored path: `authoring.archiving.Archive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Archive
+where
+  earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
+### authoring.archiving.Unarchive
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+then
+  Sessioning.use (session)
+```
+
+### authoring.archiving.Unarchive:author#2
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Unarchive
+where
+  earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+then
+  Posting.unarchive (item: scenario)
+```
+
+### authoring.archiving.Unarchive:author#3
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Posting.unarchive (item: scenario), asked by authoring.archiving.Unarchive:author#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.archiving.Unarchive:not-author#2
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Unarchive
+where
+  earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
 ### authoring.drafting.Create
 
 Authored path: `authoring.drafting.Create`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 25.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
 
 ```reaction
 when RequestBoundary.request (name, path: "/scenarios/create", requestId, session)
@@ -1316,8 +1501,8 @@ then
 ### authoring.drafting.Create#2
 
 Authored path: `authoring.drafting.Create`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 25.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Create
@@ -1330,8 +1515,8 @@ then
 ### authoring.drafting.Create#3
 
 Authored path: `authoring.drafting.Create`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 25.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
 
 ```reaction
 when Briefing.create (author: user, name, scenario), asked by authoring.drafting.Create#2
@@ -1344,8 +1529,8 @@ then
 ### authoring.drafting.Discard
 
 Authored path: `authoring.drafting.Discard`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 30.
 
 ```reaction
 when RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
@@ -1356,14 +1541,14 @@ then
 ### authoring.drafting.Discard:author#2
 
 Authored path: `authoring.drafting.Discard`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 30.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Discard
 where
   earlier, RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
-  view "(user) wrote (scenario)" with (scenario, user)
+  view "(user) is still writing (scenario)" with (scenario, user)
 then
   Briefing.discard (scenario)
 ```
@@ -1371,8 +1556,8 @@ then
 ### authoring.drafting.Discard:author#3
 
 Authored path: `authoring.drafting.Discard`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 30.
 
 ```reaction
 when Briefing.discard (scenario), asked by authoring.drafting.Discard:author#2
@@ -1385,8 +1570,8 @@ then
 ### authoring.drafting.Discard:not-author#2
 
 Authored path: `authoring.drafting.Discard`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 30.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Discard
@@ -1397,11 +1582,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.drafting.Discard:posted#2
+
+Authored path: `authoring.drafting.Discard`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 30.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Discard
+where
+  earlier, RequestBoundary.request (path: "/scenarios/discard", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "(user) is still writing (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.drafting.Publish
 
 Authored path: `authoring.drafting.Publish`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 31.
 
 ```reaction
 when RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
@@ -1409,40 +1610,57 @@ then
   Sessioning.use (session)
 ```
 
-### authoring.drafting.Publish:author#2
+### authoring.drafting.Publish:complete#2
 
 Authored path: `authoring.drafting.Publish`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 31.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Publish
 where
   earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
-  view "(user) wrote (scenario)" with (scenario, user)
+  view "(user) is still writing (scenario)" with (scenario, user)
+  Briefing._complete (scenario) has (complete: true)
 then
-  Briefing.publish (scenario)
+  Posting.post (item: scenario)
 ```
 
-### authoring.drafting.Publish:author#3
+### authoring.drafting.Publish:complete#3
 
 Authored path: `authoring.drafting.Publish`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 31.
 
 ```reaction
-when Briefing.publish (scenario), asked by authoring.drafting.Publish:author#2
+when Posting.post (item: scenario), asked by authoring.drafting.Publish:complete#2
 where
   earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
 then
   RequestBoundary.respond (requestId, scenario)
 ```
 
+### authoring.drafting.Publish:incomplete#2
+
+Authored path: `authoring.drafting.Publish`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 31.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Publish
+where
+  earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
+  view "(user) is still writing (scenario)" with (scenario, user)
+  Briefing._complete (scenario) has (complete: false)
+then
+  RequestBoundary.respond (error: "INCOMPLETE", requestId)
+```
+
 ### authoring.drafting.Publish:not-author#2
 
 Authored path: `authoring.drafting.Publish`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 31.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Publish
@@ -1453,11 +1671,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.drafting.Publish:posted#2
+
+Authored path: `authoring.drafting.Publish`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 24.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 31.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Publish
+where
+  earlier, RequestBoundary.request (path: "/scenarios/publish", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "(user) is still writing (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.drafting.RecommendTimeLimit
 
 Authored path: `authoring.drafting.RecommendTimeLimit`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
 
 ```reaction
 when RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
@@ -1468,15 +1702,14 @@ then
 ### authoring.drafting.RecommendTimeLimit:draft#2
 
 Authored path: `authoring.drafting.RecommendTimeLimit`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.RecommendTimeLimit
 where
   earlier, RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
-  view "(user) wrote (scenario)" with (scenario, user)
-  Briefing._scenario (scenario) has (published: false)
+  view "(user) is still writing (scenario)" with (scenario, user)
 then
   Tabling.recommendTimeLimit (scenario, timeLimit: minutes)
 ```
@@ -1484,8 +1717,8 @@ then
 ### authoring.drafting.RecommendTimeLimit:draft#3
 
 Authored path: `authoring.drafting.RecommendTimeLimit`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
 
 ```reaction
 when Tabling.recommendTimeLimit (scenario, timeLimit: minutes), asked by authoring.drafting.RecommendTimeLimit:draft#2
@@ -1498,8 +1731,8 @@ then
 ### authoring.drafting.RecommendTimeLimit:not-author#2
 
 Authored path: `authoring.drafting.RecommendTimeLimit`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.RecommendTimeLimit
@@ -1510,18 +1743,18 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
-### authoring.drafting.RecommendTimeLimit:published#2
+### authoring.drafting.RecommendTimeLimit:posted#2
 
 Authored path: `authoring.drafting.RecommendTimeLimit`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 27.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 29.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.RecommendTimeLimit
 where
   earlier, RequestBoundary.request (minutes, path: "/scenarios/limit", requestId, scenario, session)
   view "(user) wrote (scenario)" with (scenario, user)
-  Briefing._scenario (scenario) has (published: true)
+  no view "(user) is still writing (scenario)" with (scenario, user)
 then
   RequestBoundary.respond (error: "PUBLISHED", requestId)
 ```
@@ -1529,8 +1762,8 @@ then
 ### authoring.drafting.Rename
 
 Authored path: `authoring.drafting.Rename`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
 
 ```reaction
 when RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
@@ -1541,14 +1774,14 @@ then
 ### authoring.drafting.Rename:author#2
 
 Authored path: `authoring.drafting.Rename`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Rename
 where
   earlier, RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
-  view "(user) wrote (scenario)" with (scenario, user)
+  view "(user) is still writing (scenario)" with (scenario, user)
 then
   Briefing.rename (name, scenario)
 ```
@@ -1556,8 +1789,8 @@ then
 ### authoring.drafting.Rename:author#3
 
 Authored path: `authoring.drafting.Rename`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
 
 ```reaction
 when Briefing.rename (name, scenario), asked by authoring.drafting.Rename:author#2
@@ -1570,8 +1803,8 @@ then
 ### authoring.drafting.Rename:not-author#2
 
 Authored path: `authoring.drafting.Rename`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 20.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 26.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.drafting.Rename
@@ -1582,11 +1815,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.drafting.Rename:posted#2
+
+Authored path: `authoring.drafting.Rename`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 22.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 28.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.drafting.Rename
+where
+  earlier, RequestBoundary.request (name, path: "/scenarios/rename", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "(user) is still writing (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.issues.AddIssue
 
 Authored path: `authoring.issues.AddIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 52.
 
 ```reaction
 when RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
@@ -1597,14 +1846,14 @@ then
 ### authoring.issues.AddIssue:author#2
 
 Authored path: `authoring.issues.AddIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 52.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
 where
   earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
-  view "(user) wrote (scenario)" with (scenario, user)
+  view "(user) is still writing (scenario)" with (scenario, user)
   view "(kind) is a kind of issue" with (kind)
 then
   Briefing.addIssue (kind, name, scenario, unit)
@@ -1613,8 +1862,8 @@ then
 ### authoring.issues.AddIssue:author#3
 
 Authored path: `authoring.issues.AddIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 52.
 
 ```reaction
 when Briefing.addIssue (kind, name, scenario, unit, issue), asked by authoring.issues.AddIssue:author#2
@@ -1627,14 +1876,14 @@ then
 ### authoring.issues.AddIssue:invalid-kind#2
 
 Authored path: `authoring.issues.AddIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 52.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
 where
   earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
-  view "(user) wrote (scenario)" with (scenario, user)
+  view "(user) is still writing (scenario)" with (scenario, user)
   no view "(kind) is a kind of issue" with (kind)
 then
   RequestBoundary.respond (error: "INVALID_KIND", requestId)
@@ -1643,8 +1892,8 @@ then
 ### authoring.issues.AddIssue:not-author#2
 
 Authored path: `authoring.issues.AddIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 39.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 52.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
@@ -1655,11 +1904,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.issues.AddIssue:posted#2
+
+Authored path: `authoring.issues.AddIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 52.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddIssue
+where
+  earlier, RequestBoundary.request (kind, name, path: "/scenarios/issues/add", requestId, scenario, session, unit)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "(user) is still writing (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.issues.AddOption
 
 Authored path: `authoring.issues.AddOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
 
 ```reaction
 when RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
@@ -1670,14 +1935,14 @@ then
 ### authoring.issues.AddOption:continuous#2
 
 Authored path: `authoring.issues.AddOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
 where
   earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
-  view "(user) wrote the scenario of (issue)" with (issue, user)
+  view "(user) is still writing the scenario of (issue)" with (issue, user)
   Briefing._issue (issue) has (kind: "CONTINUOUS")
 then
   Briefing.addOption (issue, name, universalValue)
@@ -1686,8 +1951,8 @@ then
 ### authoring.issues.AddOption:continuous#3
 
 Authored path: `authoring.issues.AddOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
 
 ```reaction
 when Briefing.addOption (issue, name, universalValue, option), asked by authoring.issues.AddOption:continuous#2
@@ -1700,14 +1965,14 @@ then
 ### authoring.issues.AddOption:discrete#2
 
 Authored path: `authoring.issues.AddOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
 where
   earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
-  view "(user) wrote the scenario of (issue)" with (issue, user)
+  view "(user) is still writing the scenario of (issue)" with (issue, user)
   Briefing._issue (issue) has (kind: "DISCRETE")
 then
   Briefing.addOption (issue, name)
@@ -1716,8 +1981,8 @@ then
 ### authoring.issues.AddOption:discrete#3
 
 Authored path: `authoring.issues.AddOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
 
 ```reaction
 when Briefing.addOption (issue, name, option), asked by authoring.issues.AddOption:discrete#2
@@ -1730,8 +1995,8 @@ then
 ### authoring.issues.AddOption:not-author#2
 
 Authored path: `authoring.issues.AddOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
@@ -1742,11 +2007,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.issues.AddOption:posted#2
+
+Authored path: `authoring.issues.AddOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.AddOption
+where
+  earlier, RequestBoundary.request (issue, name, path: "/scenarios/options/add", requestId, session, universalValue)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  no view "(user) is still writing the scenario of (issue)" with (issue, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.issues.RemoveIssue
 
 Authored path: `authoring.issues.RemoveIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
 
 ```reaction
 when RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
@@ -1757,14 +2038,14 @@ then
 ### authoring.issues.RemoveIssue:author#2
 
 Authored path: `authoring.issues.RemoveIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveIssue
 where
   earlier, RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
-  view "(user) wrote the scenario of (issue)" with (issue, user)
+  view "(user) is still writing the scenario of (issue)" with (issue, user)
 then
   Briefing.removeIssue (issue)
 ```
@@ -1772,8 +2053,8 @@ then
 ### authoring.issues.RemoveIssue:author#3
 
 Authored path: `authoring.issues.RemoveIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
 
 ```reaction
 when Briefing.removeIssue (issue), asked by authoring.issues.RemoveIssue:author#2
@@ -1786,8 +2067,8 @@ then
 ### authoring.issues.RemoveIssue:not-author#2
 
 Authored path: `authoring.issues.RemoveIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveIssue
@@ -1798,11 +2079,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.issues.RemoveIssue:posted#2
+
+Authored path: `authoring.issues.RemoveIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveIssue
+where
+  earlier, RequestBoundary.request (issue, path: "/scenarios/issues/remove", requestId, session)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  no view "(user) is still writing the scenario of (issue)" with (issue, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.issues.RemoveOption
 
 Authored path: `authoring.issues.RemoveOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
 
 ```reaction
 when RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
@@ -1813,14 +2110,14 @@ then
 ### authoring.issues.RemoveOption:author#2
 
 Authored path: `authoring.issues.RemoveOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveOption
 where
   earlier, RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
-  view "(user) wrote the scenario of (option)" with (option, user)
+  view "(user) is still writing the scenario of (option)" with (option, user)
 then
   Briefing.removeOption (option)
 ```
@@ -1828,8 +2125,8 @@ then
 ### authoring.issues.RemoveOption:author#3
 
 Authored path: `authoring.issues.RemoveOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
 
 ```reaction
 when Briefing.removeOption (option), asked by authoring.issues.RemoveOption:author#2
@@ -1842,8 +2139,8 @@ then
 ### authoring.issues.RemoveOption:not-author#2
 
 Authored path: `authoring.issues.RemoveOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 44.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveOption
@@ -1854,11 +2151,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.issues.RemoveOption:posted#2
+
+Authored path: `authoring.issues.RemoveOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.RemoveOption
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/options/remove", requestId, session)
+  view "(user) wrote the scenario of (option)" with (option, user)
+  no view "(user) is still writing the scenario of (option)" with (option, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.issues.UpdateIssue
 
 Authored path: `authoring.issues.UpdateIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 53.
 
 ```reaction
 when RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
@@ -1869,14 +2182,14 @@ then
 ### authoring.issues.UpdateIssue:author#2
 
 Authored path: `authoring.issues.UpdateIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 53.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
 where
   earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
-  view "(user) wrote the scenario of (issue)" with (issue, user)
+  view "(user) is still writing the scenario of (issue)" with (issue, user)
   view "(kind) is a kind of issue" with (kind)
 then
   Briefing.updateIssue (issue, kind, name, unit)
@@ -1885,8 +2198,8 @@ then
 ### authoring.issues.UpdateIssue:author#3
 
 Authored path: `authoring.issues.UpdateIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 53.
 
 ```reaction
 when Briefing.updateIssue (issue, kind, name, unit), asked by authoring.issues.UpdateIssue:author#2
@@ -1899,14 +2212,14 @@ then
 ### authoring.issues.UpdateIssue:invalid-kind#2
 
 Authored path: `authoring.issues.UpdateIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 53.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
 where
   earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
-  view "(user) wrote the scenario of (issue)" with (issue, user)
+  view "(user) is still writing the scenario of (issue)" with (issue, user)
   no view "(kind) is a kind of issue" with (kind)
 then
   RequestBoundary.respond (error: "INVALID_KIND", requestId)
@@ -1915,8 +2228,8 @@ then
 ### authoring.issues.UpdateIssue:not-author#2
 
 Authored path: `authoring.issues.UpdateIssue`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 34.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 40.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 53.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
@@ -1927,11 +2240,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.issues.UpdateIssue:posted#2
+
+Authored path: `authoring.issues.UpdateIssue`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 47.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 53.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateIssue
+where
+  earlier, RequestBoundary.request (issue, kind, name, path: "/scenarios/issues/update", requestId, session, unit)
+  view "(user) wrote the scenario of (issue)" with (issue, user)
+  no view "(user) is still writing the scenario of (issue)" with (issue, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.issues.UpdateOption
 
 Authored path: `authoring.issues.UpdateOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
 
 ```reaction
 when RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
@@ -1942,14 +2271,14 @@ then
 ### authoring.issues.UpdateOption:continuous#2
 
 Authored path: `authoring.issues.UpdateOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
 where
   earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
-  view "(user) wrote the scenario of (option)" with (option, user)
+  view "(user) is still writing the scenario of (option)" with (option, user)
   Briefing._option (option) has (issue)
   Briefing._issue (issue) has (kind: "CONTINUOUS")
 then
@@ -1959,8 +2288,8 @@ then
 ### authoring.issues.UpdateOption:continuous#3
 
 Authored path: `authoring.issues.UpdateOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
 
 ```reaction
 when Briefing.updateOption (name, option, universalValue), asked by authoring.issues.UpdateOption:continuous#2
@@ -1973,14 +2302,14 @@ then
 ### authoring.issues.UpdateOption:discrete#2
 
 Authored path: `authoring.issues.UpdateOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
 where
   earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
-  view "(user) wrote the scenario of (option)" with (option, user)
+  view "(user) is still writing the scenario of (option)" with (option, user)
   Briefing._option (option) has (issue)
   Briefing._issue (issue) has (kind: "DISCRETE")
 then
@@ -1990,8 +2319,8 @@ then
 ### authoring.issues.UpdateOption:discrete#3
 
 Authored path: `authoring.issues.UpdateOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
 
 ```reaction
 when Briefing.updateOption (name, option), asked by authoring.issues.UpdateOption:discrete#2
@@ -2004,8 +2333,8 @@ then
 ### authoring.issues.UpdateOption:not-author#2
 
 Authored path: `authoring.issues.UpdateOption`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 43.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
@@ -2016,11 +2345,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.issues.UpdateOption:posted#2
+
+Authored path: `authoring.issues.UpdateOption`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.issues.UpdateOption
+where
+  earlier, RequestBoundary.request (name, option, path: "/scenarios/options/update", requestId, session, universalValue)
+  view "(user) wrote the scenario of (option)" with (option, user)
+  no view "(user) is still writing the scenario of (option)" with (option, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.roles.AddRole
 
 Authored path: `authoring.roles.AddRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 67.
 
 ```reaction
 when RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
@@ -2031,14 +2376,14 @@ then
 ### authoring.roles.AddRole:author#2
 
 Authored path: `authoring.roles.AddRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 67.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.AddRole
 where
   earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
-  view "(user) wrote (scenario)" with (scenario, user)
+  view "(user) is still writing (scenario)" with (scenario, user)
 then
   Briefing.addRole (batna, name, scenario)
 ```
@@ -2046,8 +2391,8 @@ then
 ### authoring.roles.AddRole:author#3
 
 Authored path: `authoring.roles.AddRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 67.
 
 ```reaction
 when Briefing.addRole (batna, name, scenario, role), asked by authoring.roles.AddRole:author#2
@@ -2060,8 +2405,8 @@ then
 ### authoring.roles.AddRole:not-author#2
 
 Authored path: `authoring.roles.AddRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 54.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 67.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.AddRole
@@ -2072,11 +2417,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.roles.AddRole:posted#2
+
+Authored path: `authoring.roles.AddRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 67.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.AddRole
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/add", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "(user) is still writing (scenario)" with (scenario, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.roles.DescribeRole
 
 Authored path: `authoring.roles.DescribeRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 71.
 
 ```reaction
 when RequestBoundary.request (path: "/scenarios/roles/summary", requestId, role, session, summary)
@@ -2087,8 +2448,8 @@ then
 ### authoring.roles.DescribeRole:author#2
 
 Authored path: `authoring.roles.DescribeRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 71.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.DescribeRole
@@ -2102,8 +2463,8 @@ then
 ### authoring.roles.DescribeRole:author#3
 
 Authored path: `authoring.roles.DescribeRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 71.
 
 ```reaction
 when Briefing.describeRole (role, summary), asked by authoring.roles.DescribeRole:author#2
@@ -2116,8 +2477,8 @@ then
 ### authoring.roles.DescribeRole:not-author#2
 
 Authored path: `authoring.roles.DescribeRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 58.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 71.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.DescribeRole
@@ -2131,8 +2492,8 @@ then
 ### authoring.roles.RemoveRole
 
 Authored path: `authoring.roles.RemoveRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 69.
 
 ```reaction
 when RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
@@ -2143,14 +2504,14 @@ then
 ### authoring.roles.RemoveRole:author#2
 
 Authored path: `authoring.roles.RemoveRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 69.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.RemoveRole
 where
   earlier, RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
-  view "(user) wrote the scenario of (role)" with (role, user)
+  view "(user) is still writing the scenario of (role)" with (role, user)
 then
   Briefing.removeRole (role)
 ```
@@ -2158,8 +2519,8 @@ then
 ### authoring.roles.RemoveRole:author#3
 
 Authored path: `authoring.roles.RemoveRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 69.
 
 ```reaction
 when Briefing.removeRole (role), asked by authoring.roles.RemoveRole:author#2
@@ -2172,8 +2533,8 @@ then
 ### authoring.roles.RemoveRole:not-author#2
 
 Authored path: `authoring.roles.RemoveRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 56.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 69.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.RemoveRole
@@ -2184,11 +2545,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.roles.RemoveRole:posted#2
+
+Authored path: `authoring.roles.RemoveRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 69.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.RemoveRole
+where
+  earlier, RequestBoundary.request (path: "/scenarios/roles/remove", requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+  no view "(user) is still writing the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.roles.SetPayoff
 
 Authored path: `authoring.roles.SetPayoff`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 72.
 
 ```reaction
 when RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
@@ -2199,14 +2576,14 @@ then
 ### authoring.roles.SetPayoff:author#2
 
 Authored path: `authoring.roles.SetPayoff`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 72.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
 where
   earlier, RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
-  view "(user) wrote the scenario of (role)" with (role, user)
+  view "(user) is still writing the scenario of (role)" with (role, user)
 then
   Briefing.setPayoff (option, points, role)
 ```
@@ -2214,8 +2591,8 @@ then
 ### authoring.roles.SetPayoff:author#3
 
 Authored path: `authoring.roles.SetPayoff`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 72.
 
 ```reaction
 when Briefing.setPayoff (option, points, role), asked by authoring.roles.SetPayoff:author#2
@@ -2228,8 +2605,8 @@ then
 ### authoring.roles.SetPayoff:not-author#2
 
 Authored path: `authoring.roles.SetPayoff`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 59.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 72.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
@@ -2240,11 +2617,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.roles.SetPayoff:posted#2
+
+Authored path: `authoring.roles.SetPayoff`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 72.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.SetPayoff
+where
+  earlier, RequestBoundary.request (option, path: "/scenarios/payoffs/set", points, requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+  no view "(user) is still writing the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.roles.UpdateRole
 
 Authored path: `authoring.roles.UpdateRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 68.
 
 ```reaction
 when RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
@@ -2255,14 +2648,14 @@ then
 ### authoring.roles.UpdateRole:author#2
 
 Authored path: `authoring.roles.UpdateRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 68.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.UpdateRole
 where
   earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
-  view "(user) wrote the scenario of (role)" with (role, user)
+  view "(user) is still writing the scenario of (role)" with (role, user)
 then
   Briefing.updateRole (batna, name, role)
 ```
@@ -2270,8 +2663,8 @@ then
 ### authoring.roles.UpdateRole:author#3
 
 Authored path: `authoring.roles.UpdateRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 68.
 
 ```reaction
 when Briefing.updateRole (batna, name, role), asked by authoring.roles.UpdateRole:author#2
@@ -2284,8 +2677,8 @@ then
 ### authoring.roles.UpdateRole:not-author#2
 
 Authored path: `authoring.roles.UpdateRole`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 55.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 68.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.UpdateRole
@@ -2296,11 +2689,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.roles.UpdateRole:posted#2
+
+Authored path: `authoring.roles.UpdateRole`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 68.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.UpdateRole
+where
+  earlier, RequestBoundary.request (batna, name, path: "/scenarios/roles/update", requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+  no view "(user) is still writing the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.roles.WriteBrief
 
 Authored path: `authoring.roles.WriteBrief`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 70.
 
 ```reaction
 when RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
@@ -2311,14 +2720,14 @@ then
 ### authoring.roles.WriteBrief:author#2
 
 Authored path: `authoring.roles.WriteBrief`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 70.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.WriteBrief
 where
   earlier, RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
-  view "(user) wrote the scenario of (role)" with (role, user)
+  view "(user) is still writing the scenario of (role)" with (role, user)
 then
   Briefing.setBrief (brief, role)
 ```
@@ -2326,8 +2735,8 @@ then
 ### authoring.roles.WriteBrief:author#3
 
 Authored path: `authoring.roles.WriteBrief`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 70.
 
 ```reaction
 when Briefing.setBrief (brief, role), asked by authoring.roles.WriteBrief:author#2
@@ -2340,8 +2749,8 @@ then
 ### authoring.roles.WriteBrief:not-author#2
 
 Authored path: `authoring.roles.WriteBrief`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 49.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 57.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 70.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.roles.WriteBrief
@@ -2352,11 +2761,27 @@ then
   RequestBoundary.respond (error: "NOT_FOUND", requestId)
 ```
 
+### authoring.roles.WriteBrief:posted#2
+
+Authored path: `authoring.roles.WriteBrief`.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 62.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 70.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.roles.WriteBrief
+where
+  earlier, RequestBoundary.request (brief, path: "/scenarios/roles/brief", requestId, role, session)
+  view "(user) wrote the scenario of (role)" with (role, user)
+  no view "(user) is still writing the scenario of (role)" with (role, user)
+then
+  RequestBoundary.respond (error: "PUBLISHED", requestId)
+```
+
 ### authoring.showing.ShowDraft
 
 Authored path: `authoring.showing.ShowDraft`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 15.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 17.
 
 ```reaction
 when RequestBoundary.request (path: "/scenarios/show", requestId, scenario, session)
@@ -2367,8 +2792,8 @@ then
 ### authoring.showing.ShowDraft:author#2
 
 Authored path: `authoring.showing.ShowDraft`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 15.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 17.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.showing.ShowDraft
@@ -2382,8 +2807,8 @@ then
 ### authoring.showing.ShowDraft:not-author#2
 
 Authored path: `authoring.showing.ShowDraft`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 15.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 17.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.showing.ShowDraft
@@ -2397,8 +2822,8 @@ then
 ### authoring.showing.ShowMine
 
 Authored path: `authoring.showing.ShowMine`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 14.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 16.
 
 ```reaction
 when RequestBoundary.request (path: "/scenarios/mine", requestId, session)
@@ -2409,8 +2834,8 @@ then
 ### authoring.showing.ShowMine#2
 
 Authored path: `authoring.showing.ShowMine`.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 11.
-- Covered by [Writing a scenario](../design/compositions/authoring.md), line 14.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 16.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.showing.ShowMine
@@ -3397,7 +3822,7 @@ when Sessioning.use (session, subject: user), asked by practice.choosing.ShowBak
 where
   earlier, RequestBoundary.request (path: "/bakery", requestId, session)
 then
-  RequestBoundary.respond (ratings: former "the ratings of (user)" with (user), requestId, scenarios: former "the published scenarios", tables: former "the tables (user) has a seat at" with (user))
+  RequestBoundary.respond (ratings: former "the ratings of (user)" with (user), requestId, scenarios: former "the scenarios in the bakery", tables: former "the tables (user) has a seat at" with (user))
 ```
 
 ### practice.starting.RefuseUnplayable
@@ -5767,6 +6192,7 @@ not listed here have no explicit input contract.
 - `/matchmaking/stop` — requires `request`, `session`
 - `/matchmaking/wait` — requires `request`, `session`
 - `/practice/start` — requires `role`, `scenario`, `session`
+- `/scenarios/archive` — requires `scenario`, `session`
 - `/scenarios/create` — requires `name`, `session`
 - `/scenarios/discard` — requires `scenario`, `session`
 - `/scenarios/issues/add` — requires `kind`, `name`, `scenario`, `session`, `unit`
@@ -5786,6 +6212,7 @@ not listed here have no explicit input contract.
 - `/scenarios/roles/summary` — requires `role`, `session`, `summary`
 - `/scenarios/roles/update` — requires `batna`, `name`, `role`, `session`
 - `/scenarios/show` — requires `scenario`, `session`
+- `/scenarios/unarchive` — requires `scenario`, `session`
 - `/settings/prep-sheet` — requires `on`, `session`
 - `/settings/show` — requires `session`
 - `/tables/accept` — requires `proposal`, `session`, `table`

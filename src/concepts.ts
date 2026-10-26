@@ -8,6 +8,7 @@ import { inviting } from "./concepts/Inviting/registry.ts";
 import { matchmaking } from "./concepts/Matchmaking/registry.ts";
 import { rating } from "./concepts/Rating/registry.ts";
 import { noting, prioritiesNoting, targetNoting, walkawayNoting } from "./concepts/Noting/registry.ts";
+import { posting } from "./concepts/Posting/registry.ts";
 import { preferring } from "./concepts/Preferring/registry.ts";
 import { proposing, timeLimitProposing } from "./concepts/Proposing/registry.ts";
 import { reasoning } from "./concepts/Reasoning/registry.ts";
@@ -23,6 +24,7 @@ export const applicationConceptSet = conceptSet({
   Sessioning: sessioning,
   AgentSessioning: agentSessioning,
   Briefing: briefing,
+  Posting: posting,
   Tabling: tabling,
   Conversing: conversing,
   Proposing: proposing,

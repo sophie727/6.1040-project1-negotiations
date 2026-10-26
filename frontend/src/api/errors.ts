@@ -66,6 +66,8 @@ const messages: Record<string, Record<string, string>> = {
     CONFLICT: "A published scenario can't change.",
   },
   "/scenarios/discard": { CONFLICT: "A published scenario can't be discarded." },
+  "/scenarios/archive": { CONFLICT: "Only a published scenario that's in the bakery can be archived." },
+  "/scenarios/unarchive": { CONFLICT: "This scenario is already in the bakery." },
   "/scenarios/publish": {
     CONFLICT: "It isn't ready yet: it needs an issue, two options for every issue, two roles, and a brief for every role.",
   },
@@ -97,6 +99,7 @@ const messages: Record<string, Record<string, string>> = {
   },
   "/scenarios/roles/remove": { CONFLICT: "A published scenario can't change." },
   "/scenarios/roles/brief": { INVALID_REQUEST: "A brief must have 1 to 20,000 characters." },
+  "/scenarios/roles/summary": { INVALID_REQUEST: "Who a role is can be at most 300 characters." },
   "/scenarios/payoffs/set": { CONFLICT: "A published scenario can't change." },
 };
 

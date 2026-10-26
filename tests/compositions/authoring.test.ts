@@ -67,7 +67,7 @@ describe("writing a scenario", () => {
 
     expect(ok(await api.scenarios.publish({ session: lease.session, scenario: lease.scenario })).scenario).toBe(lease.scenario);
     expect(ok(await api.scenarios.mine({ session: lease.session })).scenarios).toEqual([
-      { scenario: lease.scenario, name: "The Lease", published: true },
+      { scenario: lease.scenario, name: "The Lease", published: true, archived: false },
     ]);
 
     // It's in everyone's bakery now, with the time limit Sophie recommended, and Nadia practices it as Ana.
@@ -172,7 +172,7 @@ describe("writing a scenario", () => {
     await finish(app, lease);
     ok(await api.scenarios.publish({ session, scenario: lease.scenario }));
 
-    expect(await api.scenarios.publish({ session, scenario: lease.scenario })).toEqual({ error: "ALREADY_PUBLISHED" });
+    expect(await api.scenarios.publish({ session, scenario: lease.scenario })).toEqual({ error: "PUBLISHED" });
     for (const refused of [
       api.scenarios.rename({ session, scenario: lease.scenario, name: "Another Lease" }),
       api.scenarios.discard({ session, scenario: lease.scenario }),
@@ -211,5 +211,50 @@ describe("writing a scenario", () => {
       { role: lease.ana, name: "Ana", summary: ana },
       { role: lease.ben, name: "Ben", summary: "Ana's roommate, who'd rather pay less rent." },
     ]);
+  });
+
+  test("Sophie archives The Lease, so nobody starts it, while the tables people already have stay theirs", async () => {
+    const app = await startWholePie({ coach: null });
+    const { api, register, practice } = app;
+    const lease = await leaseDraft(app);
+    const { session } = lease;
+    // A draft isn't in the bakery, so there's nothing to archive; Sophie can discard it instead.
+    expect(await api.scenarios.archive({ session, scenario: lease.scenario })).toEqual({ error: "NOT_POSTED" });
+    await finish(app, lease);
+    ok(await api.scenarios.publish({ session, scenario: lease.scenario }));
+
+    // Nadia starts practicing it before Sophie archives it.
+    const nadia = await practice("nadia", "Ana", "The Lease");
+
+    // Only Sophie can archive it.
+    const omar = await register("omar");
+    expect(await api.scenarios.archive({ session: omar.session, scenario: lease.scenario })).toEqual({ error: "NOT_FOUND" });
+    ok(await api.scenarios.archive({ session, scenario: lease.scenario }));
+    expect(await api.scenarios.archive({ session, scenario: lease.scenario })).toEqual({ error: "ALREADY_ARCHIVED" });
+    expect(ok(await api.scenarios.mine({ session })).scenarios).toEqual([
+      { scenario: lease.scenario, name: "The Lease", published: true, archived: true },
+    ]);
+    expect(await lease.show()).toMatchObject({ published: true, archived: true });
+
+    // It's gone from the bakery, and nobody can start a table for it, with the AI, with friends, or with someone new.
+    const bakery = ok(await api.bakery({ session: omar.session }));
+    expect(bakery.scenarios.map(({ name }) => name)).not.toContain("The Lease");
+    const start = { session: omar.session, scenario: lease.scenario, role: lease.ben };
+    expect(await api.practice.start(start)).toEqual({ error: "NOT_FOUND" });
+    expect(await api.friends.start(start)).toEqual({ error: "NOT_FOUND" });
+    expect(await api.matchmaking.find({ session: omar.session, scenario: lease.scenario, open: false })).toEqual({ error: "NOT_FOUND" });
+
+    // Nadia's table is still in her list, and she can still negotiate there.
+    const hers = ok(await api.bakery({ session: nadia.session }));
+    expect(hers.tables).toMatchObject([{ table: nadia.table, scenarioName: "The Lease", roleName: "Ana" }]);
+    expect((await nadia.show()).table).toMatchObject({ scenarioName: "The Lease" });
+    ok(await api.tables.start({ session: nadia.session, table: nadia.table, minutes: 20 }));
+    ok(await api.tables.send({ session: nadia.session, table: nadia.table, body: "Hi Ben, shall we talk about the big bedroom?" }));
+
+    // Sophie puts it back, and it's in the bakery again.
+    ok(await api.scenarios.unarchive({ session, scenario: lease.scenario }));
+    expect(await api.scenarios.unarchive({ session, scenario: lease.scenario })).toEqual({ error: "NOT_ARCHIVED" });
+    expect(ok(await api.bakery({ session: omar.session })).scenarios.map(({ name }) => name)).toContain("The Lease");
+    ok(await api.practice.start(start));
   });
 });

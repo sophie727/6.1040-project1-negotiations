@@ -4,7 +4,7 @@ The bakery is where a person picks something to negotiate. A practice table seat
 
 ## Choosing a scenario
 
-The [bakery endpoint](reaction:practice.choosing.ShowBakery) responds with the person's [ratings](ratings.md#showing-ratings), and two lists. The first is [the published scenarios](former:practice.choosing.scenarios), by name, each with the time limit its author recommends, its roles with their summaries, so a person can tell who each side is before choosing one, and [how spicy it is](#how-spicy-a-scenario-is). The second is [the tables the person has a seat at](former:practice.choosing.tablesOf), most recently opened first, each with its scenario, the person's role, its status, and the usernames of the other people at it, so the person can go back to a negotiation or its debrief.
+The [bakery endpoint](reaction:practice.choosing.ShowBakery) responds with the person's [ratings](ratings.md#showing-ratings), and two lists. The first is [the scenarios in the bakery](former:practice.choosing.scenarios): the ones [in the bakery](view:practice.choosing.inBakery), which their authors posted and haven't [archived](authoring.md#archiving), in the order they were posted, each with the time limit its author recommends, its roles with their summaries, so a person can tell who each side is before choosing one, and [how spicy it is](#how-spicy-a-scenario-is). The second is [the tables the person has a seat at](former:practice.choosing.tablesOf), most recently opened first, each with its scenario, the person's role, its status, and the usernames of the other people at it, so the person can go back to a negotiation or its debrief.
 
 ```endpoints
 practice.choosing.ShowBakery at /bakery
@@ -34,7 +34,7 @@ counterpartFor(role: String) : String
   Names the AI counterpart that plays a role at a practice table beside `bot:counterpart`: `bot:counterpart:` followed by the role.
 ```
 
-Only [a role of a published scenario can be practiced](view:practice.starting.playable). [A second endpoint at the same path](reaction:practice.starting.RefuseUnplayable) refuses anything else with `NOT_FOUND`, such as a role of another scenario, or a scenario its author hasn't published. It needs no session, since anyone can see which scenarios are published.
+Only [a role of a scenario in the bakery can be practiced](view:practice.starting.playable): one that is posted and not archived. [A second endpoint at the same path](reaction:practice.starting.RefuseUnplayable) refuses anything else with `NOT_FOUND`, such as a role of another scenario, a scenario its author hasn't posted, or one its author archived. It needs no session, since anyone can see which scenarios are in the bakery.
 
 ```endpoints
 practice.starting.StartPractice at /practice/start

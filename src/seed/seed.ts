@@ -1,4 +1,5 @@
 import type { ActionRefusal } from "@mit-sdg/sync-engine/assembly";
+import type { Db } from "mongodb";
 import type { Option, Scenario } from "../concepts/Briefing/Briefing.ts";
 import type { User } from "../concepts/Registering/Registering.ts";
 import type { assembleApplication } from "../assembly.ts";
@@ -17,21 +18,46 @@ export const builtInScenarios: ScenarioDefinition[] = [theJobOffer, theLaunchRoo
 const CASE_BANK = "wholepie";
 
 /**
- * Creates and publishes each built-in scenario that no published scenario is named after yet: every one on a server's
- * first start with an empty database, and only those added since on a database that has the others. A built-in
- * scenario published before roles had summaries gets its roles' summaries, which can change after publishing. It goes
- * through the concepts' actions, as an author would, so reactions see every step.
+ * Creates and posts each built-in scenario that no posted scenario is named after yet: every one on a server's first
+ * start with an empty database, and only those added since on a database that has the others. A built-in scenario
+ * posted before roles had summaries gets its roles' summaries, which can change after posting. It goes through the
+ * concepts' actions, as an author would, so reactions see every step.
  */
 export async function seed({ concepts }: { concepts: Concepts }): Promise<void> {
-  const published = new Map((await concepts.Briefing._published()).map(({ scenario, name }) => [name, scenario]));
+  const posted = new Map((await postedScenarios(concepts)).map(({ scenario, name }) => [name, scenario]));
   for (const definition of builtInScenarios) {
-    const scenario = published.get(definition.name);
+    const scenario = posted.get(definition.name);
     if (scenario === undefined) await publishScenario({ concepts }, definition);
     else await describeMissingRoles(concepts, scenario, definition);
   }
 }
 
-/** Gives each role of the published `scenario` that has no summary yet the summary `definition` has for it. */
+/** The posted scenarios, archived or not, with their names, in the order they were posted. */
+export async function postedScenarios(concepts: Concepts): Promise<{ scenario: Scenario; name: string }[]> {
+  const posted: { scenario: Scenario; name: string }[] = [];
+  for (const { item: scenario } of await concepts.Posting._posts()) {
+    const [found] = await concepts.Briefing._scenario({ scenario });
+    if (found !== undefined) posted.push({ scenario, name: found.name });
+  }
+  return posted;
+}
+
+/**
+ * Before Posting existed, Briefing kept which scenarios were published itself, as a `published` field on each scenario.
+ * This posts every scenario marked that way, oldest first, unless Posting has it already, and then removes the field,
+ * so a database from before keeps its bakery, and its scenarios still can't change. Once no scenario has the field, it
+ * does nothing, so it runs on every start, before seeding.
+ */
+export async function postScenariosPublishedInBriefing({ database, concepts }: { database: Db; concepts: Concepts }): Promise<void> {
+  const scenarios = database.collection<{ _id: Scenario; published?: boolean }>("briefing.scenarios");
+  for (const { _id: scenario, published } of await scenarios.find({ published: { $exists: true } }).sort({ _id: 1 }).toArray()) {
+    const { posted } = await concepts.Posting._post({ item: scenario });
+    if (published === true && !posted) await must(concepts.Posting.post({ item: scenario }), `post scenario ${scenario}`);
+    await scenarios.updateOne({ _id: scenario }, { $unset: { published: "" } });
+  }
+}
+
+/** Gives each role of the posted `scenario` that has no summary yet the summary `definition` has for it. */
 async function describeMissingRoles(concepts: Concepts, scenario: Scenario, definition: ScenarioDefinition): Promise<void> {
   for (const { role, name } of await concepts.Briefing._roles({ scenario })) {
     const summary = definition.roles.find((each) => each.name === name)?.summary;
@@ -42,7 +68,7 @@ async function describeMissingRoles(concepts: Concepts, scenario: Scenario, defi
   }
 }
 
-/** Creates and publishes `definition`, authored by the case bank, as the built-in scenarios are. */
+/** Creates and posts `definition`, authored by the case bank, as the built-in scenarios are. */
 export async function publishScenario({ concepts }: { concepts: Concepts }, definition: ScenarioDefinition): Promise<void> {
   await create(concepts, await caseBankAuthor(concepts), definition);
 }
@@ -80,7 +106,7 @@ async function create(concepts: Concepts, author: User, definition: ScenarioDefi
       }
     }
   }
-  await must(concepts.Briefing.publish({ scenario }), what);
+  await must(concepts.Posting.post({ item: scenario }), what);
   await must(concepts.Tabling.recommendTimeLimit({ scenario, timeLimit: definition.timeLimit }), what);
 }
 

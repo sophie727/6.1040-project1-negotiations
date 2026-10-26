@@ -26,8 +26,12 @@ function matchmake() {
   choosing.value = null;
 }
 
-/** The scenarios the person wrote, drafts and published ones, so they can go back to writing them. */
+/**
+ * The scenarios the person wrote, drafts and published ones, so they can go back to writing them, newest first, with the
+ * archived ones last, out of the way.
+ */
 const written = ref<WrittenScenario[]>([]);
+const writtenInOrder = computed(() => [...written.value].sort((one, other) => Number(one.archived) - Number(other.archived)));
 
 onMounted(async () => {
   void api.scenarios.mine().then((mine) => {
@@ -104,12 +108,13 @@ const tables = computed(() => bakery.value?.tables ?? []);
     <section v-if="written.length > 0" class="panel">
       <h2>Your scenarios</h2>
       <ul class="tables">
-        <li v-for="scenario in written" :key="scenario.scenario">
+        <li v-for="scenario in writtenInOrder" :key="scenario.scenario" :class="{ archived: scenario.archived }">
           <a :href="`/write/${scenario.scenario}`" @click.prevent="go(`/write/${scenario.scenario}`)">
             <span aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
             <strong>{{ scenario.name }}</strong>
           </a>
-          <span class="badge" :class="scenario.published ? 'good' : 'warm'">{{ scenario.published ? "Published" : "Draft" }}</span>
+          <span v-if="scenario.archived" class="badge">Archived</span>
+          <span v-else class="badge" :class="scenario.published ? 'good' : 'warm'">{{ scenario.published ? "Published" : "Draft" }}</span>
         </li>
       </ul>
     </section>
@@ -290,5 +295,8 @@ const tables = computed(() => bakery.value?.tables ?? []);
 }
 .tables a:hover strong {
   text-decoration: underline;
+}
+.tables li.archived a {
+  color: var(--color-text-muted);
 }
 </style>

@@ -1,14 +1,16 @@
 # Writing a scenario
 
-Anyone with an account can write a scenario of their own, as the built-in ones were written, and publish it to the bakery, where everyone can negotiate it. Sophie writes The Lease, in which Ana and Ben agree on who takes the big bedroom and how to split the rent. Everything here goes through Briefing, whose drafts can change until they are published: the endpoints check who is writing, and Briefing checks what is written.
+Anyone with an account can write a scenario of their own, as the built-in ones were written, and publish it to the bakery, where everyone can negotiate it. Sophie writes The Lease, in which Ana and Ben agree on who takes the big bedroom and how to split the rent. Briefing holds what she writes and checks it, and Posting puts it in the bakery when she publishes it. The endpoints here check who is writing, and that the scenario isn't posted yet, since a posted scenario stays as people negotiate it.
 
 ## Who may write what
 
-Only the author of a scenario can see or change it. Each endpoint below reads its user from the session and checks that they [wrote the scenario](view:authoring.access.wrote), or the scenario that [the issue](view:authoring.access.wroteIssue), [the option](view:authoring.access.wroteOption), or [the role](view:authoring.access.wroteRole) belongs to. Anyone else, and anything that doesn't exist, is refused with `NOT_FOUND`, as if the scenario weren't there, so a draft's contents stay private until it is published. Briefing's own refusals, such as `PUBLISHED` for any change to a published scenario, reach the author as they are.
+Only the author of a scenario can see or change it. Each endpoint below reads its user from the session and checks that they [wrote the scenario](view:authoring.access.wrote), or the scenario that [the issue](view:authoring.access.wroteIssue), [the option](view:authoring.access.wroteOption), or [the role](view:authoring.access.wroteRole) belongs to. Anyone else, and anything that doesn't exist, is refused with `NOT_FOUND`, as if the scenario weren't there, so a draft's contents stay private until it is published. Briefing's own refusals, such as `NAME_TAKEN`, reach the author as they are.
+
+Briefing lets a scenario change whenever its author likes, but once people negotiate a scenario, it mustn't change under them: a deal's points, the whole pie, and the ratings all come from it. So every endpoint that changes a scenario first checks that the author [is still writing it](view:authoring.access.drafting), or the scenario of [the issue](view:authoring.access.draftingIssue), [the option](view:authoring.access.draftingOption), or [the role](view:authoring.access.draftingRole): they wrote it, and haven't posted it yet. The author of a posted scenario is refused with `PUBLISHED`. Only a role's summary can change after posting, since it changes nothing a deal is worth.
 
 ## Your scenarios
 
-The [list endpoint](reaction:authoring.showing.ShowMine) responds with [the scenarios the person wrote](former:authoring.showing.scenariosBy), drafts and published ones, newest first, so the bakery can list them. The [show endpoint](reaction:authoring.showing.ShowDraft) responds with [the scenario as its author writes it](former:authoring.showing.draftOf): its name, whether it is published, the time limit its author recommends, every issue with its options, and every role with its BATNA, its brief, its summary, and the points it has so far. Unlike [the table](table.md#showing-the-table), which shows each negotiator only their own brief and points, it shows the author everyone's.
+The [list endpoint](reaction:authoring.showing.ShowMine) responds with [the scenarios the person wrote](former:authoring.showing.scenariosBy), newest first, each with whether it is posted and whether it is archived, so the bakery can list them. The [show endpoint](reaction:authoring.showing.ShowDraft) responds with [the scenario as its author writes it](former:authoring.showing.draftOf): its name, whether it is posted and whether it is archived, the time limit its author recommends, every issue with its options, and every role with its BATNA, its brief, its summary, and the points it has so far. Unlike [the table](table.md#showing-the-table), which shows each negotiator only their own brief and points, it shows the author everyone's.
 
 ```endpoints
 authoring.showing.ShowMine at /scenarios/mine
@@ -17,9 +19,9 @@ authoring.showing.ShowDraft at /scenarios/show
 
 ## Drafting
 
-Sophie [starts a draft](reaction:authoring.drafting.Create) by naming it. Briefing refuses a blank name, or one that another scenario, published or not, already has. While it's a draft, she can [rename it](reaction:authoring.drafting.Rename), [recommend a time limit](reaction:authoring.drafting.RecommendTimeLimit) in Tabling, which the page suggests to whoever negotiates it, and [discard it](reaction:authoring.drafting.Discard) with everything in it. Tabling would take a new recommendation for a published scenario too, so the `published` path refuses it with `PUBLISHED`, as Briefing refuses every other change once a scenario is published.
+Sophie [starts a draft](reaction:authoring.drafting.Create) by naming it. Briefing refuses a blank name, or one that another scenario, published or not, already has. While it's a draft, she can [rename it](reaction:authoring.drafting.Rename), [recommend a time limit](reaction:authoring.drafting.RecommendTimeLimit) in Tabling, which the page suggests to whoever negotiates it, and [discard it](reaction:authoring.drafting.Discard) with everything in it. Tabling would take a new recommendation for a posted scenario too, so it is refused with `PUBLISHED`, like every other change.
 
-When it's ready, she [publishes it](reaction:authoring.drafting.Publish). Briefing refuses with `INCOMPLETE` until it has an issue, at least two roles, two options for every issue, and a brief and every payoff for every role. From then on, the scenario is in the bakery, where anyone can practice it, negotiate it with friends, or be matched for it, and nothing about it changes but its roles' summaries.
+When it's ready, she [publishes it](reaction:authoring.drafting.Publish), which posts it with `Posting.post`. Until Briefing says it is complete, with an issue, at least two roles, two options for every issue, and a brief and every payoff for every role, the endpoint refuses with `INCOMPLETE`. From then on, the scenario is [in the bakery](view:practice.choosing.inBakery), where anyone can practice it, negotiate it with friends, or be matched for it, and nothing about it changes but its roles' summaries.
 
 ```endpoints
 authoring.drafting.Create at /scenarios/create
@@ -27,6 +29,17 @@ authoring.drafting.Rename at /scenarios/rename
 authoring.drafting.RecommendTimeLimit at /scenarios/limit
 authoring.drafting.Discard at /scenarios/discard
 authoring.drafting.Publish at /scenarios/publish
+```
+
+## Archiving
+
+Sophie published Test Lease to see how the page works, and doesn't want anyone else to pick it. She [archives it](reaction:authoring.archiving.Archive), and it leaves the bakery: nobody can [practice it](view:practice.starting.playable), start a table for friends with it, or [be matched for it](view:matchmaking.looking.findable). Archiving takes nothing from the people who already negotiated it, or are negotiating it: their tables stay in their list of negotiations, and they can still negotiate there, read the transcript, and see the debrief. An archived scenario is still posted, so it still can't change under them. Friends can still join a table opened for it with its link. Posting refuses to archive a draft with `NOT_POSTED`, since a draft isn't in the bakery and can be discarded instead, and an archived scenario with `ALREADY_ARCHIVED`.
+
+If Sophie changes her mind, she [unarchives it](reaction:authoring.archiving.Unarchive), and it is back in the bakery. Posting refuses a scenario that isn't archived with `NOT_ARCHIVED`.
+
+```endpoints
+authoring.archiving.Archive at /scenarios/archive
+authoring.archiving.Unarchive at /scenarios/unarchive
 ```
 
 ## Issues

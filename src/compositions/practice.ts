@@ -5,10 +5,15 @@ import { COUNTERPART } from "./counterpart.ts";
 import { textInput } from "./reusable/inputs.ts";
 import { openSeats, ratingsOf, seatedAs } from "./table.ts";
 
-const { Briefing, Registering, Sessioning, Tabling } = concepts;
+const { Briefing, Posting, Registering, Sessioning, Tabling } = concepts;
 const { counterpartFor, spiceLevel } = computations;
 
 // Choosing
+
+/** (scenario) is in the bakery: its author posted it and hasn't archived it, so people can start negotiating it. */
+export const inBakery = view("(scenario) is in the bakery", ({ scenario }) =>
+  where(Posting._post({ item: scenario }).is({ posted: true, archived: false })),
+).holds();
 
 /**
  * How spicy (scenario) is, from 1 (mild) to 3 (hot): how much its whole pie adds to what its roles get together by
@@ -23,13 +28,17 @@ export const spiceOf = view("how spicy (scenario) is", ({ scenario }, { spice },
 ).optional();
 
 /**
- * The published scenarios, by name, each with its recommended time limit, its roles with their summaries, or null for a
- * role without one, and how spicy it is. Only the
- * spice level leaves the server: the whole pie's points would tell the roles what the others get by walking away.
+ * The scenarios in the bakery, in the order they were posted, each with its name, its recommended time limit, its roles
+ * with their summaries, or null for a role without one, and how spicy it is. Only the spice level leaves the server:
+ * the whole pie's points would tell the roles what the others get by walking away.
  */
-const scenarios = former("the published scenarios", (_input, { scenario, name, timeLimit, role, roleName, summary, spice }) =>
-  each(Briefing._published({}).is({ scenario, name }))
-    .where(whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit })), spiceOf({ scenario }).is({ spice }))
+const scenarios = former("the scenarios in the bakery", (_input, { scenario, name, timeLimit, role, roleName, summary, spice }) =>
+  each(Posting._posts({}).is({ item: scenario, archived: false }))
+    .where(
+      Briefing._scenario({ scenario }).is({ name }),
+      whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit })),
+      spiceOf({ scenario }).is({ spice }),
+    )
     .form({
       scenario,
       name,
@@ -74,9 +83,9 @@ const ShowBakery = endpoint(
 
 // Starting
 
-/** (role) belongs to (scenario), and (scenario) is published, so people can practice it. */
+/** (role) belongs to (scenario), and (scenario) is in the bakery, so people can start negotiating it. */
 export const playable = view("(role) of (scenario) can be practiced", ({ scenario, role }) =>
-  where(Briefing._role({ role }).is({ scenario }), Briefing._scenario({ scenario }).is({ published: true })),
+  where(Briefing._role({ role }).is({ scenario }), inBakery({ scenario })),
 ).holds();
 
 const StartPractice = endpoint(
@@ -114,6 +123,6 @@ const RefuseUnplayable = endpoint("/practice/start", ({ session, scenario, role 
 );
 
 export const composition = {
-  choosing: { spiceOf, scenarios, tablesOf, ShowBakery },
+  choosing: { inBakery, spiceOf, scenarios, tablesOf, ShowBakery },
   starting: { playable, StartPractice, SeatMoreCounterparts, RefuseUnplayable },
 };

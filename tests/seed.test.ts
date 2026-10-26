@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { assembleApplication } from "../src/assembly.ts";
 import { MemoryProvider } from "../src/concepts/Federating/provider.ts";
 import type { TermSheet } from "../src/concepts/Briefing/Briefing.ts";
-import { publishScenario, seed } from "../src/seed/seed.ts";
+import { postScenariosPublishedInBriefing, postedScenarios, publishScenario, seed } from "../src/seed/seed.ts";
 import { theJobOffer } from "../src/seed/theJobOffer.ts";
 import { ok } from "./support/reusable/results.ts";
 import { testDatabase } from "./support/reusable/mongo.ts";
@@ -12,7 +12,7 @@ async function seeded(name = "The Job Offer") {
   const application = assembleApplication({ database: await testDatabase(), commons: new MemoryProvider() });
   await seed(application);
   const { Briefing } = application.concepts;
-  const published = await Briefing._published();
+  const published = await postedScenarios(application.concepts);
   const scenario = published.find((row) => row.name === name)!.scenario;
   const issues = await Briefing._issues({ scenario });
   const options = new Map(await Promise.all(issues.map(async ({ issue }) => [issue, await Briefing._options({ issue })] as const)));
@@ -84,16 +84,16 @@ describe("seeding", () => {
   test("seeding a database that already has every built-in scenario changes nothing", async () => {
     const { application, published } = await seeded();
     await seed(application);
-    expect(await application.concepts.Briefing._published()).toEqual(published);
+    expect(await postedScenarios(application.concepts)).toEqual(published);
     expect(await application.concepts.Registering._byUsername({ username: "wholepie" })).toHaveLength(1);
   });
 
   test("a database seeded before The Launch Room existed gets it, and keeps its own Job Offer", async () => {
     const application = assembleApplication({ database: await testDatabase(), commons: new MemoryProvider() });
     await publishScenario(application, theJobOffer);
-    const [jobOffer] = await application.concepts.Briefing._published();
+    const [jobOffer] = await postedScenarios(application.concepts);
     await seed(application);
-    const published = await application.concepts.Briefing._published();
+    const published = await postedScenarios(application.concepts);
     expect(published.map(({ name }) => name)).toEqual(["The Job Offer", "The Launch Room"]);
     expect(published[0]).toEqual(jobOffer!);
   });
@@ -102,7 +102,7 @@ describe("seeding", () => {
     const application = assembleApplication({ database: await testDatabase(), commons: new MemoryProvider() });
     const { Briefing } = application.concepts;
     await publishScenario(application, { ...theJobOffer, roles: theJobOffer.roles.map((role) => ({ ...role, summary: "" })) });
-    const scenario = (await Briefing._published())[0]!.scenario;
+    const scenario = (await postedScenarios(application.concepts))[0]!.scenario;
     const roles = new Map((await Briefing._roles({ scenario })).map(({ role, name }) => [name, role]));
     const [hiro, manon] = [roles.get("Hiro")!, roles.get("Manon")!];
     ok(await Briefing.describeRole({ role: hiro, summary: "Hiro, as the author put it." }));
@@ -110,6 +110,31 @@ describe("seeding", () => {
     await seed(application);
     expect((await Briefing._role({ role: hiro }))[0]?.summary).toBe("Hiro, as the author put it.");
     expect((await Briefing._role({ role: manon }))[0]?.summary).toBe(theJobOffer.roles.find(({ name }) => name === "Manon")!.summary);
+  });
+
+  test("a database from before Posting keeps its bakery: what Briefing marked published is posted, oldest first, once", async () => {
+    const database = await testDatabase();
+    const application = assembleApplication({ database, commons: new MemoryProvider() });
+    const { Briefing, Posting, Registering } = application.concepts;
+    const { user: author } = ok(await Registering.register({ username: "sophie" }));
+    // Before Posting, Briefing marked the scenarios it published with a field of their own.
+    const { scenario: offer } = ok(await Briefing.create({ author, name: "The Offer" }));
+    const { scenario: lease } = ok(await Briefing.create({ author, name: "The Lease" }));
+    const { scenario: draft } = ok(await Briefing.create({ author, name: "A draft" }));
+    const scenarios = database.collection<{ _id: string; published?: boolean }>("briefing.scenarios");
+    await scenarios.updateOne({ _id: offer }, { $set: { published: true } });
+    await scenarios.updateOne({ _id: lease }, { $set: { published: true } });
+    await scenarios.updateOne({ _id: draft }, { $set: { published: false } });
+
+    await postScenariosPublishedInBriefing({ database, concepts: application.concepts });
+    expect(await Posting._posts()).toEqual([
+      { item: offer, archived: false },
+      { item: lease, archived: false },
+    ]);
+    expect(await scenarios.countDocuments({ published: { $exists: true } })).toBe(0);
+    // Once nothing is marked, it does nothing.
+    await postScenariosPublishedInBriefing({ database, concepts: application.concepts });
+    expect(await Posting._posts()).toHaveLength(2);
   });
 });
 

@@ -3,10 +3,8 @@ import spec from "@design/concepts/Briefing.md" with { type: "text" };
 import type { Db } from "mongodb";
 import type { User } from "../Registering/Registering.ts";
 import {
-  AlreadyPublished,
   BriefingConcept,
   DifferentScenarios,
-  Incomplete,
   InvalidBrief,
   InvalidIssueName,
   InvalidOptionName,
@@ -16,7 +14,6 @@ import {
   IssueExists,
   NameTaken,
   OptionExists,
-  Published,
   RoleExists,
   UnitNotAllowed,
   UnknownIssue,
@@ -39,7 +36,6 @@ export const briefing = registerConcept({
     INVALID_SCENARIO_NAME: InvalidScenarioName,
     NAME_TAKEN: NameTaken,
     UNKNOWN_SCENARIO: UnknownScenario,
-    PUBLISHED: Published,
     INVALID_ISSUE_NAME: InvalidIssueName,
     ISSUE_EXISTS: IssueExists,
     UNIT_NOT_ALLOWED: UnitNotAllowed,
@@ -57,8 +53,6 @@ export const briefing = registerConcept({
     UNKNOWN_ROLE: UnknownRole,
     INVALID_BRIEF: InvalidBrief,
     INVALID_SUMMARY: InvalidSummary,
-    ALREADY_PUBLISHED: AlreadyPublished,
-    INCOMPLETE: Incomplete,
   },
   floors: { mongo: ({ database }: { database: Db }, name: string) => new Briefing(database, name) },
 });

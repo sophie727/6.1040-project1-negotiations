@@ -14,7 +14,8 @@ import { stillMissing, useDraft } from "./draft.ts";
 /**
  * A scenario its author is writing: a General tab with what everyone at the table shares, and a tab for each role with
  * their brief and points. Every change is saved as the author makes it. Publishing puts it in the bakery for everyone,
- * after which nothing about it can change, so the page then shows it as it was published.
+ * after which nothing about it can change, so the page then shows it as it was published. Archiving takes it out of the
+ * bakery again, as for a scenario written to try the page out, and leaves the negotiations already started alone.
  */
 const props = defineProps<{ scenario: ScenarioId }>();
 const { draft, trouble, saving, saved, load, save } = useDraft(props.scenario);
@@ -29,6 +30,7 @@ watch(openRole, (role) => {
 });
 
 const published = computed(() => draft.value?.published ?? false);
+const archived = computed(() => draft.value?.archived ?? false);
 const missing = computed(() => (draft.value === null ? [] : stillMissing(draft.value)));
 const briefWritten = (role: DraftRole) => narrativeOf(role.brief, role.name).trim() !== "";
 
@@ -80,6 +82,22 @@ async function publish() {
   if (publishProblem.value === null) justPublished.value = true;
 }
 
+// Archiving
+
+/** Why archiving, or putting the scenario back, was refused. */
+const archiveProblem = ref<string | null>(null);
+
+async function archive() {
+  const name = draft.value?.name ?? "this scenario";
+  const question = `Archive ${name}? It leaves the bakery, so nobody can start it, but negotiations people already started stay theirs. You can put it back anytime.`;
+  if (!window.confirm(question)) return;
+  archiveProblem.value = await save("/scenarios/archive", api.scenarios.archive({ scenario: props.scenario }));
+}
+
+async function unarchive() {
+  archiveProblem.value = await save("/scenarios/unarchive", api.scenarios.unarchive({ scenario: props.scenario }));
+}
+
 async function discard() {
   if (!window.confirm(`Discard ${draft.value?.name ?? "this draft"}? Everything in it goes, and it can't come back.`)) return;
   const problem = await save("/scenarios/discard", api.scenarios.discard({ scenario: props.scenario }));
@@ -105,8 +123,12 @@ async function discard() {
             {{ draft.name }}
           </h1>
           <p class="state">
-            <span class="badge" :class="published ? 'good' : 'warm'">{{ published ? "Published" : "Draft" }}</span>
-            <span v-if="published" class="muted">It's in the bakery, and only who each role is can change now.</span>
+            <span v-if="archived" class="badge">Archived</span>
+            <span v-else class="badge" :class="published ? 'good' : 'warm'">{{ published ? "Published" : "Draft" }}</span>
+            <span v-if="archived" class="muted">
+              It's out of the bakery, so nobody can start it. Negotiations already started stay with the people in them.
+            </span>
+            <span v-else-if="published" class="muted">It's in the bakery, and only who each role is can change now.</span>
             <span v-else class="muted" aria-live="polite">
               {{ saving > 0 ? "Saving…" : saved ? "Every change is saved." : "Only you can see this draft until you publish it." }}
             </span>
@@ -116,7 +138,12 @@ async function discard() {
           <button type="button" class="text-button" @click="discard">Discard draft</button>
           <button type="button" class="button primary" @click="startPublishing">Publish…</button>
         </div>
+        <div v-else class="actions">
+          <button v-if="archived" type="button" class="button primary" @click="unarchive">Put back in the bakery</button>
+          <button v-else type="button" class="button outline" @click="archive">Archive…</button>
+        </div>
       </header>
+      <p v-if="archiveProblem" class="refusal" role="alert">{{ archiveProblem }}</p>
 
       <nav class="tabs" role="tablist" aria-label="Parts of the scenario">
         <button type="button" role="tab" :aria-selected="tab === 'general'" @click="tab = 'general'">General</button>

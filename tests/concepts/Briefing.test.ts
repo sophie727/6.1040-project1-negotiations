@@ -1,9 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  AlreadyPublished,
   BriefingConcept,
   DifferentScenarios,
-  Incomplete,
   InvalidBrief,
   InvalidSummary,
   InvalidIssueName,
@@ -15,7 +13,6 @@ import {
   NameTaken,
   type Option,
   OptionExists,
-  Published,
   type Role,
   RoleExists,
   type Scenario,
@@ -66,7 +63,7 @@ async function setPayoffs(briefing: Briefing, role: Role, points: [Option, numbe
   for (const [option, worth] of points) await briefing.setPayoff({ role, option, points: worth });
 }
 
-/** A published scenario with one discrete issue and one continuous issue that only moves points from one role to the other. */
+/** A complete scenario with one discrete issue and one continuous issue that only moves points from one role to the other. */
 async function lease(briefing: Briefing, batnas: { ana: number; ben: number }) {
   const { scenario } = await briefing.create({ author: "sophie", name: `Lease ${batnas.ana}-${batnas.ben}` });
   const { issue: room } = await briefing.addIssue({ scenario, name: "Room", kind: "DISCRETE" });
@@ -81,7 +78,6 @@ async function lease(briefing: Briefing, batnas: { ana: number; ben: number }) {
   await setPayoffs(briefing, ben, [[big, 0], [small, 10], [none, 0], [all, 100]]);
   await briefing.setBrief({ role: ana, brief: "You are Ana." });
   await briefing.setBrief({ role: ben, brief: "You are Ben." });
-  await briefing.publish({ scenario });
   return { scenario, room, rent, big, small, ana, ben };
 }
 
@@ -91,24 +87,17 @@ async function expectRefusal(attempt: Promise<unknown>, refusal: new (message?: 
 }
 
 describe("Briefing", () => {
-  test("its principle: Sophie publishes The Job Offer once every role has a brief, and Briefing scores term sheets and finds the whole pie", async () => {
+  test("its principle: once every role of The Job Offer has a brief, it is complete, and Briefing scores term sheets and finds the whole pie", async () => {
     const { briefing } = await setup();
     const offer = await jobOffer(briefing, { brief: false });
     await briefing.setBrief({ role: offer.manon, brief: "You are Manon, the hiring manager." });
 
-    // Hiro has no brief yet, so Sophie can't publish.
-    await expectRefusal(
-      briefing.publish({ scenario: offer.scenario }),
-      Incomplete,
-      "A scenario needs an issue, at least two roles, at least two options for every issue, and every payoff and brief before it can be published.",
-    );
+    // Hiro has no brief yet, so the scenario isn't complete, and Briefing scores nothing.
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: false }]);
+    expect(await briefing._wholePie({ scenario: offer.scenario })).toEqual([]);
     await briefing.setBrief({ role: offer.hiro, brief: "You are Hiro, a candidate for a management role." });
-    expect(await briefing.publish({ scenario: offer.scenario })).toEqual({ scenario: offer.scenario });
-    await expectRefusal(
-      briefing.addIssue({ scenario: offer.scenario, name: "Bonus", kind: "CONTINUOUS" }),
-      Published,
-      "A published scenario can't be changed.",
-    );
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: true }]);
+    expect(await briefing._complete({ scenario: "nowhere" as Scenario })).toEqual([]);
 
     // A salary of 100000 is halfway between $80K and $120K, so it's worth 300 to Hiro; Full Coverage is worth 300 more.
     const terms = { [offer.salary]: 100000, [offer.insurance]: offer.full };
@@ -133,7 +122,7 @@ describe("Briefing", () => {
   test("Briefing stores names trimmed and refuses a blank or overlong one", async () => {
     const { briefing } = await setup();
     const { scenario } = await briefing.create({ author: "sophie", name: "  The Job Offer  " });
-    expect(await briefing._scenario({ scenario })).toEqual([{ name: "The Job Offer", author: "sophie", published: false }]);
+    expect(await briefing._scenario({ scenario })).toEqual([{ name: "The Job Offer", author: "sophie" }]);
     await expectRefusal(
       briefing.create({ author: "lee", name: " The Job Offer" }),
       NameTaken,
@@ -258,7 +247,7 @@ describe("Briefing", () => {
     expect(await briefing._role({ role: offer.manon })).toStrictEqual([{ scenario: offer.scenario, name: "Manon", batna: 300 }]);
   });
 
-  test("a role's summary has at most 300 characters, a blank one clears it, and it can change after publishing", async () => {
+  test("a role's summary has at most 300 characters, and a blank one clears it", async () => {
     const { briefing } = await setup();
     const offer = await jobOffer(briefing);
     await expectRefusal(
@@ -270,44 +259,32 @@ describe("Briefing", () => {
     expect(await briefing.describeRole({ role: offer.hiro, summary: "  The candidate.  " })).toEqual({});
     expect((await briefing._role({ role: offer.hiro }))[0]?.summary).toBe("The candidate.");
 
-    // A summary changes nothing a deal is worth, so it can change once the scenario is published.
-    await briefing.publish({ scenario: offer.scenario });
     await briefing.describeRole({ role: offer.hiro, summary: "Fernwood's top choice for the role." });
     expect((await briefing._role({ role: offer.hiro }))[0]?.summary).toBe("Fernwood's top choice for the role.");
     await briefing.describeRole({ role: offer.hiro, summary: " " });
     expect((await briefing._role({ role: offer.hiro }))[0]).not.toHaveProperty("summary");
   });
 
-  test("publishing needs every payoff, and nothing about a published scenario can change", async () => {
+  test("a scenario is complete only once every role has a payoff for every option", async () => {
     const { briefing } = await setup();
     const offer = await jobOffer(briefing);
-    const { option: lunch } = await briefing.addOption({ issue: offer.insurance, name: "Dental only" });
+    const { option: dental } = await briefing.addOption({ issue: offer.insurance, name: "Dental only" });
     // Nobody has points for the new option yet.
-    await expect(briefing.publish({ scenario: offer.scenario })).rejects.toThrow(Incomplete);
-    await briefing.setPayoff({ role: offer.hiro, option: lunch, points: 50 });
-    await briefing.setPayoff({ role: offer.manon, option: lunch, points: 0 });
-    await briefing.publish({ scenario: offer.scenario });
-    expect(await briefing._published()).toEqual([{ scenario: offer.scenario, name: "The Job Offer" }]);
-
-    await expectRefusal(briefing.publish({ scenario: offer.scenario }), AlreadyPublished, "This scenario is already published.");
-    await expectRefusal(briefing.publish({ scenario: "nowhere" as Scenario }), UnknownScenario, "There is no such scenario.");
-    for (const change of [
-      () => briefing.addOption({ issue: offer.insurance, name: "Vision only" }),
-      () => briefing.addRole({ scenario: offer.scenario, name: "Recruiter", batna: 0 }),
-      () => briefing.setPayoff({ role: offer.hiro, option: offer.full, points: 1 }),
-      () => briefing.setBrief({ role: offer.hiro, brief: "Changed" }),
-    ]) {
-      await expectRefusal(change(), Published, "A published scenario can't be changed.");
-    }
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: false }]);
+    await briefing.setPayoff({ role: offer.hiro, option: dental, points: 50 });
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: false }]);
+    await briefing.setPayoff({ role: offer.manon, option: dental, points: 0 });
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: true }]);
   });
 
   test("_dealValidity reports every problem with a term sheet, issue by issue", async () => {
     const { briefing } = await setup();
-    const offer = await jobOffer(briefing);
+    const offer = await jobOffer(briefing, { brief: false });
     expect(await briefing._dealValidity({ scenario: offer.scenario, terms: {} })).toEqual([
-      { problem: "This scenario doesn't exist or isn't published." },
+      { problem: "This scenario doesn't exist or isn't complete." },
     ]);
-    await briefing.publish({ scenario: offer.scenario });
+    await briefing.setBrief({ role: offer.hiro, brief: "You are Hiro." });
+    await briefing.setBrief({ role: offer.manon, brief: "You are Manon." });
 
     expect(await briefing._dealValidity({ scenario: offer.scenario, terms: { [offer.salary]: 80000, [offer.insurance]: offer.none } })).toEqual([]);
     expect(
@@ -345,14 +322,14 @@ describe("Briefing", () => {
     expect(pie?.terms[rent]).toBeNumber();
   });
 
-  test("the whole pie is empty when no term sheet is worth at least its BATNA to everyone, or the scenario isn't published", async () => {
+  test("the whole pie is empty when no term sheet is worth at least its BATNA to everyone, or the scenario isn't complete", async () => {
     const { briefing } = await setup();
     const { scenario } = await lease(briefing, { ana: 150, ben: 150 });
     expect(await briefing._wholePie({ scenario })).toEqual([]);
     // Even with no deal possible, everyone gets their BATNA when nobody agrees: 150 each, 300 together.
     expect(await briefing._jointBatna({ scenario })).toEqual([{ jointBatna: 300 }]);
     expect(await briefing._jointBatna({ scenario: "nowhere" as Scenario })).toEqual([]);
-    const offer = await jobOffer(briefing);
+    const offer = await jobOffer(briefing, { brief: false });
     expect(await briefing._wholePie({ scenario: offer.scenario })).toEqual([]);
   });
 
@@ -409,7 +386,7 @@ describe("Briefing drafts", () => {
     await briefing.updateRole({ role: offer.manon, name: "Manon", batna: 900 });
     expect(await briefing._role({ role: offer.manon })).toMatchObject([{ name: "Manon", batna: 900 }]);
     await briefing.rename({ scenario: offer.scenario, name: "The Offer" });
-    expect(await briefing._scenario({ scenario: offer.scenario })).toEqual([{ name: "The Offer", author: "sophie", published: false }]);
+    expect(await briefing._scenario({ scenario: offer.scenario })).toEqual([{ name: "The Offer", author: "sophie" }]);
   });
 
   test("a continuous option moves to another universal value, and keeps the order of its range", async () => {
@@ -466,14 +443,14 @@ describe("Briefing drafts", () => {
     await expectRefusal(briefing.discard({ scenario: "nowhere" as Scenario }), UnknownScenario, "no such scenario");
   });
 
-  test("removing a role or an issue takes its payoffs with it, so publishing waits only for what is left", async () => {
+  test("removing a role or an issue takes its payoffs with it, so being complete depends only on what is left", async () => {
     const { briefing } = await setup();
     const offer = await jobOffer(briefing);
     const { role: recruiter } = await briefing.addRole({ scenario: offer.scenario, name: "Recruiter", batna: 0 });
     const { issue: perks } = await briefing.addIssue({ scenario: offer.scenario, name: "Perks", kind: "DISCRETE" });
     await briefing.addOption({ issue: perks, name: "Gym" });
     await briefing.setPayoff({ role: recruiter, option: offer.low, points: 10 });
-    await expect(briefing.publish({ scenario: offer.scenario })).rejects.toThrow(Incomplete);
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: false }]);
 
     await briefing.removeRole({ role: recruiter });
     await briefing.removeIssue({ issue: perks });
@@ -483,10 +460,10 @@ describe("Briefing drafts", () => {
     ]);
     expect((await briefing._issues({ scenario: offer.scenario })).map(({ name }) => name)).toEqual(["Salary", "Health insurance"]);
     expect(await briefing._payoffs({ role: recruiter })).toEqual([]);
-    await briefing.publish({ scenario: offer.scenario });
+    expect(await briefing._complete({ scenario: offer.scenario })).toEqual([{ complete: true }]);
   });
 
-  test("discarding a draft removes it with everything in it and frees its name, and nothing about a published scenario changes", async () => {
+  test("discarding a scenario removes it with everything in it and frees its name", async () => {
     const { briefing } = await setup();
     const draft = await jobOffer(briefing);
     await briefing.discard({ scenario: draft.scenario });
@@ -497,31 +474,18 @@ describe("Briefing drafts", () => {
     expect(await briefing._option({ option: draft.full })).toEqual([]);
     expect(await briefing._authoredBy({ author: "sophie" })).toEqual([]);
 
-    const offer = await jobOffer(briefing);
-    await briefing.publish({ scenario: offer.scenario });
-    for (const change of [
-      () => briefing.rename({ scenario: offer.scenario, name: "Another" }),
-      () => briefing.discard({ scenario: offer.scenario }),
-      () => briefing.updateIssue({ issue: offer.salary, name: "Pay", kind: "CONTINUOUS" }),
-      () => briefing.removeIssue({ issue: offer.insurance }),
-      () => briefing.updateOption({ option: offer.full, name: "All of it" }),
-      () => briefing.removeOption({ option: offer.half }),
-      () => briefing.updateRole({ role: offer.hiro, name: "Hiro", batna: 0 }),
-      () => briefing.removeRole({ role: offer.manon }),
-    ]) {
-      await expectRefusal(change(), Published, "A published scenario can't be changed.");
-    }
+    // Its name is free again.
+    expect((await briefing.create({ author: "sophie", name: "The Job Offer" })).scenario).toBeString();
   });
 
-  test("_authoredBy lists the scenarios an author created, drafts and published ones alike, newest first", async () => {
+  test("_authoredBy lists the scenarios an author created, complete or not, newest first", async () => {
     const { briefing } = await setup();
     const offer = await jobOffer(briefing);
-    await briefing.publish({ scenario: offer.scenario });
     const { scenario: draft } = await briefing.create({ author: "sophie", name: "The Lease" });
     await briefing.create({ author: "omar", name: "The Car" });
     expect(await briefing._authoredBy({ author: "sophie" })).toEqual([
-      { scenario: draft, name: "The Lease", published: false },
-      { scenario: offer.scenario, name: "The Job Offer", published: true },
+      { scenario: draft, name: "The Lease" },
+      { scenario: offer.scenario, name: "The Job Offer" },
     ]);
     expect(await briefing._authoredBy({ author: "nadia" })).toEqual([]);
   });

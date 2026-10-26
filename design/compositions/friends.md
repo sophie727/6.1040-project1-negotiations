@@ -4,7 +4,7 @@ A person can negotiate against friends instead of the counterpart. They open a t
 
 ## Starting a table for friends
 
-The [start endpoint](reaction:friends.starting.StartWithFriends) takes a scenario and the role the person wants to play. Like [a practice table](practice.md#starting-a-practice-table), it opens a table in Tabling, waits until the flow has settled so that [the table](table.md#seating) has a seat for each role, and seats the person in their role. It then invites people to the table with `Inviting.invite`, and responds with the table. The other seats stay empty, so the table can't begin until friends fill them. Only [a role of a published scenario](view:practice.starting.playable) can be chosen, and [a second endpoint at the same path](reaction:friends.starting.RefuseUnplayable) refuses anything else with `NOT_FOUND`.
+The [start endpoint](reaction:friends.starting.StartWithFriends) takes a scenario and the role the person wants to play. Like [a practice table](practice.md#starting-a-practice-table), it opens a table in Tabling, waits until the flow has settled so that [the table](table.md#seating) has a seat for each role, and seats the person in their role. It then invites people to the table with `Inviting.invite`, and responds with the table. The other seats stay empty, so the table can't begin until friends fill them. Only [a role of a scenario in the bakery](view:practice.starting.playable), posted and not archived, can be chosen, and [a second endpoint at the same path](reaction:friends.starting.RefuseUnplayable) refuses anything else with `NOT_FOUND`.
 
 ```endpoints
 friends.starting.StartWithFriends at /friends/start

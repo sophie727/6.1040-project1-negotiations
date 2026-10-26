@@ -1,6 +1,6 @@
 # The Whole Pie types
 
-Every person in The Whole Pie is a Registering user, who signs in with a password through Authenticating, or with Commons through CommonsFederating, and stays signed in through Sessioning. CommonsFederating is Federating with Commons, the class's site, as the other site, so a Commons account is linked to the user it first registered, and reaches that user each time. People write scenarios in Briefing, and negotiate them at tables in Tabling.
+Every person in The Whole Pie is a Registering user, who signs in with a password through Authenticating, or with Commons through CommonsFederating, and stays signed in through Sessioning. CommonsFederating is Federating with Commons, the class's site, as the other site, so a Commons account is linked to the user it first registered, and reaches that user each time. People write scenarios in Briefing, post them to the bakery with Posting, and negotiate them at tables in Tabling. Briefing knows nothing of posting: the scenarios it holds are drafts, complete or not, that it can score once complete. A posted scenario is one its author finished and put in the bakery, where people can start negotiating it, and the endpoints that change a scenario refuse once it is posted, so it stays as people negotiated it. Archiving takes it out of the bakery again, but it stays posted, so the tables already opened for it carry on.
 
 A seat at a table belongs to a player: either a person, or one of the AI counterparts. A counterpart is a bot whose name starts with `bot:`: `bot:counterpart` takes a seat at each practice table, and at a scenario with more than two roles, a counterpart named for its role, `bot:counterpart:` followed by the role, takes each other seat the person doesn't. The agent process that plays them reads each role's brief from the table, so a bot's name is all a table needs to record.
 
@@ -47,6 +47,9 @@ instantiate Sessioning as AgentSessioning with
 
 instantiate Briefing with
   Author is Registering.User
+
+instantiate Posting with
+  Item is Briefing.Scenario
 
 instantiate Tabling with
   Scenario is Briefing.Scenario
