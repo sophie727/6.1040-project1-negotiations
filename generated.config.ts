@@ -28,6 +28,7 @@ export default {
       new URL("./design/compositions/ratings.md", import.meta.url),
       new URL("./design/compositions/preparing.md", import.meta.url),
       new URL("./design/compositions/authoring.md", import.meta.url),
+      new URL("./design/compositions/admin.md", import.meta.url),
     ],
   },
   // The browser's client uses the HTTP contract, where each refusal arrives as its HTTP category.

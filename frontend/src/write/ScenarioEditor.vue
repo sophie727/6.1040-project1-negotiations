@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { api, type DraftRole, type ScenarioId } from "../api/client.ts";
 import { messageFor } from "../api/errors.ts";
+import { ADMIN } from "../bakery/admin.ts";
 import { pastryFor } from "../bakery/pastries.ts";
 import { useSession } from "../reusable/session.ts";
 import Dialog from "../reusable/ui/Dialog.vue";
@@ -31,6 +32,8 @@ watch(openRole, (role) => {
 
 const published = computed(() => draft.value?.published ?? false);
 const archived = computed(() => draft.value?.archived ?? false);
+/** The admin archived it, so only the admin can put it back. */
+const lockedByAdmin = computed(() => archived.value && draft.value?.archivedBy === ADMIN && useSession().me.value?.username !== ADMIN);
 const missing = computed(() => (draft.value === null ? [] : stillMissing(draft.value)));
 const briefWritten = (role: DraftRole) => narrativeOf(role.brief, role.name).trim() !== "";
 
@@ -123,9 +126,13 @@ async function discard() {
             {{ draft.name }}
           </h1>
           <p class="state">
-            <span v-if="archived" class="badge">Archived</span>
+            <span v-if="archived" class="badge">{{ draft.archivedBy === ADMIN ? "Archived by admin" : "Archived" }}</span>
             <span v-else class="badge" :class="published ? 'good' : 'warm'">{{ published ? "Published" : "Draft" }}</span>
-            <span v-if="archived" class="muted">
+            <span v-if="lockedByAdmin" class="muted">
+              The admin took it out of the bakery, so only the admin can put it back. Negotiations already started stay
+              with the people in them.
+            </span>
+            <span v-else-if="archived" class="muted">
               It's out of the bakery, so nobody can start it. Negotiations already started stay with the people in them.
             </span>
             <span v-else-if="published" class="muted">It's in the bakery, and only who each role is can change now.</span>
@@ -138,7 +145,7 @@ async function discard() {
           <button type="button" class="text-button" @click="discard">Discard draft</button>
           <button type="button" class="button primary" @click="startPublishing">Publish…</button>
         </div>
-        <div v-else class="actions">
+        <div v-else-if="!lockedByAdmin" class="actions">
           <button v-if="archived" type="button" class="button primary" @click="unarchive">Put back in the bakery</button>
           <button v-else type="button" class="button outline" @click="archive">Archive…</button>
         </div>

@@ -31,6 +31,17 @@ export class AuthenticatingConcept<User extends string> {
     return { user };
   }
 
+  /**
+   * Replaces the user's password, or sets it when they have none. No endpoint offers it: the server uses it to keep the
+   * admin account's password the one its settings give.
+   */
+  async reset({ user, password }: { user: User; password: string }) {
+    if (!acceptable(password)) throw new InvalidPassword("A password must have 8 to 128 characters.");
+    const verifier = await passwordHash.hash(password, { algorithm: "argon2id" });
+    await this.users.updateOne({ _id: user }, { $set: { verifier } }, { upsert: true });
+    return { user };
+  }
+
   async authenticate({ user, password }: { user: User; password: string }) {
     const found = await this.users.findOne({ _id: user });
     if (found === null || !(await passwordHash.verify(password, found.verifier))) {

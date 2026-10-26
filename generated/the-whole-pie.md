@@ -17,6 +17,8 @@ Defined in [Authenticating](../design/concepts/Authenticating.md), line 1.
 - `set(user: User, password: String) : returns (user: User)`
   - Refuses `INVALID_PASSWORD`: A password must have 8 to 128 characters.
   - Refuses `PASSWORD_SET`: This account already has a password.
+- `reset(user: User, password: String) : returns (user: User)`
+  - Refuses `INVALID_PASSWORD`: A password must have 8 to 128 characters.
 - `authenticate(user: User, password: String) : returns (user: User)`
   - Refuses `INVALID_CREDENTIALS`: The username or password is incorrect.
 
@@ -130,9 +132,9 @@ Defined in [Conversing](../design/concepts/Conversing.md), line 1.
 
 #### Instances
 
-- `Conversing` — instance of `Conversing` — [The Whole Pie types](../design/types.md), line 59.
-  - `Speaker` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 61.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 60.
+- `Conversing` — instance of `Conversing` — [The Whole Pie types](../design/types.md), line 60.
+  - `Speaker` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 62.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 61.
 
 ### Federating
 
@@ -173,9 +175,9 @@ Defined in [Inviting](../design/concepts/Inviting.md), line 1.
 
 #### Instances
 
-- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 81.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 83.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 82.
+- `Inviting` — instance of `Inviting` — [The Whole Pie types](../design/types.md), line 82.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 84.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 83.
 
 ### Matchmaking
 
@@ -204,10 +206,10 @@ Defined in [Matchmaking](../design/concepts/Matchmaking.md), line 1.
 
 #### Instances
 
-- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 85.
-  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 88.
-  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 87.
-  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 86.
+- `Matchmaking` — instance of `Matchmaking` — [The Whole Pie types](../design/types.md), line 86.
+  - `Place` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 89.
+  - `Pool` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 88.
+  - `Seeker` is `Registering.User` — [The Whole Pie types](../design/types.md), line 87.
 
 ### Noting
 
@@ -224,18 +226,18 @@ Defined in [Noting](../design/concepts/Noting.md), line 1.
 
 #### Instances
 
-- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 73.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 74.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 75.
-- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 106.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 107.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 108.
-- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 98.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 99.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 100.
-- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 102.
-  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 103.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 104.
+- `Noting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 74.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 75.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 76.
+- `PrioritiesNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 107.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 108.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 109.
+- `TargetNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 99.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 100.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 101.
+- `WalkawayNoting` — instance of `Noting` — [The Whole Pie types](../design/types.md), line 103.
+  - `Author` is `Registering.User` — [The Whole Pie types](../design/types.md), line 104.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 105.
 
 ### Posting
 
@@ -245,7 +247,7 @@ Defined in [Posting](../design/concepts/Posting.md), line 1.
 
 - `post(item: Item) : returns ()`
   - Refuses `ALREADY_POSTED`: This is already posted.
-- `archive(item: Item) : returns ()`
+- `archive(item: Item, archiver: Person) : returns ()`
   - Refuses `NOT_POSTED`: Only something posted can be archived.
   - Refuses `ALREADY_ARCHIVED`: This is already archived.
 - `unarchive(item: Item) : returns ()`
@@ -255,11 +257,13 @@ Defined in [Posting](../design/concepts/Posting.md), line 1.
 
 - `_posts() : many (item: Item, archived: Flag)`
 - `_post(item: Item) : one (posted: Flag, archived: Flag)`
+- `_archiver(item: Item) : optional (archiver: Person)`
 
 #### Instances
 
 - `Posting` — instance of `Posting` — [The Whole Pie types](../design/types.md), line 51.
   - `Item` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 52.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 53.
 
 ### Preferring
 
@@ -276,8 +280,8 @@ Defined in [Preferring](../design/concepts/Preferring.md), line 1.
 
 #### Instances
 
-- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 110.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 111.
+- `Preferring` — instance of `Preferring` — [The Whole Pie types](../design/types.md), line 111.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 112.
 
 ### Proposing
 
@@ -310,14 +314,14 @@ Defined in [Proposing](../design/concepts/Proposing.md), line 1.
 
 #### Instances
 
-- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 63.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 65.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 64.
-  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 66.
-- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 68.
-  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 70.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 69.
-  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 71.
+- `Proposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 64.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 66.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 65.
+  - `Terms` is `TermSheet` — [The Whole Pie types](../design/types.md), line 67.
+- `TimeLimitProposing` — instance of `Proposing` — [The Whole Pie types](../design/types.md), line 69.
+  - `Party` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 71.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 70.
+  - `Terms` is `TimeLimit` — [The Whole Pie types](../design/types.md), line 72.
 
 ### Rating
 
@@ -335,9 +339,9 @@ Defined in [Rating](../design/concepts/Rating.md), line 1.
 
 #### Instances
 
-- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 94.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 95.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 96.
+- `Rating` — instance of `Rating` — [The Whole Pie types](../design/types.md), line 95.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 96.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 97.
 
 ### Reasoning
 
@@ -379,9 +383,9 @@ Defined in [Reasoning](../design/concepts/Reasoning.md), line 1.
 
 #### Instances
 
-- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 77.
-  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 79.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 78.
+- `Reasoning` — instance of `Reasoning` — [The Whole Pie types](../design/types.md), line 78.
+  - `Reasoner` is `Agent` — [The Whole Pie types](../design/types.md), line 80.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 79.
 
 ### Registering
 
@@ -420,9 +424,9 @@ Defined in [Reviewing](../design/concepts/Reviewing.md), line 1.
 
 #### Instances
 
-- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 90.
-  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 92.
-  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 91.
+- `Reviewing` — instance of `Reviewing` — [The Whole Pie types](../design/types.md), line 91.
+  - `Person` is `Registering.User` — [The Whole Pie types](../design/types.md), line 93.
+  - `Subject` is `Tabling.Table` — [The Whole Pie types](../design/types.md), line 92.
 
 ### Sessioning
 
@@ -494,10 +498,10 @@ Defined in [Tabling](../design/concepts/Tabling.md), line 1.
 
 #### Instances
 
-- `Tabling` — instance of `Tabling` — [The Whole Pie types](../design/types.md), line 54.
-  - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 57.
-  - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 56.
-  - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 55.
+- `Tabling` — instance of `Tabling` — [The Whole Pie types](../design/types.md), line 55.
+  - `Negotiator` is `Player` — [The Whole Pie types](../design/types.md), line 58.
+  - `Role` is `Briefing.Role` — [The Whole Pie types](../design/types.md), line 57.
+  - `Scenario` is `Briefing.Scenario` — [The Whole Pie types](../design/types.md), line 56.
 
 ## Application types
 
@@ -719,6 +723,16 @@ Authored path: `authoring.access.draftingRole`.
     view "(user) is still writing (scenario)" with (scenario, user)
 ```
 
+### (user) is the admin
+
+Authored path: `admin.access.isAdmin`.
+- Covered by [The admin](../design/compositions/admin.md), line 7.
+
+```view
+(user) is the admin — inputs (user); outputs (); bindings ()
+  where Registering._username (user) has (username: "admin")
+```
+
 ### (user) wrote the scenario of (issue)
 
 Authored path: `authoring.access.wroteIssue`.
@@ -824,6 +838,18 @@ people can look for others to negotiate (scenario) with — inputs (scenario); o
   where view "(scenario) is in the bakery" with (scenario)
 ```
 
+### the admin archived (scenario)
+
+Authored path: `admin.access.archivedByAdmin`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+
+```view
+the admin archived (scenario) — inputs (scenario); outputs (); bindings (archiver)
+  where
+    Posting._archiver (item: scenario) has (archiver)
+    view "(user) is the admin" with (user: archiver)
+```
+
 ### the role (user) plays at (table)
 
 Authored path: `table.access.seatedAs`.
@@ -917,6 +943,18 @@ the terms (table) settled on — inputs (table); outputs (terms); bindings () �
     Proposing._agreement (subject: table) has (terms)
 ```
 
+### the username of whoever archived (scenario)
+
+Authored path: `admin.access.archivedBy`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+
+```view
+the username of whoever archived (scenario) — inputs (scenario); outputs (username); bindings (archiver) — answers at most one (username)
+  where
+    Posting._archiver (item: scenario) has (archiver)
+    Registering._username (user: archiver) has (username)
+```
+
 ### when the time is up at (table), once it began
 
 Authored path: `table.access.began`.
@@ -961,12 +999,14 @@ Authored path: `authoring.showing.draftOf`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
 
 ```former
-Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, archived, timeLimit, role, roleName, batna, brief, summary, option, points); promises exactly one record — forms:
+Former "(scenario) as its author writes it" — inputs (scenario); bindings (name, published, archived, archiver, timeLimit, role, roleName, batna, brief, summary, option, points); promises exactly one record — forms:
   a record of
     where Briefing._scenario (scenario) has (name)
     where Posting._post (item: scenario) has (archived, posted: published)
+    where whether view "the username of whoever archived (scenario)" with (scenario) has (username: archiver)
     where whether Tabling._recommendedTimeLimit (scenario) has (timeLimit)
     archived
+    archivedBy: archiver
     issues: former "the issues of (scenario)" with (scenario)
     name
     published
@@ -1076,6 +1116,25 @@ Former "(table) as each counterpart there sees it" — inputs (table); bindings 
   each view "a role a counterpart plays at (table)" with (table) has (role)
     form a record of
       … former "(table) as (role) sees it" with (role, table)
+```
+
+### every posted scenario
+
+Authored path: `admin.overseeing.postedScenarios`.
+- Covered by [The admin](../design/compositions/admin.md), line 15.
+
+```former
+Former "every posted scenario" — inputs (); bindings (scenario, archived, name, author, authorName, archiver); promises exactly one record — forms:
+  each Posting._posts () has (archived, item: scenario)
+    where Briefing._scenario (scenario) has (author, name)
+    where Registering._username (user: author) has (username: authorName)
+    where whether view "the username of whoever archived (scenario)" with (scenario) has (username: archiver)
+    form a record of
+      archived
+      archivedBy: archiver
+      author: authorName
+      name
+      scenario
 ```
 
 ### every side of (table), as each saw it
@@ -1268,11 +1327,13 @@ Authored path: `authoring.showing.scenariosBy`.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 13.
 
 ```former
-Former "the scenarios (user) wrote" — inputs (user); bindings (scenario, name, published, archived); promises exactly one record — forms:
+Former "the scenarios (user) wrote" — inputs (user); bindings (scenario, name, published, archived, archiver); promises exactly one record — forms:
   each Briefing._authoredBy (author: user) has (name, scenario)
     where Posting._post (item: scenario) has (archived, posted: published)
+    where whether view "the username of whoever archived (scenario)" with (scenario) has (username: archiver)
     form a record of
       archived
+      archivedBy: archiver
       name
       published
       scenario
@@ -1374,9 +1435,52 @@ then
   RequestBoundary.respond (error: message, requestId)
 ```
 
+### admin.overseeing.ShowPosted
+
+Authored path: `admin.overseeing.ShowPosted`.
+- Covered by [The admin](../design/compositions/admin.md), line 15.
+- Covered by [The admin](../design/compositions/admin.md), line 18.
+
+```reaction
+when RequestBoundary.request (path: "/admin/scenarios", requestId, session)
+then
+  Sessioning.use (session)
+```
+
+### admin.overseeing.ShowPosted:admin#2
+
+Authored path: `admin.overseeing.ShowPosted`.
+- Covered by [The admin](../design/compositions/admin.md), line 15.
+- Covered by [The admin](../design/compositions/admin.md), line 18.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by admin.overseeing.ShowPosted
+where
+  view "(user) is the admin" with (user)
+  earlier, RequestBoundary.request (path: "/admin/scenarios", requestId, session)
+then
+  RequestBoundary.respond (requestId, scenarios: former "every posted scenario")
+```
+
+### admin.overseeing.ShowPosted:not-admin#2
+
+Authored path: `admin.overseeing.ShowPosted`.
+- Covered by [The admin](../design/compositions/admin.md), line 15.
+- Covered by [The admin](../design/compositions/admin.md), line 18.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by admin.overseeing.ShowPosted
+where
+  no view "(user) is the admin" with (user)
+  earlier, RequestBoundary.request (path: "/admin/scenarios", requestId, session)
+then
+  RequestBoundary.respond (error: "NOT_FOUND", requestId)
+```
+
 ### authoring.archiving.Archive
 
 Authored path: `authoring.archiving.Archive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
 
@@ -1386,9 +1490,42 @@ then
   Sessioning.use (session)
 ```
 
+### authoring.archiving.Archive:admin#2
+
+Authored path: `authoring.archiving.Archive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Archive
+where
+  view "(user) is the admin" with (user)
+  earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
+  no view "(user) wrote (scenario)" with (scenario, user)
+then
+  Posting.archive (archiver: user, item: scenario)
+```
+
+### authoring.archiving.Archive:admin#3
+
+Authored path: `authoring.archiving.Archive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
+
+```reaction
+when Posting.archive (archiver: user, item: scenario), asked by authoring.archiving.Archive:admin#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
 ### authoring.archiving.Archive:author#2
 
 Authored path: `authoring.archiving.Archive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
 
@@ -1398,17 +1535,18 @@ where
   earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
   view "(user) wrote (scenario)" with (scenario, user)
 then
-  Posting.archive (item: scenario)
+  Posting.archive (archiver: user, item: scenario)
 ```
 
 ### authoring.archiving.Archive:author#3
 
 Authored path: `authoring.archiving.Archive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
 
 ```reaction
-when Posting.archive (item: scenario), asked by authoring.archiving.Archive:author#2
+when Posting.archive (archiver: user, item: scenario), asked by authoring.archiving.Archive:author#2
 where
   earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
 then
@@ -1418,12 +1556,14 @@ then
 ### authoring.archiving.Archive:not-author#2
 
 Authored path: `authoring.archiving.Archive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 36.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 41.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.archiving.Archive
 where
+  no view "(user) is the admin" with (user)
   earlier, RequestBoundary.request (path: "/scenarios/archive", requestId, scenario, session)
   no view "(user) wrote (scenario)" with (scenario, user)
 then
@@ -1433,6 +1573,7 @@ then
 ### authoring.archiving.Unarchive
 
 Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
 
@@ -1442,17 +1583,69 @@ then
   Sessioning.use (session)
 ```
 
-### authoring.archiving.Unarchive:author#2
+### authoring.archiving.Unarchive:admin#2
 
 Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.archiving.Unarchive
 where
+  view "(user) is the admin" with (user)
+  earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+then
+  Posting.unarchive (item: scenario)
+```
+
+### authoring.archiving.Unarchive:admin#3
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Posting.unarchive (item: scenario), asked by authoring.archiving.Unarchive:admin#2
+where
+  earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+then
+  RequestBoundary.respond (requestId)
+```
+
+### authoring.archiving.Unarchive:archived-by-admin#2
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Unarchive
+where
+  no view "(user) is the admin" with (user)
   earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
   view "(user) wrote (scenario)" with (scenario, user)
+  view "the admin archived (scenario)" with (scenario)
+then
+  RequestBoundary.respond (error: "ARCHIVED_BY_ADMIN", requestId)
+```
+
+### authoring.archiving.Unarchive:author#2
+
+Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
+- Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
+
+```reaction
+when Sessioning.use (session, subject: user), asked by authoring.archiving.Unarchive
+where
+  no view "(user) is the admin" with (user)
+  earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
+  view "(user) wrote (scenario)" with (scenario, user)
+  no view "the admin archived (scenario)" with (scenario)
 then
   Posting.unarchive (item: scenario)
 ```
@@ -1460,6 +1653,7 @@ then
 ### authoring.archiving.Unarchive:author#3
 
 Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
 
@@ -1474,12 +1668,14 @@ then
 ### authoring.archiving.Unarchive:not-author#2
 
 Authored path: `authoring.archiving.Unarchive`.
+- Covered by [The admin](../design/compositions/admin.md), line 11.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 38.
 - Covered by [Writing a scenario](../design/compositions/authoring.md), line 42.
 
 ```reaction
 when Sessioning.use (session, subject: user), asked by authoring.archiving.Unarchive
 where
+  no view "(user) is the admin" with (user)
   earlier, RequestBoundary.request (path: "/scenarios/unarchive", requestId, scenario, session)
   no view "(user) wrote (scenario)" with (scenario, user)
 then
@@ -6171,6 +6367,7 @@ object or lacks a required key. The response uses `INVALID_INPUT` and names
 the path or missing key. A declared default fills an absent key. Endpoints
 not listed here have no explicit input contract.
 
+- `/admin/scenarios` — requires `session`
 - `/answers/abandon` — requires `prompt`, `reason`, `session`
 - `/answers/conclude` — requires `prompt`, `session`
 - `/answers/extend` — requires `prompt`, `session`, `text`

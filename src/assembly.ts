@@ -1,5 +1,6 @@
 import { assemble, type LogSink, type OperationalObserver } from "@mit-sdg/sync-engine/assembly";
 import type { Db } from "mongodb";
+import { composition as admin } from "./compositions/admin.ts";
 import { composition as authoring } from "./compositions/authoring.ts";
 import { composition as counterpart } from "./compositions/counterpart.ts";
 import { composition as debrief } from "./compositions/debrief.ts";
@@ -44,6 +45,7 @@ export function assembleApplication(
       ratings,
       preparing,
       authoring,
+      admin,
     },
   });
 }

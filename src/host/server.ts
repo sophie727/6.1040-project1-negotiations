@@ -5,7 +5,8 @@
  * Apps sets to 0.0.0.0), PUBLIC_ORIGIN (the origin browsers use, which Commons sends people back to after they sign in
  * there), COMMONS_ORIGIN (the Commons people sign in with; https://class.mit-sdg.dev unless set), MONGODB_URL (or
  * MONGODB_URI), and MONGODB_DB (unset on 6.1040 Apps, whose address names the database). Without a MongoDB address, the
- * data is kept in memory. On each start, the server posts any scenario that Briefing marked published before Posting
+ * data is kept in memory. ADMIN_PASSWORD is the password of the admin account, `admin`, which can archive any scenario;
+ * without it, nobody can sign in as the admin. On each start, the server posts any scenario that Briefing marked published before Posting
  * existed, and then any built-in scenario the database doesn't have yet.
  *
  * With ANTHROPIC_API_KEY (and optionally ANTHROPIC_MODEL), the counterpart and the coach write with Claude, through
@@ -23,7 +24,7 @@ import { scriptedReasoner } from "../agents/reusable/reasoners.ts";
 import { createTimekeeper } from "../agents/timekeeper.ts";
 import { assembleApplication } from "../assembly.ts";
 import { CommonsProvider } from "../concepts/Federating/provider.ts";
-import { postScenariosPublishedInBriefing, seed } from "../seed/seed.ts";
+import { ensureAdmin, postScenariosPublishedInBriefing, seed } from "../seed/seed.ts";
 import { connect } from "./database.ts";
 import { wholePiePolicy } from "./http.ts";
 
@@ -37,6 +38,8 @@ const counterpart = createCounterpart(model ? modelCounterpart(model) : scripted
 const coach = createCoach(model ? modelCoach(model) : scriptedReasoner(scriptedDebrief));
 const commons = new CommonsProvider({ origin: process.env.COMMONS_ORIGIN ?? "https://class.mit-sdg.dev", app: publicOrigin });
 const application = assembleApplication({ database, commons }, { observers: [counterpart.observer, coach.observer] });
+// The admin's username is taken before anyone can sign up, and its password comes from the settings.
+await ensureAdmin(application, process.env.ADMIN_PASSWORD);
 await postScenariosPublishedInBriefing({ database, concepts: application.concepts });
 await seed(application);
 const gateway = createGateway<TheWholePieWire>({ application });

@@ -50,6 +50,7 @@ instantiate Briefing with
 
 instantiate Posting with
   Item is Briefing.Scenario
+  Person is Registering.User
 
 instantiate Tabling with
   Scenario is Briefing.Scenario

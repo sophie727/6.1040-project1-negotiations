@@ -1,6 +1,7 @@
 import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { each, former, is, no, type ReadLine, view, whether, where } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
+import { archivedBy, archivedByAdmin, isAdmin } from "./admin.ts";
 import { inputOf, textInput } from "./reusable/inputs.ts";
 import { issuesOf } from "./table.ts";
 
@@ -70,30 +71,35 @@ const isIssueKind = view("(kind) is a kind of issue", ({ kind }) => where(is.amo
 
 // Showing
 
-/** The scenarios (user) wrote, newest first, each with whether it is posted and whether it is archived. */
-const scenariosBy = former("the scenarios (user) wrote", ({ user }, { scenario, name, published, archived }) =>
+/**
+ * The scenarios (user) wrote, newest first, each with whether it is posted, whether it is archived, and the username of
+ * whoever archived it, or null.
+ */
+const scenariosBy = former("the scenarios (user) wrote", ({ user }, { scenario, name, published, archived, archiver }) =>
   each(Briefing._authoredBy({ author: user }).is({ scenario, name }))
-    .where(Posting._post({ item: scenario }).is({ posted: published, archived }))
-    .form({ scenario, name, published, archived }),
+    .where(Posting._post({ item: scenario }).is({ posted: published, archived }), whether(archivedBy({ scenario }).is({ username: archiver })))
+    .form({ scenario, name, published, archived, archivedBy: archiver }),
 );
 
 /**
- * (scenario) as its author writes it: its name, whether it is posted and archived, the time limit its author recommends, its
+ * (scenario) as its author writes it: its name, whether it is posted and archived, and by whom, the time limit its author recommends, its
  * issues with their options, and each role with its BATNA, its brief and its summary, each null before it has one, and its
  * points for each option it has points for so far.
  */
 const draftOf = former(
   "(scenario) as its author writes it",
-  ({ scenario }, { name, published, archived, timeLimit, role, roleName, batna, brief, summary, option, points }) =>
+  ({ scenario }, { name, published, archived, archiver, timeLimit, role, roleName, batna, brief, summary, option, points }) =>
     where(
       Briefing._scenario({ scenario }).is({ name }),
       Posting._post({ item: scenario }).is({ posted: published, archived }),
+      whether(archivedBy({ scenario }).is({ username: archiver })),
       whether(Tabling._recommendedTimeLimit({ scenario }).is({ timeLimit })),
     ).form({
       scenario,
       name,
       published,
       archived,
+      archivedBy: archiver,
       timeLimit,
       issues: issuesOf({ scenario }),
       roles: each(Briefing._roles({ scenario }).is({ role, name: roleName }))
@@ -423,8 +429,9 @@ const SetPayoff = endpoint(
 // Archiving
 
 /**
- * Takes (scenario) out of the bakery, so nobody can start negotiating it. Tables already opened for it stay with the
- * people at them. Posting refuses a scenario that isn't posted with NOT_POSTED, and an archived one with ALREADY_ARCHIVED.
+ * Takes (scenario) out of the bakery, so nobody can start negotiating it, for its author or the admin, and Posting
+ * remembers which of them did. Tables already opened for it stay with the people at them. Posting refuses a scenario
+ * that isn't posted with NOT_POSTED, and an archived one with ALREADY_ARCHIVED.
  */
 const Archive = endpoint(
   "/scenarios/archive",
@@ -433,28 +440,42 @@ const Archive = endpoint(
       .then(Sessioning.use({ session }).responds({ subject: user }))
       .then(
         where(wrote({ user, scenario }))
-          .then(Posting.archive({ item: scenario }).responds({}))
+          .then(Posting.archive({ item: scenario, archiver: user }).responds({}))
           .then(respond({}))
           .named("author"),
-        where(no(wrote({ user, scenario })))
+        where(no(wrote({ user, scenario })), isAdmin({ user }))
+          .then(Posting.archive({ item: scenario, archiver: user }).responds({}))
+          .then(respond({}))
+          .named("admin"),
+        where(no(wrote({ user, scenario })), no(isAdmin({ user })))
           .then(respond({ error: "NOT_FOUND" }))
           .named("not-author"),
       ),
   { validators: { input: textInput } },
 );
 
-/** Puts (scenario) back in the bakery. Posting refuses a scenario that isn't archived with NOT_ARCHIVED. */
+/**
+ * Puts (scenario) back in the bakery. The admin can put back any scenario; its author can put it back unless the admin
+ * archived it, which is refused with ARCHIVED_BY_ADMIN. Posting refuses a scenario that isn't archived with NOT_ARCHIVED.
+ */
 const Unarchive = endpoint(
   "/scenarios/unarchive",
   ({ session, scenario, user }) =>
     receive({ session, scenario })
       .then(Sessioning.use({ session }).responds({ subject: user }))
       .then(
-        where(wrote({ user, scenario }))
+        where(isAdmin({ user }))
+          .then(Posting.unarchive({ item: scenario }).responds({}))
+          .then(respond({}))
+          .named("admin"),
+        where(no(isAdmin({ user })), wrote({ user, scenario }), no(archivedByAdmin({ scenario })))
           .then(Posting.unarchive({ item: scenario }).responds({}))
           .then(respond({}))
           .named("author"),
-        where(no(wrote({ user, scenario })))
+        where(no(isAdmin({ user })), wrote({ user, scenario }), archivedByAdmin({ scenario }))
+          .then(respond({ error: "ARCHIVED_BY_ADMIN" }))
+          .named("archived-by-admin"),
+        where(no(isAdmin({ user })), no(wrote({ user, scenario })))
           .then(respond({ error: "NOT_FOUND" }))
           .named("not-author"),
       ),

@@ -4,7 +4,7 @@ import { testDatabase } from "../support/reusable/mongo.ts";
 import { expectOneWinner } from "../support/reusable/race.ts";
 
 async function setup() {
-  return { posting: new PostingConcept<string>(await testDatabase()) };
+  return { posting: new PostingConcept<string, string>(await testDatabase()) };
 }
 
 async function expectRefusal(attempt: Promise<unknown>, refusal: new (message?: string) => Error, message: string) {
@@ -24,8 +24,10 @@ describe("Posting", () => {
     ]);
 
     // Archived, Test Lease is still posted, so what people did with it still refers to something posted.
-    await posting.archive({ item: "test-lease" });
+    await posting.archive({ item: "test-lease", archiver: "sophie" });
     expect(await posting._post({ item: "test-lease" })).toEqual({ posted: true, archived: true });
+    expect(await posting._archiver({ item: "test-lease" })).toEqual([{ archiver: "sophie" }]);
+    expect(await posting._archiver({ item: "the-lease" })).toEqual([]);
     expect(await posting._posts()).toEqual([
       { item: "the-lease", archived: false },
       { item: "test-lease", archived: true },
@@ -33,17 +35,18 @@ describe("Posting", () => {
 
     await posting.unarchive({ item: "test-lease" });
     expect(await posting._post({ item: "test-lease" })).toEqual({ posted: true, archived: false });
+    expect(await posting._archiver({ item: "test-lease" })).toEqual([]);
   });
 
   test("nothing is posted twice, and only something posted is archived or unarchived", async () => {
     const { posting } = await setup();
-    await expectRefusal(posting.archive({ item: "a-draft" }), NotPosted, "Only something posted can be archived.");
+    await expectRefusal(posting.archive({ item: "a-draft", archiver: "sophie" }), NotPosted, "Only something posted can be archived.");
     await expectRefusal(posting.unarchive({ item: "a-draft" }), NotArchived, "This isn't archived.");
     await posting.post({ item: "the-lease" });
     await expectRefusal(posting.post({ item: "the-lease" }), AlreadyPosted, "This is already posted.");
     await expectRefusal(posting.unarchive({ item: "the-lease" }), NotArchived, "This isn't archived.");
-    await posting.archive({ item: "the-lease" });
-    await expectRefusal(posting.archive({ item: "the-lease" }), AlreadyArchived, "This is already archived.");
+    await posting.archive({ item: "the-lease", archiver: "sophie" });
+    await expectRefusal(posting.archive({ item: "the-lease", archiver: "sophie" }), AlreadyArchived, "This is already archived.");
     // Posting it again is still refused: it is posted, only archived.
     await expectRefusal(posting.post({ item: "the-lease" }), AlreadyPosted, "This is already posted.");
   });

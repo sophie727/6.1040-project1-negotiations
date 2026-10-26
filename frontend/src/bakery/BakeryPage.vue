@@ -7,6 +7,8 @@ import Icon from "../reusable/ui/Icon.vue";
 import { useSession } from "../reusable/session.ts";
 import { go } from "../router.ts";
 import { pastryFor, statusLabels } from "./pastries.ts";
+import AdminPanel from "./AdminPanel.vue";
+import { ADMIN } from "./admin.ts";
 import MatchmakingDialog from "./MatchmakingDialog.vue";
 import SpiceLevel from "./SpiceLevel.vue";
 import StartDialog from "./StartDialog.vue";
@@ -33,7 +35,8 @@ function matchmake() {
 const written = ref<WrittenScenario[]>([]);
 const writtenInOrder = computed(() => [...written.value].sort((one, other) => Number(one.archived) - Number(other.archived)));
 
-onMounted(async () => {
+/** Loads the case, the person's tables, and the scenarios they wrote, again after the admin archives or puts one back. */
+async function load() {
   void api.scenarios.mine().then((mine) => {
     if (!("error" in mine)) written.value = mine.scenarios;
   });
@@ -44,7 +47,8 @@ onMounted(async () => {
     return;
   }
   bakery.value = result;
-});
+}
+onMounted(load);
 
 const scenarios = computed(() => bakery.value?.scenarios ?? []);
 const tables = computed(() => bakery.value?.tables ?? []);
@@ -113,11 +117,13 @@ const tables = computed(() => bakery.value?.tables ?? []);
             <span aria-hidden="true">{{ pastryFor(scenario.name) }}</span>
             <strong>{{ scenario.name }}</strong>
           </a>
-          <span v-if="scenario.archived" class="badge">Archived</span>
+          <span v-if="scenario.archived" class="badge">{{ scenario.archivedBy === ADMIN ? "Archived by admin" : "Archived" }}</span>
           <span v-else class="badge" :class="scenario.published ? 'good' : 'warm'">{{ scenario.published ? "Published" : "Draft" }}</span>
         </li>
       </ul>
     </section>
+
+    <AdminPanel @changed="load" />
 
     <StartDialog
       v-if="choosing"

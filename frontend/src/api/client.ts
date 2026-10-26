@@ -35,6 +35,8 @@ export type Invitation = Extract<InvitationView, { invitation: unknown }>["invit
 
 /** A scenario the person wrote, as `/scenarios/mine` lists it: a draft, or published. */
 export type WrittenScenario = Output<"/scenarios/mine">["scenarios"][number];
+/** A posted scenario, as `/admin/scenarios` lists them for the admin. */
+export type PostedScenario = Output<"/admin/scenarios">["scenarios"][number];
 /** What `/scenarios/show` responds with: a scenario as its author writes it, with every role's brief and points. */
 export type Draft = Output<"/scenarios/show">["draft"];
 export type ScenarioId = Draft["scenario"];

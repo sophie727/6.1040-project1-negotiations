@@ -7,7 +7,7 @@ import type { Reasoner } from "../../src/agents/reusable/agent.ts";
 import { scriptedReasoner } from "../../src/agents/reusable/reasoners.ts";
 import { assembleApplication } from "../../src/assembly.ts";
 import { type Identity, MemoryProvider } from "../../src/concepts/Federating/provider.ts";
-import { seed } from "../../src/seed/seed.ts";
+import { ensureAdmin, seed } from "../../src/seed/seed.ts";
 import { testDatabase } from "./reusable/mongo.ts";
 import { ok } from "./reusable/results.ts";
 
@@ -24,6 +24,9 @@ function termSheets(issues: readonly { issue: string; name: string; kind: string
       }),
     );
 }
+
+/** The admin's password in every test, as `ADMIN_PASSWORD` gives it to the server. */
+export const ADMIN_PASSWORD = "rolling pin";
 
 /** 2:00 pm on the day of the tests, when every test's clock starts. */
 export const START = new Date("2026-10-15T14:00:00.000Z");
@@ -48,6 +51,7 @@ export async function startWholePie({
   );
   const commons = new MemoryProvider();
   const application = assembleApplication({ database, commons }, { clock: () => now, observers: agents.map(({ observer }) => observer) });
+  await ensureAdmin(application, ADMIN_PASSWORD);
   await seed(application);
   const api = createLocalClient<TheWholePieWire>({ invoker: createGateway<TheWholePieWire>({ application }) });
   for (const agent of agents) void agent.start({ application, api });

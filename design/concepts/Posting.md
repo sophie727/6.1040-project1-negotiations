@@ -8,13 +8,16 @@ _Prevents:_ people find something before its owner posts it, or after they take 
 
 ## Principle
 
-Sophie finishes writing The Lease and posts it, so it is among the posted items, where anyone can find it. She also posted Test Lease, to see how the page works, and now archives it. It is still posted, so whatever people already did with it still refers to something posted, but it is archived, so nobody new picks it. If she wants it back, she unarchives it. She can't post The Lease a second time, and she can't archive something she never posted.
+Sophie finishes writing The Lease and posts it, so it is among the posted items, where anyone can find it. She also posted Test Lease, to see how the page works, and now archives it. It is still posted, so whatever people already did with it still refers to something posted, but it is archived, so nobody new picks it, and Posting remembers that Sophie archived it. If she wants it back, she unarchives it, and nobody has archived it any more. She can't post The Lease a second time, and she can't archive something she never posted.
 
 ## Types
 
 ```types
 external Item
   What is posted.
+
+external Person
+  Who archives something.
 ```
 
 ## State
@@ -23,6 +26,9 @@ external Item
 a set of Posts with
   a unique Item
   an archived Flag
+  an optional archiver Person
+
+Rule: a post has an archiver exactly when it is archived.
 ```
 
 ## Actions
@@ -37,7 +43,7 @@ post(item: Item) : returns ()
     add a new post with item, not archived
     returns
 
-archive(item: Item) : returns ()
+archive(item: Item, archiver: Person) : returns ()
   where item has no post
   then
     refuses NOT_POSTED "Only something posted can be archived."
@@ -46,7 +52,7 @@ archive(item: Item) : returns ()
     refuses ALREADY_ARCHIVED "This is already archived."
   where item's post is not archived
   then
-    set item's post to archived
+    set item's post to archived, by archiver
     returns
 
 unarchive(item: Item) : returns ()
@@ -55,7 +61,7 @@ unarchive(item: Item) : returns ()
     refuses NOT_ARCHIVED "This isn't archived."
   where item's post is archived
   then
-    set item's post to not archived
+    set item's post to not archived, leaving out its archiver
     returns
 ```
 
@@ -68,4 +74,7 @@ _posts() : many (item: Item, archived: Flag)
 
 _post(item: Item) : one (posted: Flag, archived: Flag)
   Returns whether the item is posted, and whether it is archived; an item never posted is neither.
+
+_archiver(item: Item) : optional (archiver: Person)
+  Returns who archived the item, or no row when it isn't archived.
 ```

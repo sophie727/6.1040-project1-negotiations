@@ -1,5 +1,6 @@
 import type { ActionRefusal } from "@mit-sdg/sync-engine/assembly";
 import type { Db } from "mongodb";
+import { ADMIN } from "../compositions/admin.ts";
 import type { Option, Scenario } from "../concepts/Briefing/Briefing.ts";
 import type { User } from "../concepts/Registering/Registering.ts";
 import type { assembleApplication } from "../assembly.ts";
@@ -55,6 +56,19 @@ export async function postScenariosPublishedInBriefing({ database, concepts }: {
     if (published === true && !posted) await must(concepts.Posting.post({ item: scenario }), `post scenario ${scenario}`);
     await scenarios.updateOne({ _id: scenario }, { $unset: { published: "" } });
   }
+}
+
+/**
+ * Registers the admin account if nobody has its username yet, so nobody else can take it, and, given a password, resets
+ * the account's password to it, so the admin signs in with the one the server's settings give, even after it changes.
+ * A password Authenticating refuses, such as one shorter than 8 characters, leaves the old one, and says so.
+ */
+export async function ensureAdmin({ concepts }: { concepts: Concepts }, password: string | undefined): Promise<void> {
+  const [existing] = await concepts.Registering._byUsername({ username: ADMIN });
+  const user = existing?.user ?? (await must(concepts.Registering.register({ username: ADMIN }), "register the admin")).user;
+  if (password === undefined || password === "") return;
+  const reset = await concepts.Authenticating.reset({ user, password });
+  if ("error" in reset) console.warn(`The admin's password wasn't changed: ${String(reset.detail ?? reset.error)}`);
 }
 
 /** Gives each role of the posted `scenario` that has no summary yet the summary `definition` has for it. */

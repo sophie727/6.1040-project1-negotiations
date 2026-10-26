@@ -62,6 +62,8 @@ const publicErrors = {
   NOT_POSTED: "CONFLICT",
   ALREADY_ARCHIVED: "CONFLICT",
   NOT_ARCHIVED: "CONFLICT",
+  // Only the admin puts back a scenario the admin archived.
+  ARCHIVED_BY_ADMIN: "FORBIDDEN",
   // A draft, or part of one, that another request removed a moment before.
   UNKNOWN_SCENARIO: "NOT_FOUND",
   UNKNOWN_ISSUE: "NOT_FOUND",

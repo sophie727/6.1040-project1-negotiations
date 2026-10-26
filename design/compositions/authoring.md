@@ -10,7 +10,7 @@ Briefing lets a scenario change whenever its author likes, but once people negot
 
 ## Your scenarios
 
-The [list endpoint](reaction:authoring.showing.ShowMine) responds with [the scenarios the person wrote](former:authoring.showing.scenariosBy), newest first, each with whether it is posted and whether it is archived, so the bakery can list them. The [show endpoint](reaction:authoring.showing.ShowDraft) responds with [the scenario as its author writes it](former:authoring.showing.draftOf): its name, whether it is posted and whether it is archived, the time limit its author recommends, every issue with its options, and every role with its BATNA, its brief, its summary, and the points it has so far. Unlike [the table](table.md#showing-the-table), which shows each negotiator only their own brief and points, it shows the author everyone's.
+The [list endpoint](reaction:authoring.showing.ShowMine) responds with [the scenarios the person wrote](former:authoring.showing.scenariosBy), newest first, each with whether it is posted, whether it is archived, and by whom, so the bakery can list them. The [show endpoint](reaction:authoring.showing.ShowDraft) responds with [the scenario as its author writes it](former:authoring.showing.draftOf): its name, whether it is posted, whether it is archived and by whom, the time limit its author recommends, every issue with its options, and every role with its BATNA, its brief, its summary, and the points it has so far. Unlike [the table](table.md#showing-the-table), which shows each negotiator only their own brief and points, it shows the author everyone's.
 
 ```endpoints
 authoring.showing.ShowMine at /scenarios/mine
@@ -33,9 +33,9 @@ authoring.drafting.Publish at /scenarios/publish
 
 ## Archiving
 
-Sophie published Test Lease to see how the page works, and doesn't want anyone else to pick it. She [archives it](reaction:authoring.archiving.Archive), and it leaves the bakery: nobody can [practice it](view:practice.starting.playable), start a table for friends with it, or [be matched for it](view:matchmaking.looking.findable). Archiving takes nothing from the people who already negotiated it, or are negotiating it: their tables stay in their list of negotiations, and they can still negotiate there, read the transcript, and see the debrief. An archived scenario is still posted, so it still can't change under them. Friends can still join a table opened for it with its link. Posting refuses to archive a draft with `NOT_POSTED`, since a draft isn't in the bakery and can be discarded instead, and an archived scenario with `ALREADY_ARCHIVED`.
+Sophie published Test Lease to see how the page works, and doesn't want anyone else to pick it. She [archives it](reaction:authoring.archiving.Archive), and it leaves the bakery: nobody can [practice it](view:practice.starting.playable), start a table for friends with it, or [be matched for it](view:matchmaking.looking.findable). Archiving takes nothing from the people who already negotiated it, or are negotiating it: their tables stay in their list of negotiations, and they can still negotiate there, read the transcript, and see the debrief. An archived scenario is still posted, so it still can't change under them. Friends can still join a table opened for it with its link. Posting refuses to archive a draft with `NOT_POSTED`, since a draft isn't in the bakery and can be discarded instead, and an archived scenario with `ALREADY_ARCHIVED`. Posting remembers who archived it: Sophie, or [the admin](admin.md), who can archive anyone's scenario.
 
-If Sophie changes her mind, she [unarchives it](reaction:authoring.archiving.Unarchive), and it is back in the bakery. Posting refuses a scenario that isn't archived with `NOT_ARCHIVED`.
+If Sophie changes her mind, she [unarchives it](reaction:authoring.archiving.Unarchive), and it is back in the bakery. Posting refuses a scenario that isn't archived with `NOT_ARCHIVED`. A scenario the admin archived only the admin can put back, so Sophie is refused with `ARCHIVED_BY_ADMIN`.
 
 ```endpoints
 authoring.archiving.Archive at /scenarios/archive
